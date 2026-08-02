@@ -7,6 +7,8 @@ import '../widgets/apartment_selector.dart';
 import '../widgets/health_card.dart';
 import '../widgets/priority_card.dart';
 import '../widgets/compliance_card.dart';
+import '../widgets/score_breakdown_card.dart';
+import '../widgets/property_advisor_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -75,6 +77,16 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 25),
 
               const ComplianceCard(),
+
+              const SizedBox(height: 25),
+            
+              const ScoreBreakdownCard(),
+
+              const SizedBox(height: 25),
+
+              PropertyAdvisorCard(
+               apartment: selectedApartment,
+              ),
 
               const SizedBox(height: 40),
             ],

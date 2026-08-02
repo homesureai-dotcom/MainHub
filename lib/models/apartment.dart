@@ -1,4 +1,5 @@
 import 'compliance_item.dart';
+import 'timeline_event.dart';
 
 class Apartment {
   final String projectName;
@@ -19,6 +20,7 @@ class Apartment {
   final int estimatedMinutes;
 
   final List<ComplianceItem> complianceItems;
+  final List<TimelineEvent> timeline;
 
   Apartment({
     required this.projectName,
@@ -35,5 +37,6 @@ class Apartment {
     required this.priorityTask,
     required this.estimatedMinutes,
     required this.complianceItems,
+    required this.timeline,
   });
 }
