@@ -9,6 +9,8 @@ import '../widgets/priority_card.dart';
 import '../widgets/compliance_card.dart';
 import '../widgets/score_breakdown_card.dart';
 import '../widgets/property_advisor_card.dart';
+import '../widgets/project_journey_card.dart';
+import 'property_health_record_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,7 +90,39 @@ class _HomeScreenState extends State<HomeScreen> {
                apartment: selectedApartment,
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 25),
+
+             ProjectJourneyCard(
+              apartment: selectedApartment,
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+             icon: const Icon(Icons.health_and_safety),
+              label: const Text(
+              "View Property Health Record",
+              style: TextStyle(fontSize: 18),
+              ),
+              style: ElevatedButton.styleFrom(
+               padding: const EdgeInsets.symmetric(vertical: 18),
+              ),
+             onPressed: () {
+             Navigator.push(
+              context,
+             MaterialPageRoute(
+               builder: (_) => PropertyHealthRecordScreen(
+              apartment: selectedApartment,
+          ),
+        ),
+      );
+    },
+  ),
+),
+
+const SizedBox(height: 40),
             ],
           ),
         ),

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const HomeSureAI());
+  runApp(const HomeSureAIApp());
 }
 
-class HomeSureAI extends StatelessWidget {
-  const HomeSureAI({super.key});
+class HomeSureAIApp extends StatelessWidget {
+  const HomeSureAIApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'HomeSure AI',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      debugShowCheckedModeBanner: false,
+
+      theme: AppTheme.lightTheme,
+
       home: const HomeScreen(),
     );
   }
