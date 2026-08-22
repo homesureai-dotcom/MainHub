@@ -12,13 +12,14 @@ class AppTheme {
 
     scaffoldBackgroundColor: AppColors.background,
 
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+      surface: Colors.white,
     ),
 
     // ---------- Typography ----------
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(),
+    textTheme: GoogleFonts.manropeTextTheme(),
 
     // ---------- AppBar ----------
     appBarTheme: AppBarTheme(
@@ -26,8 +27,8 @@ class AppTheme {
       centerTitle: false,
       backgroundColor: AppColors.background,
       foregroundColor: AppColors.textPrimary,
-      titleTextStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 28,
+      titleTextStyle: GoogleFonts.manrope(
+        fontSize: 30,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
       ),
@@ -36,8 +37,10 @@ class AppTheme {
     // ---------- Cards ----------
     cardTheme: CardThemeData(
       color: AppColors.card,
-      elevation: 4,
-      shadowColor: Colors.black12,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           AppSpacing.cardRadius,
@@ -51,15 +54,33 @@ class AppTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        minimumSize: const Size(double.infinity, 58),
+        minimumSize: const Size(double.infinity, 54),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
             AppSpacing.buttonRadius,
           ),
         ),
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+        textStyle: GoogleFonts.manrope(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+
+    // ---------- Filled Buttons ----------
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 54),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            AppSpacing.buttonRadius,
+          ),
+        ),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
         ),
       ),
     ),
@@ -75,23 +96,28 @@ class AppTheme {
       ),
 
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
       ),
 
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide(
           color: AppColors.border,
         ),
       ),
 
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide(
           color: AppColors.primary,
           width: 2,
         ),
       ),
+    ),
+
+    dividerTheme: const DividerThemeData(
+      thickness: 1,
+      space: 32,
     ),
   );
 }

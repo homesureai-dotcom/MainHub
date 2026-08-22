@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_text_styles.dart';
-
 class GreetingHeader extends StatelessWidget {
-  final String apartmentName;
+  final String userName;
 
   const GreetingHeader({
     super.key,
-    required this.apartmentName,
+    required this.userName,
   });
 
   String getGreeting() {
@@ -32,21 +30,24 @@ class GreetingHeader extends StatelessWidget {
 
         Text(
           "${getGreeting()} 👋",
-          style: AppTextStyles.heading,
+          style: Theme.of(context)
+              .textTheme
+              .headlineMedium
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
 
-        const SizedBox(height: 6),
-
-        const Text(
-          "Welcome back",
-          style: AppTextStyles.caption,
-        ),
-
-        const SizedBox(height: 18),
+        const SizedBox(height: 10),
 
         Text(
-          apartmentName,
-          style: AppTextStyles.display,
+          userName,
+          style: Theme.of(context)
+              .textTheme
+              .displaySmall
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
+import 'screens/onboarding/splash_screen.dart';
 
 void main() {
   runApp(const HomeSureAIApp());
@@ -15,10 +15,9 @@ class HomeSureAIApp extends StatelessWidget {
     return MaterialApp(
       title: 'HomeSure AI',
       debugShowCheckedModeBanner: false,
-
       theme: AppTheme.lightTheme,
 
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
