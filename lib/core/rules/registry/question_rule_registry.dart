@@ -20,7 +20,7 @@ class QuestionRuleRegistry {
         return const SaleDeedRule();
 
       case "LEGAL_KHATA":
-        return const EKhataRule();
+        return const EkhataRule();
 
       case "LEGAL_EC":
         return const EncumbranceRule();

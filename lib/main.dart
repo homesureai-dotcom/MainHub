@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'theme/app_theme.dart';
 import 'screens/onboarding/splash_screen.dart';
+import 'features/design_system/screens/engine_playground_screen.dart';
 
 void main() {
   runApp(const HomeSureAIApp());
 }
+
+///
+/// Toggle this to true whenever you want to test
+/// the Property Intelligence Engine.
+///
+/// false = Normal HomeSure App
+/// true  = Engine Playground
+///
+const bool kDeveloperMode = false;
 
 class HomeSureAIApp extends StatelessWidget {
   const HomeSureAIApp({super.key});
@@ -17,7 +27,9 @@ class HomeSureAIApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
 
-      home: const SplashScreen(),
+      home: kDeveloperMode
+          ? const EnginePlaygroundScreen()
+          : const SplashScreen(),
     );
   }
 }
