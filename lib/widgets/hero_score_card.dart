@@ -4,7 +4,7 @@ import '../theme/app_gradients.dart';
 import 'common/health_score_indicator.dart';
 
 class HeroScoreCard extends StatelessWidget {
-  final int score;
+  final int? score;
   final String status;
   final int verifiedCount;
   final int pendingCount;
@@ -23,6 +23,8 @@ class HeroScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasScore = score != null;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -33,9 +35,8 @@ class HeroScoreCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           const Text(
-            "PROPERTY HEALTH SCORE",
+            'PROPERTY HEALTH SCORE',
             style: TextStyle(
               color: Colors.white70,
               letterSpacing: 2,
@@ -47,23 +48,24 @@ class HeroScoreCard extends StatelessWidget {
           const SizedBox(height: 24),
 
           Center(
-            child: HealthScoreIndicator(
-              score: score,
-              status: status,
-            ),
+            child: hasScore
+                ? HealthScoreIndicator(
+                    score: score!,
+                    status: status,
+                  )
+                : const _NotAssessedState(),
           ),
 
           const SizedBox(height: 28),
 
           Row(
             children: [
-
               Expanded(
                 child: _StatusCard(
                   icon: Icons.check_circle,
                   color: Colors.greenAccent,
                   value: verifiedCount,
-                  label: "Verified",
+                  label: 'Verified',
                 ),
               ),
 
@@ -74,7 +76,7 @@ class HeroScoreCard extends StatelessWidget {
                   icon: Icons.schedule,
                   color: Colors.orangeAccent,
                   value: pendingCount,
-                  label: "Pending",
+                  label: 'Pending',
                 ),
               ),
 
@@ -85,60 +87,13 @@ class HeroScoreCard extends StatelessWidget {
                   icon: Icons.error_outline,
                   color: Colors.redAccent,
                   value: issueCount,
-                  label: "Issues",
+                  label: 'Issues',
                 ),
               ),
             ],
           ),
 
           const SizedBox(height: 28),
-
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-
-                const Icon(
-                  Icons.workspace_premium,
-                  color: Colors.amber,
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-
-                      Text(
-                        "Builder Confidence",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-
-                      SizedBox(height: 4),
-
-                      Text(
-                        "★★★★☆ Trusted Builder",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
 
           SizedBox(
             width: double.infinity,
@@ -150,9 +105,59 @@ class HeroScoreCard extends StatelessWidget {
               ),
               onPressed: onPressed,
               icon: const Icon(Icons.description_outlined),
-              label: const Text(
-                "View Property Health Report",
+              label: Text(
+                hasScore
+                    ? 'View Property Health Report'
+                    : 'Start Property Health Assessment',
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotAssessedState extends StatelessWidget {
+  const _NotAssessedState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 180,
+      height: 180,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: .08),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: .25),
+          width: 2,
+        ),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.health_and_safety_outlined,
+            color: Colors.white70,
+            size: 42,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Not Assessed',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Complete your assessment',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
             ),
           ),
         ],
@@ -187,7 +192,6 @@ class _StatusCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-
           Icon(
             icon,
             color: color,
@@ -197,7 +201,7 @@ class _StatusCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            "$value",
+            '$value',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

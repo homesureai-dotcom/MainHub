@@ -1,13 +1,15 @@
+import '../../phs/phs_answer.dart';
+import '../../phs/phs_categories.dart';
 import '../config/question_rule_config.dart';
 import '../models/question_evaluation.dart';
-import '../../../core/phs/phs_answer.dart';
 import '../../../models/property_health/property_risk.dart';
 import '../../../models/property_health/recommendation.dart';
 
 /// Executes a QuestionRuleConfig against a user's answer.
 ///
-/// The evaluator contains no business rules.
-/// It simply interprets configuration.
+/// The evaluator contains no question-specific business rules.
+/// It interprets the supplied configuration and produces a
+/// runtime QuestionEvaluation.
 class RuleEvaluator {
   const RuleEvaluator();
 
@@ -19,35 +21,37 @@ class RuleEvaluator {
 
     PropertyRisk? risk;
 
-    if (answerConfig.hasRisk) {
-      final config = answerConfig.risk!;
+    if (answerConfig.risk != null) {
+      final riskConfig = answerConfig.risk!;
 
       risk = PropertyRisk(
         id: '${rule.questionId}_${answer.response.name}',
-        title: config.title,
-        description: config.description,
-        severity: config.severity,
-        phiImpact: config.phiImpact,
-        category: "General",
+        title: riskConfig.title,
+        description: riskConfig.description,
+        severity: riskConfig.severity,
+        phiImpact: riskConfig.phiImpact,
+        category: rule.category.displayName,
       );
     }
 
     Recommendation? recommendation;
 
-    if (answerConfig.hasRecommendation) {
-      final config = answerConfig.recommendation!;
+    if (answerConfig.recommendation != null) {
+      final recommendationConfig = answerConfig.recommendation!;
 
       recommendation = Recommendation(
         id: '${rule.questionId}_${answer.response.name}',
-        title: config.title,
-        description: config.description,
-        estimatedPHIGain: config.estimatedPHIGain,
-        priority: RecommendationPriority.medium,
-        requiredDocuments: config.requiredDocuments,
+        title: recommendationConfig.title,
+        description: recommendationConfig.description,
+        estimatedPHIGain: recommendationConfig.estimatedPHIGain,
+        priority: recommendationConfig.priority,
+        requiredDocuments:
+            recommendationConfig.requiredDocuments,
       );
     }
 
     return QuestionEvaluation(
+      category: rule.category,
       score: answerConfig.score,
       maxScore: rule.weight,
       risk: risk,

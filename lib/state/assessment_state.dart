@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/assessment/assessment_result.dart';
+import '../core/evidence/evidence_repository.dart';
+import '../core/evidence/in_memory_evidence_repository.dart';
 import '../core/phs/phs_answer.dart';
 import '../features/report/models/property_health_report.dart';
 
@@ -11,6 +13,9 @@ class AssessmentState extends ChangeNotifier {
 
   final List<PHSAnswer> _answers = [];
 
+  final EvidenceRepository _evidenceRepository =
+      InMemoryEvidenceRepository();
+
   AssessmentResult? _latestResult;
 
   PropertyHealthReport? _latestReport;
@@ -20,6 +25,8 @@ class AssessmentState extends ChangeNotifier {
   String? _propertyId;
 
   List<PHSAnswer> get answers => List.unmodifiable(_answers);
+
+  EvidenceRepository get evidenceRepository => _evidenceRepository;
 
   AssessmentResult? get latestResult => _latestResult;
 
@@ -41,6 +48,8 @@ class AssessmentState extends ChangeNotifier {
     _latestReport = null;
     _completedAt = null;
     _propertyId = propertyId;
+
+    _evidenceRepository.clear();
 
     notifyListeners();
   }
@@ -74,6 +83,8 @@ class AssessmentState extends ChangeNotifier {
     _latestReport = null;
     _completedAt = null;
     _propertyId = null;
+
+    _evidenceRepository.clear();
 
     notifyListeners();
   }
