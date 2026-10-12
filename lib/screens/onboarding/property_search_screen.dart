@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../data/properties.dart';
-import '../../models/property.dart';
+import '../../models/property.dart' as legacy;
+import '../../features/property/models/property.dart' as feature;
+import '../../features/property/models/property_adapter.dart';
+import '../../features/property/state/property_state.dart';
 import '../../widgets/common/app_button.dart';
 import '../../widgets/common/app_search_field.dart';
 import '../../widgets/common/onboarding_scaffold.dart';
@@ -18,66 +21,115 @@ class PropertySearchScreen extends StatefulWidget {
 
 class _PropertySearchScreenState
     extends State<PropertySearchScreen> {
+  final PropertyState propertyState =
+      PropertyState.instance;
 
-  List<Property> filteredProperties = properties;
+  List<legacy.Property> filteredProperties =
+      properties;
 
-  Property? selectedProperty;
+  legacy.Property? selectedProperty;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final feature.Property? sharedProperty =
+        propertyState.selectedProperty;
+
+    if (sharedProperty == null) {
+      return;
+    }
+
+    for (final legacy.Property property in properties) {
+      if (property.id == sharedProperty.id ||
+          property.name == sharedProperty.name) {
+        selectedProperty = property;
+        break;
+      }
+    }
+  }
+
+  void _persistSelectedProperty(
+    legacy.Property property,
+  ) {
+    feature.Property? canonicalProperty;
+
+    for (final feature.Property candidate
+        in propertyState.properties) {
+      if (candidate.id == property.id ||
+          candidate.name == property.name) {
+        canonicalProperty = candidate;
+        break;
+      }
+    }
+
+    if (canonicalProperty != null) {
+      propertyState.selectProperty(
+        canonicalProperty,
+      );
+      return;
+    }
+
+    propertyState.selectProperty(
+      PropertyAdapter.fromLegacy(property),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
       title: "Find Your Property",
-
       subtitle:
           "Search from verified HomeSure properties.",
-
       bottom: AppButton(
         text: "Continue",
-
         enabled: selectedProperty != null,
-
         onPressed: () {
-          if (selectedProperty == null) return;
+          final legacy.Property? property =
+              selectedProperty;
+
+          if (property == null) {
+            return;
+          }
+
+          _persistSelectedProperty(property);
 
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => PropertyDetailsScreen(
-                property: selectedProperty!,
+              builder: (_) =>
+                  PropertyDetailsScreen(
+                property: property,
               ),
             ),
           );
         },
       ),
-
       child: Column(
         children: [
-
           AppSearchField(
             hintText: "Search properties",
-
             onChanged: (value) {
-
               setState(() {
-
-                filteredProperties = properties.where((property) {
-
-                  return property.name
-                          .toLowerCase()
-                          .contains(value.toLowerCase()) ||
-                      property.builder
-                          .toLowerCase()
-                          .contains(value.toLowerCase());
-
-                }).toList();
-
+                filteredProperties =
+                    properties.where(
+                  (legacy.Property property) {
+                    return property.name
+                            .toLowerCase()
+                            .contains(
+                              value.toLowerCase(),
+                            ) ||
+                        property.builder
+                            .toLowerCase()
+                            .contains(
+                              value.toLowerCase(),
+                            );
+                  },
+                ).toList();
               });
-
             },
           ),
-
           const SizedBox(height: 24),
-
           const Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -88,31 +140,27 @@ class _PropertySearchScreenState
               ),
             ),
           ),
-
           const SizedBox(height: 20),
-
           Expanded(
             child: ListView.builder(
-              itemCount: filteredProperties.length,
-
+              itemCount:
+                  filteredProperties.length,
               itemBuilder: (context, index) {
-
-                final property = filteredProperties[index];
+                final legacy.Property property =
+                    filteredProperties[index];
 
                 return PropertyCard(
                   property: property,
-
                   onTap: () {
-
                     setState(() {
-
                       selectedProperty = property;
-
                     });
 
+                    _persistSelectedProperty(
+                      property,
+                    );
                   },
                 );
-
               },
             ),
           ),

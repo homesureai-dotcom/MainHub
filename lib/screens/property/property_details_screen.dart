@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../models/property.dart';
+import '../../features/property/models/property_adapter.dart';
+import '../../features/property/state/property_state.dart';
 import '../../widgets/common/app_button.dart';
 import '../../widgets/property/property_hero_card.dart';
 import '../assessment/surebot_screen.dart';
-
 
 class PropertyDetailsScreen extends StatelessWidget {
   final Property property;
@@ -13,6 +14,23 @@ class PropertyDetailsScreen extends StatelessWidget {
     super.key,
     required this.property,
   });
+
+  void _selectCanonicalProperty() {
+    final propertyState =
+        PropertyState.instance;
+
+    for (final candidate in propertyState.properties) {
+      if (candidate.id == property.id ||
+          candidate.name == property.name) {
+        propertyState.selectProperty(candidate);
+        return;
+      }
+    }
+
+    propertyState.selectProperty(
+      PropertyAdapter.fromLegacy(property),
+    );
+  }
 
   Widget buildScoreTile(
     String title,
@@ -33,7 +51,8 @@ class PropertyDetailsScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: color.withValues(alpha: .12),
+            backgroundColor:
+                color.withValues(alpha: .12),
             child: Text(
               "$score",
               style: TextStyle(
@@ -42,9 +61,7 @@ class PropertyDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(width: 18),
-
           Expanded(
             child: Text(
               title,
@@ -54,7 +71,6 @@ class PropertyDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-
           Icon(
             Icons.arrow_forward_ios,
             size: 16,
@@ -69,26 +85,26 @@ class PropertyDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFFF8FAFC),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            24,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
-
               PropertyHeroCard(
                 property: property,
               ),
-
               const SizedBox(height: 32),
-
               const Text(
                 "Property DNA",
                 style: TextStyle(
@@ -96,9 +112,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               const Text(
                 "Understand what contributes to your HomeSure Score.",
                 style: TextStyle(
@@ -106,46 +120,42 @@ class PropertyDetailsScreen extends StatelessWidget {
                   fontSize: 15,
                 ),
               ),
-
               const SizedBox(height: 24),
-
               buildScoreTile(
                 "Legal Compliance",
                 property.legalScore,
                 Colors.green,
               ),
-
               buildScoreTile(
                 "Utilities",
                 property.utilityScore,
                 Colors.orange,
               ),
-
               buildScoreTile(
                 "Safety",
                 property.safetyScore,
                 Colors.blue,
               ),
-
               buildScoreTile(
                 "Builder Reliability",
                 property.builderScore,
                 Colors.purple,
               ),
-
               const SizedBox(height: 28),
-
               AppButton(
                 text: "Start Assessment",
                 icon: Icons.play_arrow_rounded,
                 onPressed: () {
-                 Navigator.push(
-                  context,
-                   MaterialPageRoute(
-                   builder: (_) => const SureBotScreen(),
-                  ),
-                 );
-                 },
+                  _selectCanonicalProperty();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const SureBotScreen(),
+                    ),
+                  );
+                },
               ),
             ],
           ),

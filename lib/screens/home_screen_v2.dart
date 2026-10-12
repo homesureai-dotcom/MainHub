@@ -26,10 +26,14 @@ class HomeScreenV2 extends StatefulWidget {
 }
 
 class _HomeScreenV2State extends State<HomeScreenV2> {
-  final PropertyState propertyState = PropertyState.instance;
-  final AssessmentState assessmentState = AssessmentState.instance;
+  final PropertyState propertyState =
+      PropertyState.instance;
 
-  late final DashboardDataCoordinator _dashboardCoordinator;
+  final AssessmentState assessmentState =
+      AssessmentState.instance;
+
+  late final DashboardDataCoordinator
+      _dashboardCoordinator;
 
   DashboardData? _dashboardData;
   bool _isLoading = true;
@@ -38,7 +42,8 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   void initState() {
     super.initState();
 
-    _dashboardCoordinator = DashboardDataCoordinator(
+    _dashboardCoordinator =
+        DashboardDataCoordinator(
       propertyState: propertyState,
       assessmentState: assessmentState,
     );
@@ -58,11 +63,14 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
   void _refresh() {
     if (!mounted) return;
+
     _loadDashboardData();
   }
 
   Future<void> _loadDashboardData() async {
-    final data = await _dashboardCoordinator.build();
+    final data =
+        await _dashboardCoordinator.build();
+
     if (!mounted) return;
 
     setState(() {
@@ -72,12 +80,15 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   }
 
   void _openEvidenceDetails() {
-    final summary = _dashboardData?.evidenceSummary;
+    final summary =
+        _dashboardData?.evidenceSummary;
+
     if (summary == null) return;
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => EvidenceDetailsScreen(
+        builder: (_) =>
+            EvidenceDetailsScreen(
           summary: summary,
         ),
       ),
@@ -87,7 +98,8 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   void _openAiAdvisor() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => const SureBotScreen(),
+        builder: (_) =>
+            const SureBotScreen(),
       ),
     );
   }
@@ -104,9 +116,11 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PropertyHealthResultScreen(
+        builder: (_) =>
+            PropertyHealthResultScreen(
           result: result,
-          evidenceSummary: data?.evidenceSummary,
+          evidenceSummary:
+              data?.evidenceSummary,
         ),
       ),
     );
@@ -133,18 +147,23 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
         body: Center(
           child: Text(
             'No property selected.',
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: 18,
+            ),
           ),
         ),
       );
     }
 
     final property = data.property;
-    final score = data.healthScore?.round();
-    final status = data.healthGrade;
+    final score =
+        data.healthScore?.round();
+    final status =
+        data.healthGrade;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor:
+          const Color(0xFFF8FAFC),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
@@ -154,39 +173,54 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
             32,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               const GreetingHeader(
                 userName: 'Vinod',
               ),
               const SizedBox(height: 24),
               PropertySelectorCard(
-                propertyName: property.name,
-                location: property.address.city,
+                propertyName:
+                    property.name,
+                location:
+                    property.address.city,
                 onTap: () {},
               ),
               const SizedBox(height: 28),
               HeroScoreCard(
                 score: score,
-                status: status ?? 'Not Assessed',
-                verifiedCount: property.compliance.verifiedCount,
-                pendingCount: property.compliance.pendingCount,
-                issueCount: property.compliance.issueCount,
+                status:
+                    status ?? 'Not Assessed',
+                verifiedCount:
+                    property.compliance
+                        .verifiedCount,
+                pendingCount:
+                    property.compliance
+                        .pendingCount,
+                issueCount:
+                    property.compliance
+                        .issueCount,
                 onPressed: () {},
               ),
               const SizedBox(height: 24),
               AssessmentProgressCard(
-                completedQuestions: data.evaluatedQuestionCount,
-                totalQuestions: data.totalQuestionCount,
+                completedQuestions:
+                    data.evaluatedQuestionCount,
+                totalQuestions:
+                    data.totalQuestionCount,
                 completionPercentage:
                     data.questionCompletionPercentage,
-                completedCategories: data.evaluatedCategoryCount,
-                totalCategories: data.totalCategoryCount,
+                completedCategories:
+                    data.evaluatedCategoryCount,
+                totalCategories:
+                    data.totalCategoryCount,
               ),
               const SizedBox(height: 24),
               EvidenceSnapshotCard(
                 data: data,
-                onViewDetails: _openEvidenceDetails,
+                onViewDetails:
+                    _openEvidenceDetails,
               ),
               const SizedBox(height: 24),
               TodaysPrioritiesCard(
@@ -194,15 +228,21 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
               ),
               const SizedBox(height: 32),
               QuickActionGrid(
-                onAiAdvisor: _openAiAdvisor,
-                onDocuments: _openDocuments,
-                onCompliance: _openCompliance,
-                onTimeline: _openTimeline,
+                onAiAdvisor:
+                    _openAiAdvisor,
+                onDocuments:
+                    _openDocuments,
+                onCompliance:
+                    _openCompliance,
+                onTimeline:
+                    _openTimeline,
               ),
               const SizedBox(height: 32),
               const RecentAlertsCard(),
               const SizedBox(height: 32),
-              const AIInsightsCard(),
+              AIInsightsCard(
+                data: data,
+              ),
               const SizedBox(height: 40),
             ],
           ),
