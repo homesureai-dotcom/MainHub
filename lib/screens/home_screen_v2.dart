@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../features/dashboard/coordinators/dashboard_data_coordinator.dart';
 import '../features/dashboard/models/dashboard_data.dart';
+import '../features/dashboard/models/dashboard_priority.dart';
 import '../features/property/state/property_state.dart';
+import '../features/surebot/builders/surebot_context_builder.dart';
 import '../screens/assessment/evidence_details_screen.dart';
 import '../screens/assessment/property_health_result_screen.dart';
 import '../screens/assessment/surebot_screen.dart';
@@ -32,8 +34,10 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   final AssessmentState assessmentState =
       AssessmentState.instance;
 
-  late final DashboardDataCoordinator
-      _dashboardCoordinator;
+  final SureBotContextBuilder _sureBotContextBuilder =
+      const SureBotContextBuilder();
+
+  late final DashboardDataCoordinator _dashboardCoordinator;
 
   DashboardData? _dashboardData;
   bool _isLoading = true;
@@ -96,10 +100,26 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   }
 
   void _openAiAdvisor() {
+    final data = _dashboardData;
+
+    if (data == null) {
+      return;
+    }
+
+    final DashboardPriority? currentPriority = data.priorities.isEmpty
+        ? null
+        : data.priorities.first;
+
+    final sureBotContext = _sureBotContextBuilder.build(
+      data,
+      currentPriority: currentPriority,
+    );
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            const SureBotScreen(),
+        builder: (_) => SureBotScreen(
+          sureBotContext: sureBotContext,
+        ),
       ),
     );
   }

@@ -315,23 +315,171 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // ------------------------------------------------------------
+      // Verify the Quick Actions section.
+      // ------------------------------------------------------------
+
+      final quickActionGrid = find.byType(QuickActionGrid);
+
       expect(
-        find.byType(HeroScoreCard),
+        quickActionGrid,
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify all four Quick Action cards exist.
+      // ------------------------------------------------------------
+
+      final quickActionCards = find.descendant(
+        of: quickActionGrid,
+        matching: find.byType(QuickActionCard),
+      );
+
+      expect(
+        quickActionCards,
+        findsNWidgets(4),
+      );
+
+      // ------------------------------------------------------------
+      // Verify the AI Advisor action exists.
+      // ------------------------------------------------------------
+
+      final aiAdvisorTitle = find.descendant(
+        of: quickActionGrid,
+        matching: find.text('AI Advisor'),
+      );
+
+      expect(
+        aiAdvisorTitle,
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Make the AI Advisor card visible.
+      // ------------------------------------------------------------
+
+      await tester.ensureVisible(aiAdvisorTitle);
+
+      await tester.pumpAndSettle();
+
+      // ------------------------------------------------------------
+      // Tap the actual AI Advisor action.
+      // ------------------------------------------------------------
+
+      await tester.tap(aiAdvisorTitle);
+
+      await tester.pumpAndSettle();
+
+      // ------------------------------------------------------------
+      // Verify Dashboard -> SureBotScreen navigation.
+      // ------------------------------------------------------------
+
+      expect(
+        find.byType(SureBotScreen),
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify contextual SureBot UI.
+      // ------------------------------------------------------------
+
+      expect(
+        find.text('SureBot'),
         findsOneWidget,
       );
 
       expect(
-        find.byType(AssessmentProgressCard),
+        find.text("I'm SureBot. I already have some context about your property."),
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify property context.
+      // ------------------------------------------------------------
+
+      expect(
+        find.text('Casagrand Aquene'),
         findsOneWidget,
       );
 
       expect(
-        find.byType(EvidenceSnapshotCard),
+        find.text('Casagrand'),
         findsOneWidget,
       );
 
       expect(
-        find.byType(TodaysPrioritiesCard),
+        find.text('Bangalore, Karnataka'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('Apartment'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('2025'),
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify health context.
+      // ------------------------------------------------------------
+
+      expect(
+        find.text('Property Health'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('In progress'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('1/33'),
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify evidence context.
+      // ------------------------------------------------------------
+
+      expect(
+        find.text('Evidence'),
+        findsOneWidget,
+      );
+
+      // ------------------------------------------------------------
+      // Verify the current priority.
+      //
+      // This assertion validates the complete
+      // Dashboard -> SureBotContextBuilder -> SureBotScreen
+      // integration.
+      // ------------------------------------------------------------
+
+      expect(
+        find.text('Current Priority'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('Obtain Registered Sale Deed'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('Potential PHI improvement: +25'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('Required documents'),
+        findsOneWidget,
+      );
+
+      expect(
+        find.text('• Registered Sale Deed'),
         findsOneWidget,
       );
     },
