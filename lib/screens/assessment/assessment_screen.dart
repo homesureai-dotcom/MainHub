@@ -17,6 +17,7 @@ import '../../core/evidence/question_evidence_coordinator.dart';
 import '../../core/evidence/video_capture_service.dart';
 import '../../core/phs/phs_answer.dart';
 import '../../data/phs_questions.dart';
+import '../../features/property/state/property_state.dart';
 import '../../state/assessment_state.dart';
 import '../../widgets/assessment/answer_option.dart';
 import '../../widgets/assessment/assessment_progress.dart';
@@ -40,12 +41,30 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
   final AssessmentState assessmentState = AssessmentState.instance;
 
+  final PropertyState propertyState = PropertyState.instance;
+
+  final PHSCategoryQuestionResolver _categoryQuestionResolver =
+      const PHSCategoryQuestionResolver();
+
+  final PHSQuestionProgressResolver _questionProgressResolver =
+      const PHSQuestionProgressResolver();
+
   late final QuestionEvidenceCoordinator _evidenceCoordinator;
-  late final AssessmentEvidenceManagementService
-      _evidenceManagementService;
+
+  late final AssessmentEvidenceManagementService _evidenceManagementService;
+
   late final EvidenceCaptureCoordinator _evidenceCaptureCoordinator;
 
   List<Evidence> _currentQuestionEvidence = const [];
+
+  PHSQuestionProgress? get _currentQuestionProgress =>
+      _questionProgressResolver.resolve(
+        questionId: phsQuestions[currentQuestion].id,
+        questions: phsQuestions,
+        answeredQuestionIds: assessmentState.answers
+            .map((answer) => answer.questionId)
+            .toSet(),
+      );
 
   @override
   void initState() {
@@ -54,22 +73,72 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     _initializeEvidenceCoordinator();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      assessmentState.startAssessment();
+      _initializeAssessment();
+    });
+  }
 
-      _loadCurrentQuestionEvidence();
+  void _initializeAssessment() {
+    assessmentState.startAssessment(
+      propertyId: propertyState.selectedProperty?.id,
+    );
+
+    _restoreCurrentQuestion();
+
+    _loadCurrentQuestionEvidence();
+  }
+
+  void _restoreCurrentQuestion() {
+    final savedQuestionId = assessmentState.currentQuestionId;
+
+    if (savedQuestionId != null) {
+      final savedIndex = phsQuestions.indexWhere(
+        (question) => question.id == savedQuestionId,
+      );
+
+      if (savedIndex >= 0) {
+        setState(() {
+          currentQuestion = savedIndex;
+        });
+
+        return;
+      }
+    }
+
+    final answers = assessmentState.answers;
+
+    if (answers.isEmpty) {
+      setState(() {
+        currentQuestion = 0;
+      });
+
+      return;
+    }
+
+    final answeredQuestionIds = answers.map((answer) => answer.questionId);
+
+    final nextUnansweredIndex = phsQuestions.indexWhere(
+      (question) => !answeredQuestionIds.contains(question.id),
+    );
+
+    if (nextUnansweredIndex >= 0) {
+      setState(() {
+        currentQuestion = nextUnansweredIndex;
+      });
+
+      return;
+    }
+
+    setState(() {
+      currentQuestion = phsQuestions.length - 1;
     });
   }
 
   void _initializeEvidenceCoordinator() {
     final typeMapper = const EvidenceTypeMapper();
 
-    final resolver = EvidenceRequirementResolver(
-      typeMapper: typeMapper,
-    );
+    final resolver = EvidenceRequirementResolver(typeMapper: typeMapper);
 
-    final catalog = EvidenceRequirementCatalog(
-      resolver: resolver,
-    );
+    final catalog = EvidenceRequirementCatalog(resolver: resolver);
 
     final validator = EvidenceValidator();
 
