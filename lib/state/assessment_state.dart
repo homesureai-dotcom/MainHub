@@ -5,6 +5,10 @@ import '../core/assessment/assessment_session.dart';
 import '../core/evidence/evidence_repository.dart';
 import '../core/evidence/in_memory_evidence_repository.dart';
 import '../core/phs/phs_answer.dart';
+import '../core/phs/phs_assessment_progress.dart';
+import '../core/phs/phs_question_progress.dart';
+import '../core/phs/phs_question_progress_resolver.dart';
+import '../data/phs_questions.dart';
 import '../features/report/models/property_health_report.dart';
 
 class AssessmentState extends ChangeNotifier {
@@ -14,8 +18,10 @@ class AssessmentState extends ChangeNotifier {
 
   final List<PHSAnswer> _answers = [];
 
-  final EvidenceRepository _evidenceRepository =
-      InMemoryEvidenceRepository();
+  final EvidenceRepository _evidenceRepository = InMemoryEvidenceRepository();
+
+  final PHSQuestionProgressResolver _questionProgressResolver =
+      const PHSQuestionProgressResolver();
 
   AssessmentResult? _latestResult;
 
@@ -50,15 +56,32 @@ class AssessmentState extends ChangeNotifier {
       _session!.status == AssessmentSessionStatus.inProgress;
 
   bool get hasCompletedSession =>
-      _session != null &&
-      _session!.status == AssessmentSessionStatus.completed;
+      _session != null && _session!.status == AssessmentSessionStatus.completed;
 
   String? get currentQuestionId => _session?.currentQuestionId;
 
-  void startAssessment({
-    String? propertyId,
-    bool forceNew = false,
-  }) {
+  int get answeredQuestionCount => _answers.length;
+
+  PHSAssessmentProgress get assessmentProgress =>
+      PHSAssessmentProgress.fromQuestions(
+        questions: phsQuestions,
+        answers: _answers,
+      );
+
+  PHSQuestionProgress? get currentQuestionProgress {
+    final questionId = currentQuestionId;
+
+    if (questionId == null) {
+      return null;
+    }
+
+    return _questionProgressResolver.resolve(
+      questionId: questionId,
+      questions: phsQuestions,
+    );
+  }
+
+  void startAssessment({String? propertyId, bool forceNew = false}) {
     if (!forceNew &&
         _session != null &&
         _session!.status == AssessmentSessionStatus.inProgress) {
@@ -76,9 +99,13 @@ class AssessmentState extends ChangeNotifier {
     final now = DateTime.now();
 
     _answers.clear();
+
     _latestResult = null;
+
     _latestReport = null;
+
     _completedAt = null;
+
     _propertyId = propertyId;
 
     _evidenceRepository.clear();
@@ -96,19 +123,14 @@ class AssessmentState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveAnswer(
-    PHSAnswer answer, {
-    String? currentQuestionId,
-  }) {
+  void saveAnswer(PHSAnswer answer, {String? currentQuestionId}) {
     _answers.removeWhere(
-      (a) => a.questionId == answer.questionId,
+      (existing) => existing.questionId == answer.questionId,
     );
 
     _answers.add(answer);
 
-    _updateSession(
-      currentQuestionId: currentQuestionId ?? answer.questionId,
-    );
+    _updateSession(currentQuestionId: currentQuestionId ?? answer.questionId);
 
     notifyListeners();
   }
@@ -142,6 +164,7 @@ class AssessmentState extends ChangeNotifier {
 
   void saveResult(AssessmentResult result) {
     _latestResult = result;
+
     _completedAt ??= DateTime.now();
 
     completeAssessment();
@@ -172,9 +195,13 @@ class AssessmentState extends ChangeNotifier {
 
   void clearAssessment() {
     _answers.clear();
+
     _latestResult = null;
+
     _latestReport = null;
+
     _completedAt = null;
+
     _propertyId = null;
 
     _session = null;
@@ -185,10 +212,7 @@ class AssessmentState extends ChangeNotifier {
   }
 
   void startNewAssessment({String? propertyId}) {
-    startAssessment(
-      propertyId: propertyId,
-      forceNew: true,
-    );
+    startAssessment(propertyId: propertyId, forceNew: true);
   }
 
   void _updateSession({String? currentQuestionId}) {
@@ -202,8 +226,7 @@ class AssessmentState extends ChangeNotifier {
 
     _session = existingSession.copyWith(
       lastUpdatedAt: now,
-      currentQuestionId:
-          currentQuestionId ?? existingSession.currentQuestionId,
+      currentQuestionId: currentQuestionId ?? existingSession.currentQuestionId,
       answers: List.unmodifiable(_answers),
     );
   }

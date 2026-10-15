@@ -16,21 +16,24 @@ import '../../core/evidence/image_picker_gateway.dart';
 import '../../core/evidence/question_evidence_coordinator.dart';
 import '../../core/evidence/video_capture_service.dart';
 import '../../core/phs/phs_answer.dart';
+import '../../core/phs/phs_categories.dart';
+import '../../core/phs/phs_category_question_resolver.dart';
+import '../../core/phs/phs_question_progress.dart';
+import '../../core/phs/phs_question_progress_resolver.dart';
 import '../../data/phs_questions.dart';
 import '../../features/property/state/property_state.dart';
 import '../../state/assessment_state.dart';
 import '../../widgets/assessment/answer_option.dart';
 import '../../widgets/assessment/assessment_progress.dart';
+import '../../widgets/assessment/current_question_progress.dart';
+import '../../widgets/assessment/phs_pillar_progress.dart';
 import '../../widgets/assessment/question_card.dart';
 import 'analyzing_screen.dart';
 
 class AssessmentScreen extends StatefulWidget {
   final EvidenceCaptureService? evidenceCaptureService;
 
-  const AssessmentScreen({
-    super.key,
-    this.evidenceCaptureService,
-  });
+  const AssessmentScreen({super.key, this.evidenceCaptureService});
 
   @override
   State<AssessmentScreen> createState() => _AssessmentScreenState();
@@ -147,46 +150,36 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       validator: validator,
     );
 
-    _evidenceManagementService =
-        AssessmentEvidenceManagementService(
+    _evidenceManagementService = AssessmentEvidenceManagementService(
       repository: assessmentState.evidenceRepository,
     );
 
     final captureService =
         widget.evidenceCaptureService ??
-            CompositeEvidenceCaptureService(
-              documentCaptureService:
-                  FilePickerEvidenceCaptureService(
-                filePicker: const PlatformFilePickerGateway(),
-              ),
-              photographCaptureService:
-                  ImagePickerEvidenceCaptureService(
-                imagePicker: PlatformImagePickerGateway(),
-              ),
-              videoCaptureService:
-                  VideoCaptureService(
-                imagePicker: PlatformImagePickerGateway(),
-              ),
-            );
+        CompositeEvidenceCaptureService(
+          documentCaptureService: FilePickerEvidenceCaptureService(
+            filePicker: const PlatformFilePickerGateway(),
+          ),
+          photographCaptureService: ImagePickerEvidenceCaptureService(
+            imagePicker: PlatformImagePickerGateway(),
+          ),
+          videoCaptureService: VideoCaptureService(
+            imagePicker: PlatformImagePickerGateway(),
+          ),
+        );
 
-    _evidenceCaptureCoordinator =
-        EvidenceCaptureCoordinator(
+    _evidenceCaptureCoordinator = EvidenceCaptureCoordinator(
       captureService: captureService,
       repository: assessmentState.evidenceRepository,
     );
 
-    catalog.getForQuestion(
-      phsQuestions[currentQuestion],
-    );
+    catalog.getForQuestion(phsQuestions[currentQuestion]);
   }
 
   Future<void> _loadCurrentQuestionEvidence() async {
     final question = phsQuestions[currentQuestion];
 
-    final evidence =
-        await _evidenceCoordinator.loadEvidence(
-      question.id,
-    );
+    final evidence = await _evidenceCoordinator.loadEvidence(question.id);
 
     if (!mounted) {
       return;
@@ -197,9 +190,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     });
   }
 
-  Future<void> handleEvidenceTypeSelected(
-    EvidenceType type,
-  ) async {
+  Future<void> handleEvidenceTypeSelected(EvidenceType type) async {
     if (type == EvidenceType.document ||
         type == EvidenceType.photograph ||
         type == EvidenceType.video) {
@@ -210,9 +201,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     await _createPendingEvidence(type);
   }
 
-  Future<void> _captureEvidence(
-    EvidenceType type,
-  ) async {
+  Future<void> _captureEvidence(EvidenceType type) async {
     final question = phsQuestions[currentQuestion];
 
     final label = switch (type) {
@@ -223,19 +212,14 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     };
 
     final request = switch (type) {
-      EvidenceType.document =>
-        const EvidenceCaptureRequest.document(),
-      EvidenceType.photograph =>
-        const EvidenceCaptureRequest.photograph(),
-      EvidenceType.video =>
-        const EvidenceCaptureRequest.video(),
-      EvidenceType.manual =>
-        const EvidenceCaptureRequest.manual(),
+      EvidenceType.document => const EvidenceCaptureRequest.document(),
+      EvidenceType.photograph => const EvidenceCaptureRequest.photograph(),
+      EvidenceType.video => const EvidenceCaptureRequest.video(),
+      EvidenceType.manual => const EvidenceCaptureRequest.manual(),
     };
 
     try {
-      final evidence =
-          await _evidenceCaptureCoordinator.captureEvidence(
+      final evidence = await _evidenceCaptureCoordinator.captureEvidence(
         id: 'EVIDENCE_${DateTime.now().microsecondsSinceEpoch}',
         questionId: question.id,
         type: type,
@@ -257,9 +241,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '$label evidence added successfully.',
-          ),
+          content: Text('$label evidence added successfully.'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -270,10 +252,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            error.message ??
-                '$label capture is unavailable.',
-          ),
+          content: Text(error.message ?? '$label capture is unavailable.'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -291,9 +270,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
   }
 
-  Future<void> _createPendingEvidence(
-    EvidenceType type,
-  ) async {
+  Future<void> _createPendingEvidence(EvidenceType type) async {
     final question = phsQuestions[currentQuestion];
 
     final label = switch (type) {
@@ -315,9 +292,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       addedAt: DateTime.now(),
     );
 
-    await _evidenceCoordinator.addEvidence(
-      evidence,
-    );
+    await _evidenceCoordinator.addEvidence(evidence);
 
     await _loadCurrentQuestionEvidence();
 
@@ -336,13 +311,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     );
   }
 
-  Future<void> _handleEvidenceStatusChange(
-    Evidence updatedEvidence,
-  ) async {
+  Future<void> _handleEvidenceStatusChange(Evidence updatedEvidence) async {
     try {
-      await _evidenceManagementService.updateEvidence(
-        updatedEvidence,
-      );
+      await _evidenceManagementService.updateEvidence(updatedEvidence);
 
       await _loadCurrentQuestionEvidence();
 
@@ -352,9 +323,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Evidence status updated.',
-          ),
+          content: Text('Evidence status updated.'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -372,12 +341,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
   }
 
-  Future<void> _handleEvidenceDelete(
-    Evidence evidence,
-  ) async {
+  Future<void> _handleEvidenceDelete(Evidence evidence) async {
     try {
-      final deleted =
-          await _evidenceManagementService.deleteEvidence(
+      final deleted = await _evidenceManagementService.deleteEvidence(
         evidence.id,
       );
 
@@ -388,9 +354,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Evidence could not be found.',
-            ),
+            content: Text('Evidence could not be found.'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -424,94 +388,203 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
   }
 
+  void _openCategory(PHSCategory category) {
+    final question = _categoryQuestionResolver.resolve(
+      category: category,
+      questions: phsQuestions,
+      answers: assessmentState.answers,
+    );
+
+    if (question == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'There are no questions available for '
+            '${category.displayName}.',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      return;
+    }
+
+    final questionIndex = phsQuestions.indexWhere(
+      (candidate) => candidate.id == question.id,
+    );
+
+    if (questionIndex < 0) {
+      return;
+    }
+
+    setState(() {
+      currentQuestion = questionIndex;
+      _currentQuestionEvidence = const [];
+    });
+
+    assessmentState.updateCurrentQuestion(question.id);
+
+    _loadCurrentQuestionEvidence();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final message =
+          assessmentState.answers.any(
+            (answer) => answer.questionId == question.id,
+          )
+          ? 'Opening ${category.displayName}.'
+          : 'Continuing ${category.displayName}.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
+      );
+    });
+  }
+
   void saveAnswer(PHSResponse response) {
     final question = phsQuestions[currentQuestion];
 
+    final isLastQuestion = currentQuestion == phsQuestions.length - 1;
+
+    final nextQuestionId = isLastQuestion
+        ? question.id
+        : phsQuestions[currentQuestion + 1].id;
+
     assessmentState.saveAnswer(
-      PHSAnswer(
-        questionId: question.id,
-        response: response,
-      ),
+      PHSAnswer(questionId: question.id, response: response),
+      currentQuestionId: nextQuestionId,
     );
 
-    if (currentQuestion < phsQuestions.length - 1) {
+    if (!isLastQuestion) {
       setState(() {
         currentQuestion++;
         _currentQuestionEvidence = const [];
       });
 
       _loadCurrentQuestionEvidence();
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AnalyzingScreen(),
-        ),
-      );
+
+      return;
     }
+
+    assessmentState.completeAssessment();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const AnalyzingScreen()),
+    );
+  }
+
+  void _saveAndExit() {
+    assessmentState.updateCurrentQuestion(phsQuestions[currentQuestion].id);
+
+    assessmentState.saveAndExit();
+
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final question = phsQuestions[currentQuestion];
 
+    final progress = assessmentState.assessmentProgress;
+
+    final questionProgress = _currentQuestionProgress;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('Property Assessment'),
+        actions: [
+          TextButton(onPressed: _saveAndExit, child: const Text('Save & Exit')),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AssessmentProgress(
                 current: currentQuestion + 1,
                 total: phsQuestions.length,
               ),
+              const SizedBox(height: 8),
+              Text(
+                '${progress.answeredQuestions} of '
+                '${progress.totalQuestions} questions answered',
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 20),
+              PHSAssessmentPillarProgress(
+                progress: progress,
+                onCategoryTap: _openCategory,
+              ),
+              if (questionProgress != null) ...[
+                const SizedBox(height: 16),
+                CurrentQuestionProgress(progress: questionProgress),
+              ],
               const SizedBox(height: 24),
               QuestionCard(
                 question: question,
-                suppliedEvidence:
-                    _currentQuestionEvidence,
-                onEvidenceTypeSelected:
-                    handleEvidenceTypeSelected,
-                onEvidenceStatusChange:
-                    _handleEvidenceStatusChange,
-                onEvidenceDelete:
-                    _handleEvidenceDelete,
+                suppliedEvidence: _currentQuestionEvidence,
+                onEvidenceTypeSelected: handleEvidenceTypeSelected,
+                onEvidenceStatusChange: _handleEvidenceStatusChange,
+                onEvidenceDelete: _handleEvidenceDelete,
               ),
               const SizedBox(height: 24),
               AnswerOption(
                 icon: Icons.check_circle,
                 color: Colors.green,
                 text: 'Yes',
-                onTap: () =>
-                    saveAnswer(PHSResponse.yes),
+                onTap: () => saveAnswer(PHSResponse.yes),
               ),
               const SizedBox(height: 14),
               AnswerOption(
                 icon: Icons.cancel,
                 color: Colors.red,
                 text: 'No',
-                onTap: () =>
-                    saveAnswer(PHSResponse.no),
+                onTap: () => saveAnswer(PHSResponse.no),
               ),
               const SizedBox(height: 14),
               AnswerOption(
                 icon: Icons.help,
                 color: Colors.orange,
                 text: "I'm Not Sure",
-                onTap: () =>
-                    saveAnswer(PHSResponse.unsure),
+                onTap: () => saveAnswer(PHSResponse.unsure),
               ),
               const SizedBox(height: 32),
+              if (currentQuestion > 0)
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _goToPreviousQuestion,
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Previous Question'),
+                  ),
+                ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _goToPreviousQuestion() {
+    if (currentQuestion <= 0) {
+      return;
+    }
+
+    setState(() {
+      currentQuestion--;
+
+      _currentQuestionEvidence = const [];
+    });
+
+    assessmentState.updateCurrentQuestion(phsQuestions[currentQuestion].id);
+
+    _loadCurrentQuestionEvidence();
   }
 }
