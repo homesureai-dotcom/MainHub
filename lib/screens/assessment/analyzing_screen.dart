@@ -65,13 +65,11 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
 
     final validator = EvidenceValidator();
 
-    final questionContextBuilder =
-        PHSQuestionEvidenceContextBuilder(
+    final questionContextBuilder = PHSQuestionEvidenceContextBuilder(
       validator: validator,
     );
 
-    final questionContextService =
-        PHSQuestionEvidenceContextService(
+    final questionContextService = PHSQuestionEvidenceContextService(
       repository: _evidenceRepository,
       catalog: _evidenceCatalog,
       builder: questionContextBuilder,
@@ -86,8 +84,7 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
       builder: assessmentContextBuilder,
     );
 
-    _assessmentEvidenceSummaryBuilder =
-        AssessmentEvidenceSummaryBuilder(
+    _assessmentEvidenceSummaryBuilder = AssessmentEvidenceSummaryBuilder(
       validator: validator,
     );
   }
@@ -144,59 +141,65 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Spacer(),
-              const CircleAvatar(
-                radius: 60,
-                backgroundColor: Color(0xFF2563EB),
-                child: Icon(
-                  Icons.smart_toy,
-                  color: Colors.white,
-                  size: 60,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.sizeOf(context).height - 48,
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                const CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Color(0xFF2563EB),
+                  child: Icon(
+                    Icons.smart_toy,
+                    color: Colors.white,
+                    size: 60,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              const Text(
-                'Analyzing your Property',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 30),
+                const Text(
+                  'Analyzing your Property',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'SureBot is evaluating your responses using the '
-                'HomeSure Property Health Standard.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
+                const SizedBox(height: 14),
+                const Text(
+                  'SureBot is evaluating your responses using the '
+                  'HomeSure Property Health Standard.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              const LinearProgressIndicator(),
-              const SizedBox(height: 40),
-              const AnalyzingStep(
-                title: 'Legal & Ownership',
-                completed: true,
-              ),
-              const AnalyzingStep(
-                title: 'Construction Quality',
-                completed: true,
-              ),
-              const AnalyzingStep(
-                title: 'Utilities & Infrastructure',
-                completed: true,
-              ),
-              const AnalyzingStep(
-                title: 'Safety & Compliance',
-                completed: true,
-              ),
-              const Spacer(),
-            ],
+                const SizedBox(height: 40),
+                const LinearProgressIndicator(),
+                const SizedBox(height: 40),
+                const AnalyzingStep(
+                  title: 'Legal & Ownership',
+                  completed: true,
+                ),
+                const AnalyzingStep(
+                  title: 'Construction Quality',
+                  completed: true,
+                ),
+                const AnalyzingStep(
+                  title: 'Utilities & Infrastructure',
+                  completed: true,
+                ),
+                const AnalyzingStep(
+                  title: 'Safety & Compliance',
+                  completed: true,
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
