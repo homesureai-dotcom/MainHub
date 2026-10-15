@@ -9,17 +9,23 @@ import '../../models/property_health/category_score.dart';
 /// It does not generate risks or recommendations.
 class ScoreCalculator {
   /// Calculates the score for each Property Health category.
-  List<CategoryScore> calculate(
-    List<PHSAnswer> answers,
-  ) {
+  ///
+  /// Question scoring:
+  /// - Yes = 100% of question weight
+  /// - Unsure = 50% of question weight
+  /// - No = 0% of question weight
+  ///
+  /// A category is scored using the questions that have actually
+  /// been answered. Unanswered questions do not reduce the score.
+  List<CategoryScore> calculate(List<PHSAnswer> answers) {
     final Map<PHSCategory, double> earnedScore = {};
-    final Map<PHSCategory, double> totalScore = {};
+    final Map<PHSCategory, double> answeredScore = {};
 
     final Map<PHSCategory, int> totalQuestions = {};
+    final Map<PHSCategory, int> answeredQuestions = {};
     final Map<PHSCategory, int> passedQuestions = {};
 
     for (final question in phsQuestions) {
-      // Count total questions
       totalQuestions.update(
         question.category,
         (value) => value + 1,
@@ -27,7 +33,7 @@ class ScoreCalculator {
       );
 
       final matchingAnswers = answers.where(
-        (a) => a.questionId == question.id,
+        (answer) => answer.questionId == question.id,
       );
 
       if (matchingAnswers.isEmpty) {
@@ -35,28 +41,9 @@ class ScoreCalculator {
       }
 
       final response = matchingAnswers.first.response;
+      final questionWeight = question.weight.toDouble();
 
-      double earned = 0;
-
-      switch (response) {
-        case PHSResponse.yes:
-          earned = question.weight.toDouble();
-
-          passedQuestions.update(
-            question.category,
-            (value) => value + 1,
-            ifAbsent: () => 1,
-          );
-          break;
-
-        case PHSResponse.unsure:
-          earned = question.weight * 0.5;
-          break;
-
-        case PHSResponse.no:
-          earned = 0;
-          break;
-      }
+      final earned = questionWeight * response.value;
 
       earnedScore.update(
         question.category,
@@ -64,27 +51,42 @@ class ScoreCalculator {
         ifAbsent: () => earned,
       );
 
-      totalScore.update(
+      answeredScore.update(
         question.category,
-        (value) => value + question.weight.toDouble(),
-        ifAbsent: () => question.weight.toDouble(),
+        (value) => value + questionWeight,
+        ifAbsent: () => questionWeight,
       );
+
+      answeredQuestions.update(
+        question.category,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+
+      if (response == PHSResponse.yes) {
+        passedQuestions.update(
+          question.category,
+          (value) => value + 1,
+          ifAbsent: () => 1,
+        );
+      }
     }
 
     final List<CategoryScore> results = [];
 
     for (final category in PHSCategory.values) {
       final earned = earnedScore[category] ?? 0.0;
-      final max = totalScore[category] ?? 0.0;
+      final answeredWeight = answeredScore[category] ?? 0.0;
 
-      final double percentage =
-          max == 0 ? 0.0 : (earned / max) * 100.0;
+      final double percentage = answeredWeight == 0
+          ? 0.0
+          : (earned / answeredWeight) * 100.0;
 
       results.add(
         CategoryScore(
           category: category,
           score: percentage,
-          maxScore: max,
+          maxScore: answeredWeight,
           totalQuestions: totalQuestions[category] ?? 0,
           passedQuestions: passedQuestions[category] ?? 0,
         ),
@@ -94,19 +96,55 @@ class ScoreCalculator {
     return results;
   }
 
-  /// Calculates the overall Property Health Index.
-  double calculateOverallScore(
-    List<CategoryScore> categoryScores,
-  ) {
+  /// Calculates the overall Property Health Score.
+  ///
+  /// Category scores are weighted using the configured PHS category
+  /// weights rather than treating every category equally.
+  ///
+  /// Categories with no answered questions are excluded from the
+  /// calculation and the remaining category weights are normalized.
+  double calculateOverallScore(List<CategoryScore> categoryScores) {
     if (categoryScores.isEmpty) {
-      return 0;
+      return 0.0;
     }
 
-    final total = categoryScores.fold<double>(
-      0,
-      (sum, item) => sum + item.score,
-    );
+    double weightedScore = 0.0;
+    double assessedWeight = 0.0;
 
-    return total / categoryScores.length;
+    for (final categoryScore in categoryScores) {
+      if (categoryScore.maxScore <= 0) {
+        continue;
+      }
+
+      final categoryWeight = categoryScore.category.weight;
+
+      weightedScore += categoryScore.score * categoryWeight;
+      assessedWeight += categoryWeight;
+    }
+
+    if (assessedWeight == 0.0) {
+      return 0.0;
+    }
+
+    return weightedScore / assessedWeight;
+  }
+
+  /// Returns the percentage of questions that have been answered.
+  ///
+  /// This is deliberately separate from the health score so that an
+  /// incomplete assessment is not confused with a poor property score.
+  double calculateAssessmentCoverage(List<PHSAnswer> answers) {
+    if (phsQuestions.isEmpty) {
+      return 0.0;
+    }
+
+    final questionIds = phsQuestions.map((question) => question.id).toSet();
+
+    final answeredQuestionIds = answers
+        .where((answer) => questionIds.contains(answer.questionId))
+        .map((answer) => answer.questionId)
+        .toSet();
+
+    return (answeredQuestionIds.length / phsQuestions.length) * 100.0;
   }
 }
