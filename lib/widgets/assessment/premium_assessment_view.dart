@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/phs/phs_assessment_progress.dart';
 import '../../core/phs/phs_categories.dart';
 import '../../core/phs/phs_category_progress.dart';
-import '../../core/phs/phs_assessment_progress.dart';
 import '../../models/property_health/category_score.dart';
+import '../property_health/score_heatmap_legend.dart';
 
 /// Premium visual presentation of the Property Health assessment.
 ///
@@ -129,6 +130,10 @@ class PremiumAssessmentView extends StatelessWidget {
             const SizedBox(height: 20),
             _buildHeatmapHeader(),
             const SizedBox(height: 12),
+            ScoreHeatmapLegend(
+              score: assessmentCoverage > 0 ? overallScore : null,
+            ),
+            const SizedBox(height: 16),
             ...PHSCategory.values.map(_buildCategoryCard),
           ],
         ),
@@ -421,7 +426,6 @@ class PremiumAssessmentView extends StatelessWidget {
               ),
             ),
           ),
-
           if (isSelected)
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 4),
