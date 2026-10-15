@@ -7,11 +7,13 @@ import '../../models/property_health/recommendation.dart';
 class TodaysPrioritiesCard extends StatelessWidget {
   final DashboardData data;
   final VoidCallback? onViewAll;
+  final ValueChanged<DashboardPriority>? onPriorityTap;
 
   const TodaysPrioritiesCard({
     super.key,
     required this.data,
     this.onViewAll,
+    this.onPriorityTap,
   });
 
   static const int _maxVisiblePriorities = 3;
@@ -72,7 +74,12 @@ class TodaysPrioritiesCard extends StatelessWidget {
               )
             else ...[
               for (var index = 0; index < priorities.length; index++) ...[
-                _PriorityItem(priority: priorities[index]),
+                _PriorityItem(
+                  priority: priorities[index],
+                  onTap: onPriorityTap == null
+                      ? null
+                      : () => onPriorityTap!(priorities[index]),
+                ),
                 if (index < priorities.length - 1)
                   const SizedBox(height: 14),
               ],
@@ -96,9 +103,11 @@ class TodaysPrioritiesCard extends StatelessWidget {
 
 class _PriorityItem extends StatelessWidget {
   final DashboardPriority priority;
+  final VoidCallback? onTap;
 
   const _PriorityItem({
     required this.priority,
+    this.onTap,
   });
 
   @override
@@ -106,58 +115,75 @@ class _PriorityItem extends StatelessWidget {
     final priorityLabel = _priorityLabel(priority.priority);
     final priorityIcon = _priorityIcon(priority.priority);
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            priorityIcon,
-            size: 22,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  priority.title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  priority.description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.35,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 9),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    _PriorityBadge(label: priorityLabel),
-                    if (priority.estimatedPHIGain > 0)
-                      _PriorityBadge(
-                        label: '+${priority.estimatedPHIGain} PHI',
-                      ),
-                  ],
-                ),
-              ],
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: Colors.grey.shade200,
             ),
           ),
-        ],
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                priorityIcon,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      priority.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      priority.description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _PriorityBadge(label: priorityLabel),
+                        if (priority.estimatedPHIGain > 0)
+                          _PriorityBadge(
+                            label: '+${priority.estimatedPHIGain} PHI',
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (onTap != null) ...[
+                const SizedBox(width: 8),
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 22,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

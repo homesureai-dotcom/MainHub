@@ -243,6 +243,54 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'calls priority callback when a priority is tapped',
+      (tester) async {
+        DashboardPriority? tappedPriority;
+
+        const priority = DashboardPriority(
+          id: 'priority-001',
+          title: 'Complete e-Khata',
+          description: 'Complete the pending e-Khata process.',
+          priority: RecommendationPriority.high,
+          estimatedPHIGain: 8,
+          requiredDocuments: [
+            'Sale Deed',
+            'Khata Certificate',
+          ],
+        );
+
+        final data = createDashboardData(
+          healthResult: createHealthResult(),
+          priorities: const [
+            priority,
+          ],
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TodaysPrioritiesCard(
+                data: data,
+                onPriorityTap: (value) {
+                  tappedPriority = value;
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(
+          find.text('Complete e-Khata'),
+        );
+
+        expect(
+          tappedPriority,
+          equals(priority),
+        );
+      },
+    );
   });
 }
 
