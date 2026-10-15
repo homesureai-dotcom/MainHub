@@ -34,6 +34,7 @@ import '../../widgets/assessment/current_question_progress.dart';
 import '../../widgets/assessment/phs_pillar_progress.dart';
 import '../../widgets/assessment/premium_assessment_view.dart';
 import '../../widgets/assessment/question_card.dart';
+import '../../widgets/property_health/score_heatmap_legend.dart';
 import 'analyzing_screen.dart';
 
 class AssessmentScreen extends StatefulWidget {
@@ -774,6 +775,11 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         PHSAssessmentPillarProgress(
           progress: progress,
           onCategoryTap: _openCategory,
+        ),
+        const SizedBox(height: 16),
+        ScoreHeatmapLegend(
+          compact: true,
+          score: _assessmentCoverage > 0 ? _overallScore : null,
         ),
         if (questionProgress != null) ...[
           const SizedBox(height: 16),
