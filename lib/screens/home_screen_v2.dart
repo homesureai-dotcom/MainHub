@@ -17,6 +17,7 @@ import '../widgets/dashboard/ai_insights_card.dart';
 import '../widgets/dashboard/assessment_progress_card.dart';
 import '../widgets/dashboard/evidence_snapshot_card.dart';
 import '../widgets/dashboard/greeting_header.dart';
+import '../widgets/dashboard/property_health_breakdown_card.dart';
 import '../widgets/dashboard/property_selector_card.dart';
 import '../widgets/dashboard/quick_action_grid.dart';
 import '../widgets/dashboard/recent_alerts_card.dart';
@@ -373,8 +374,14 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                 verifiedCount: property.compliance.verifiedCount,
                 pendingCount: property.compliance.pendingCount,
                 issueCount: property.compliance.issueCount,
-                onPressed: () {},
+                onPressed: _openCompliance,
               ),
+              if (data.healthResult != null) ...[
+                const SizedBox(height: 24),
+                PropertyHealthBreakdownCard(
+                  result: data.healthResult!,
+                ),
+              ],
               const SizedBox(height: 24),
               _buildAssessmentResumeCard(),
               if (assessmentState.hasActiveSession)
