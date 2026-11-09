@@ -1,0 +1,4107 @@
+{
+  "batch_phase": "Phase 3D — 500-Project Controlled Extraction Batch",
+  "batch_index": 91,
+  "internal_sub_batch_number": 4,
+  "slug": "kritan_ira",
+  "page_band": "Early (Pages 1-100)",
+  "selection_rationale": "Stratified Early (Pages 1-100) Residential/Group Housing sample (Page 57, Approval Year 2017, promoter 'Kritan Urbane Living').",
+  "extracted_at_utc": "2026-11-09T08:04:21.204977+00:00",
+  "extraction_duration_seconds": 4.46,
+  "resolved_live_datatable_page": 54,
+  "catalogue_record": {
+    "record_key": "ACK:PR/KN/170803/001046|REG:PRM/KA/RERA/1251/310/PR/171021/001046",
+    "page_number": 57,
+    "row_order": 9,
+    "vpd_id": "1324",
+    "vpd_onclick": "return showFileApplicationPreview(this);",
+    "has_project_detail_action": true,
+    "ack_no": "PR/KN/170803/001046",
+    "reg_no": "PRM/KA/RERA/1251/310/PR/171021/001046",
+    "project_name": "Kritan Ira",
+    "promoter_name": "Kritan Urbane Living",
+    "project_type": "Residential/Group Housing",
+    "status": "APPROVED",
+    "approved_on": "21/10/2017",
+    "proposed_completion_date": "30/09/2021",
+    "canonical_project_key": "REG::PRM/KA/RERA/1251/310/PR/171021/001046",
+    "approval_year": "2017",
+    "page_band": "Early (Pages 1-100)",
+    "assigned_state": "eligible_unprocessed",
+    "selection_rationale": "Stratified Early (Pages 1-100) Residential/Group Housing sample (Page 57, Approval Year 2017, promoter 'Kritan Urbane Living').",
+    "batch_index": 91,
+    "phase3d_sequence_number": 91,
+    "internal_sub_batch_number": 4,
+    "slug": "kritan_ira",
+    "file_prefix": "091_kritan_ira"
+  },
+  "raw_dom_payload": {
+    "modal_identity": {
+      "project_name": "Kritan Ira",
+      "acknowledgement_number": "PR/KN/170803/001046",
+      "registration_number": "PRM/KA/RERA/1251/310/PR/171021/001046",
+      "portal_detail_element_id": "1324",
+      "catalogue_page_number": 57,
+      "catalogue_row_order": 9
+    },
+    "tabs": [
+      {
+        "label": "Promoter Details",
+        "id": "#home",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": false,
+        "sections": [
+          {
+            "label": "Promoter Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Promoter Type",
+                "value": "Partnership Firm",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Name",
+                "value": "Kritan Urbane Living",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Address",
+                "value": "No.977, 4th Cross, 4th Block, ,Koramangala 80 Feet Road",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "District",
+                "value": "Bengaluru Urban",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "State/UT",
+                "value": "Karnataka",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "PIN Code",
+                "value": "560034",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Company Registration No.",
+                "value": "Not applicable",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Certificate",
+                "value": "Parnership-Deed-Jan-17-2.pdf",
+                "source_link": "/download_jc?DOC_ID=rraoXuvyUz3BFSAgNhK41Q%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Certificate",
+                "filename": "Parnership-Deed-Jan-17-2.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=rraoXuvyUz3BFSAgNhK41Q%3D%3D",
+                "doc_id": "rraoXuvyUz3BFSAgNhK41Q==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": [
+              {
+                "field_or_column_label": "PAN Number",
+                "pii_category": "personal_or_entity_pan",
+                "redaction_action": "excluded_field",
+                "reason": "Excluded PAN/Aadhaar/ID identifier or document under PII policy (label='PAN Number')."
+              }
+            ]
+          },
+          {
+            "label": "Authorized Signatory Detail",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Name",
+                "value": "Harish H M",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": [
+              {
+                "field_or_column_label": "Address",
+                "pii_category": "individual_residential_address",
+                "redaction_action": "excluded_field",
+                "reason": "Excluded individual personal address 'Address' inside individual section 'Authorized Signatory Detail'."
+              },
+              {
+                "field_or_column_label": "Photograph",
+                "pii_category": "personal_photograph",
+                "redaction_action": "excluded_document",
+                "reason": "Excluded personal photograph field/link in 'Authorized Signatory Detail' (label='Photograph')."
+              }
+            ]
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Project Details",
+        "id": "#menu1",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": false,
+        "sections": [
+          {
+            "label": "Project Details",
+            "type": "mixed",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Project Name",
+                "value": "Kritan Ira",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Description",
+                "value": "Joint Development BDA Approved Project located in electronicty phase 1",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Type",
+                "value": "Residential/Group Housing",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Status",
+                "value": "New Project Launch",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Start Date",
+                "value": "25-05-2017",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Proposed Project Completion Date",
+                "value": "30-09-2021",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total Area Of Land (Sq Mtr)",
+                "value": "2529",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total Coverd Area (Sq Mtr)",
+                "value": "4421",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total Open Area (Sq Mtr)",
+                "value": "32",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Estimated Cost of Construction (INR)",
+                "value": "130000000",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Cost of Land (INR)",
+                "value": "0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total Project Cost (INR)",
+                "value": "150000000",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Address",
+                "value": "Suvey No 276 Hulimangala village, Jigini Hobli Anekal Taluk",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "District",
+                "value": "Bengaluru Urban",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Taluk",
+                "value": "Bengaluru South",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "North Latitude",
+                "value": "788200",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "North Longitude",
+                "value": "789100",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "East Latitude",
+                "value": "1418400",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "East Longitude",
+                "value": "1419000",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "West Latitude",
+                "value": "1418400",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "West Longitude",
+                "value": "1418400",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "South Latitude",
+                "value": "788200",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "South Longitude",
+                "value": "789100",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Approving Authority",
+                "value": "BDA - Bangalore Development Authority",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "No of Garage for Sale",
+                "value": "0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Area of Garage for Sale (Sq Mtr)",
+                "value": "0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "No of Parking for Sale",
+                "value": "0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Area of Parking for Sale (Sq Mtr)",
+                "value": "0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [
+              "Registration/Extensions",
+              "Start Date",
+              "Proposed Completion Date",
+              "Certificate/Order"
+            ],
+            "table_rows": [
+              {
+                "Registration/Extensions": "At the time of Registration",
+                "Start Date": "25-05-2017",
+                "Proposed Completion Date": "31-12-2019",
+                "Certificate/Order": ""
+              },
+              {
+                "Registration/Extensions": "Covid Extension",
+                "Start Date": "31-12-2020",
+                "Proposed Completion Date": "30-09-2021",
+                "Certificate/Order": ""
+              },
+              {
+                "Registration/Extensions": "Section 6 Extension",
+                "Start Date": "31-12-2019",
+                "Proposed Completion Date": "31-12-2020",
+                "Certificate/Order": ""
+              }
+            ],
+            "documents": [
+              {
+                "category": "Certificate/Order (At the time of Registration)",
+                "filename": null,
+                "url": "/certificate?CER_NO=PRM/KA/RERA/1251/310/PR/171021/001046",
+                "doc_id": "PRM/KA/RERA/1251/310/PR/171021/001046"
+              },
+              {
+                "category": "Certificate/Order (Covid Extension)",
+                "filename": null,
+                "url": "/covidcertificate?CER_NO=PRM/KA/RERA/1251/310/PR/171021/001046",
+                "doc_id": "PRM/KA/RERA/1251/310/PR/171021/001046"
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "External Development Work",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Road System",
+                "value": "Local Authority",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Water Supply",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Sewege and Drainage System",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Electricity Supply Transformer And Sub Station",
+                "value": "Local Authority",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Solid Waste Management And Disposal",
+                "value": "Local Authority",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Fire Fighting facility",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Drinking Water Facility",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Emergency Evacuation Services",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Use of Renewable Energy",
+                "value": "Self Development",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Project Bank ( Escrow Account ) Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Bank Name",
+                "value": "HDFC",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Branch",
+                "value": "Koramangala",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "ifscCode",
+                "value": "HDFC0002777",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Account No.(70% Account)",
+                "value": "50200004917409",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "State",
+                "value": "Karnataka",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "District",
+                "value": "Bengaluru Urban",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Uploaded Documents",
+        "id": "#menu2",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": false,
+        "sections": [
+          {
+            "label": "Project Documents",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": [
+              {
+                "field_or_column_label": "PAN Card",
+                "pii_category": "personal_or_entity_pan",
+                "redaction_action": "excluded_document",
+                "reason": "Excluded PAN/Aadhaar/ID identifier or document under PII policy (label='PAN Card')."
+              }
+            ]
+          },
+          {
+            "label": "Project Approval",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Commencement Certificate",
+                "value": "CC.pdf",
+                "source_link": "/download_jc?DOC_ID=TKMk6XOBWN41pWIdlwq8Xw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Approved Building/Plotting Plan",
+                "value": "APPOVED BUILDING OR PLOTTING PLAN.jpg",
+                "source_link": "/download_jc?DOC_ID=jPUJ%2FiI4%2F1PYg%2Bh5uu9z9g%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Approved Layout Plan",
+                "value": "APPROVED LAYOUT PLAN.jpg",
+                "source_link": "/download_jc?DOC_ID=OZ6rMhT3%2FwvAe2aZ17GXUA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Proforma For Sale Deed",
+                "value": "Performa Sale Deed.pdf",
+                "source_link": "/download_jc?DOC_ID=E%2B6JAT1Cwz1tb%2FAYGHVkIg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Proforma of Agreement for Sale",
+                "value": "Proforma Agreement Sale.pdf",
+                "source_link": "/download_jc?DOC_ID=COgZkEMK1Gy8pbcX%2FevdZg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Existing Layout Plan",
+                "value": "",
+                "source_link": "download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Existing Section Plan and Specification",
+                "value": "",
+                "source_link": "download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Land documents and Location",
+                "value": "Saledeed-RTC.pdf",
+                "source_link": "/download_jc?DOC_ID=83GKMiOO%2FSY1q1vjEFvUCQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Approved Section Of Building/Infrastructure Plan of Plotting",
+                "value": "APPROVED SECTPLAN.jpg",
+                "source_link": "/download_jc?DOC_ID=6SnagY06b1Nciuz5joZgOw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Area Development Plan Of Project Area",
+                "value": "Area-Devp-pl.jpg",
+                "source_link": "/download_jc?DOC_ID=Q6xrGsuitzcu6lm%2BlqTeDA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Performa of Allotment Letter",
+                "value": "Porf-Allotment Letter.pdf",
+                "source_link": "/download_jc?DOC_ID=hm3iiastXseONQVG7IXsyQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Brochure of Current Project",
+                "value": "Kritan Ira Brochure.pdf",
+                "source_link": "/download_jc?DOC_ID=3Q5cEkjdL28zgL9qOZ3w%2FA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "All NOCs from Authority",
+                "value": "PCB.pdf",
+                "source_link": "/download_jc?DOC_ID=IAV0q0I9444X7fx6p04KcA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Specification",
+                "value": "Project Specification.jpg",
+                "source_link": "/download_jc?DOC_ID=68QB18rtnxss%2FlloZ%2BEGDg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Encumbrance Certificate",
+                "value": "EC-12yrs.pdf",
+                "source_link": "/download_jc?DOC_ID=22%2FUeL0yLHOeGFs4QD%2BBPg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Section 3(1) Notarized Affidavit",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "JD AFFIDAVIT CUM DECLARATION",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Title Deed",
+                "value": "Khata.pdf",
+                "source_link": "/download_jc?DOC_ID=zgzVfR9CtYlkojxnyTy2FA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Joint Development Agreement",
+                "value": "JDA.pdf",
+                "source_link": "/download_jc?DOC_ID=e%2FIXvPwWJ3jfhK5Q0oCDjA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Any other document (Rights/Title/Interest/Name)",
+                "value": "advocatereport-mutation.pdf",
+                "source_link": "/download_jc?DOC_ID=8EIdgOwa5M6yiWK5Avo%2FDw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Conversion Certificate under Sec 95 of the KLR Act 1961",
+                "value": "Conversion Order.pdf",
+                "source_link": "/download_jc?DOC_ID=jb7QVbyD8TBTUoh6f9i5TA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Approval/NOC under Sec 14 of the KTCP Act",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=l6RjqxHAKOiVDU2YOuFZpw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Utilisation certificate",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=vs8Nlv%2BFQeTIXYuEwXt3HA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Transfer of development rights certificate",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=0kBACi3FibKctkgIBvrUaw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Relinquishment Deed",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=O4YeaR9kbAIKgPeTmNGqWg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Fire Force Department",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=Kl4s4PGvuTEVao0CTQmVOw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Airport Authority of India",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=5hHY%2BCOBiomQ3PT5YMEBwA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "BESCOM",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=PYp2T76Xqzfz%2Fv1gc9fUeA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "BWSSB",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=Npju6f0QpLSHDP0Fm5%2FJlA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "KSPCB",
+                "value": "PCB.pdf",
+                "source_link": "/download_jc?DOC_ID=yiwVgfK9RyEbMcbh9R%2Bvzw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "SEIAA",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=WSx4D46VJg1FrkvfqV9n%2FA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "BSNL",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=G7mQkkVSoDq02iCJO5VL2w%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "NOC in case of building proposals abutting to neighbouring properties",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=EH1q%2F7xLRRzsmUGwx1tGRw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Lift Authorities",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=xSYTFJAHmolX0uCuYDG2Rg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Urban Land Ceiling",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=%2BjOPykjWsufvTHGqagv8Fg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "BMRCL",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=njf2x7caGv8Vo64QLQ%2Bw2Q%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Bangalore Urban Arts Commission",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=%2BGs56mEimUuGJmJqQx908A%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Inspector of Factories Controller of explosives Railways",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=WXzRhIlsTzuKs%2BRN8iTLgg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Dist Magistrate",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=tCRCdmqRCRE%2FCkbW8kLxDQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Coastal Regulation Zone Authority",
+                "value": "NA.pdf",
+                "source_link": "/download_jc?DOC_ID=4E6eDU2bESDBZgBSH50nWA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Certificate from Registered Engineer indicating the structural safety of the building (for Apartments)",
+                "value": "NA-Certificate.pdf",
+                "source_link": "/download_jc?DOC_ID=Cw5jgO%2FdvxEtLUsf61wQyg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Sectional Drawing of the apartments",
+                "value": "APPROVED SECTPLAN.jpg",
+                "source_link": "/download_jc?DOC_ID=lDPbYUcAqN%2FGvK3ps5%2BAWQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Existing Layout Plan",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Existing Section Plan and Specification",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Change of Land Use",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Advocate Search Report",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Commencement Certificate",
+                "filename": "CC.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=TKMk6XOBWN41pWIdlwq8Xw%3D%3D",
+                "doc_id": "TKMk6XOBWN41pWIdlwq8Xw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Approved Building/Plotting Plan",
+                "filename": "APPOVED BUILDING OR PLOTTING PLAN.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=jPUJ%2FiI4%2F1PYg%2Bh5uu9z9g%3D%3D",
+                "doc_id": "jPUJ/iI4/1PYg+h5uu9z9g==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Approved Layout Plan",
+                "filename": "APPROVED LAYOUT PLAN.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=OZ6rMhT3%2FwvAe2aZ17GXUA%3D%3D",
+                "doc_id": "OZ6rMhT3/wvAe2aZ17GXUA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Proforma For Sale Deed",
+                "filename": "Performa Sale Deed.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=E%2B6JAT1Cwz1tb%2FAYGHVkIg%3D%3D",
+                "doc_id": "E+6JAT1Cwz1tb/AYGHVkIg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Proforma of Agreement for Sale",
+                "filename": "Proforma Agreement Sale.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=COgZkEMK1Gy8pbcX%2FevdZg%3D%3D",
+                "doc_id": "COgZkEMK1Gy8pbcX/evdZg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Land documents and Location",
+                "filename": "Saledeed-RTC.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=83GKMiOO%2FSY1q1vjEFvUCQ%3D%3D",
+                "doc_id": "83GKMiOO/SY1q1vjEFvUCQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Approved Section Of Building/Infrastructure Plan of Plotting",
+                "filename": "APPROVED SECTPLAN.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=6SnagY06b1Nciuz5joZgOw%3D%3D",
+                "doc_id": "6SnagY06b1Nciuz5joZgOw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Area Development Plan Of Project Area",
+                "filename": "Area-Devp-pl.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=Q6xrGsuitzcu6lm%2BlqTeDA%3D%3D",
+                "doc_id": "Q6xrGsuitzcu6lm+lqTeDA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Performa of Allotment Letter",
+                "filename": "Porf-Allotment Letter.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=hm3iiastXseONQVG7IXsyQ%3D%3D",
+                "doc_id": "hm3iiastXseONQVG7IXsyQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Brochure of Current Project",
+                "filename": "Kritan Ira Brochure.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=3Q5cEkjdL28zgL9qOZ3w%2FA%3D%3D",
+                "doc_id": "3Q5cEkjdL28zgL9qOZ3w/A==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "All NOCs from Authority",
+                "filename": "PCB.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=IAV0q0I9444X7fx6p04KcA%3D%3D",
+                "doc_id": "IAV0q0I9444X7fx6p04KcA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Project Specification",
+                "filename": "Project Specification.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=68QB18rtnxss%2FlloZ%2BEGDg%3D%3D",
+                "doc_id": "68QB18rtnxss/lloZ+EGDg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Encumbrance Certificate",
+                "filename": "EC-12yrs.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=22%2FUeL0yLHOeGFs4QD%2BBPg%3D%3D",
+                "doc_id": "22/UeL0yLHOeGFs4QD+BPg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Section 3(1) Notarized Affidavit",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "JD AFFIDAVIT CUM DECLARATION",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Title Deed",
+                "filename": "Khata.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=zgzVfR9CtYlkojxnyTy2FA%3D%3D",
+                "doc_id": "zgzVfR9CtYlkojxnyTy2FA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Joint Development Agreement",
+                "filename": "JDA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=e%2FIXvPwWJ3jfhK5Q0oCDjA%3D%3D",
+                "doc_id": "e/IXvPwWJ3jfhK5Q0oCDjA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Any other document (Rights/Title/Interest/Name)",
+                "filename": "advocatereport-mutation.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=8EIdgOwa5M6yiWK5Avo%2FDw%3D%3D",
+                "doc_id": "8EIdgOwa5M6yiWK5Avo/Dw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Conversion Certificate under Sec 95 of the KLR Act 1961",
+                "filename": "Conversion Order.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=jb7QVbyD8TBTUoh6f9i5TA%3D%3D",
+                "doc_id": "jb7QVbyD8TBTUoh6f9i5TA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Approval/NOC under Sec 14 of the KTCP Act",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=l6RjqxHAKOiVDU2YOuFZpw%3D%3D",
+                "doc_id": "l6RjqxHAKOiVDU2YOuFZpw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Utilisation certificate",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=vs8Nlv%2BFQeTIXYuEwXt3HA%3D%3D",
+                "doc_id": "vs8Nlv+FQeTIXYuEwXt3HA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Transfer of development rights certificate",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=0kBACi3FibKctkgIBvrUaw%3D%3D",
+                "doc_id": "0kBACi3FibKctkgIBvrUaw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Relinquishment Deed",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=O4YeaR9kbAIKgPeTmNGqWg%3D%3D",
+                "doc_id": "O4YeaR9kbAIKgPeTmNGqWg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Fire Force Department",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=Kl4s4PGvuTEVao0CTQmVOw%3D%3D",
+                "doc_id": "Kl4s4PGvuTEVao0CTQmVOw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Airport Authority of India",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=5hHY%2BCOBiomQ3PT5YMEBwA%3D%3D",
+                "doc_id": "5hHY+COBiomQ3PT5YMEBwA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "BESCOM",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=PYp2T76Xqzfz%2Fv1gc9fUeA%3D%3D",
+                "doc_id": "PYp2T76Xqzfz/v1gc9fUeA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "BWSSB",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=Npju6f0QpLSHDP0Fm5%2FJlA%3D%3D",
+                "doc_id": "Npju6f0QpLSHDP0Fm5/JlA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "KSPCB",
+                "filename": "PCB.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=yiwVgfK9RyEbMcbh9R%2Bvzw%3D%3D",
+                "doc_id": "yiwVgfK9RyEbMcbh9R+vzw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "SEIAA",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=WSx4D46VJg1FrkvfqV9n%2FA%3D%3D",
+                "doc_id": "WSx4D46VJg1FrkvfqV9n/A==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "BSNL",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=G7mQkkVSoDq02iCJO5VL2w%3D%3D",
+                "doc_id": "G7mQkkVSoDq02iCJO5VL2w==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "NOC in case of building proposals abutting to neighbouring properties",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=EH1q%2F7xLRRzsmUGwx1tGRw%3D%3D",
+                "doc_id": "EH1q/7xLRRzsmUGwx1tGRw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Lift Authorities",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=xSYTFJAHmolX0uCuYDG2Rg%3D%3D",
+                "doc_id": "xSYTFJAHmolX0uCuYDG2Rg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Urban Land Ceiling",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=%2BjOPykjWsufvTHGqagv8Fg%3D%3D",
+                "doc_id": "+jOPykjWsufvTHGqagv8Fg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "BMRCL",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=njf2x7caGv8Vo64QLQ%2Bw2Q%3D%3D",
+                "doc_id": "njf2x7caGv8Vo64QLQ+w2Q==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Bangalore Urban Arts Commission",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=%2BGs56mEimUuGJmJqQx908A%3D%3D",
+                "doc_id": "+Gs56mEimUuGJmJqQx908A==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Inspector of Factories Controller of explosives Railways",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=WXzRhIlsTzuKs%2BRN8iTLgg%3D%3D",
+                "doc_id": "WXzRhIlsTzuKs+RN8iTLgg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Dist Magistrate",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=tCRCdmqRCRE%2FCkbW8kLxDQ%3D%3D",
+                "doc_id": "tCRCdmqRCRE/CkbW8kLxDQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Coastal Regulation Zone Authority",
+                "filename": "NA.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=4E6eDU2bESDBZgBSH50nWA%3D%3D",
+                "doc_id": "4E6eDU2bESDBZgBSH50nWA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Certificate from Registered Engineer indicating the structural safety of the building (for Apartments)",
+                "filename": "NA-Certificate.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=Cw5jgO%2FdvxEtLUsf61wQyg%3D%3D",
+                "doc_id": "Cw5jgO/dvxEtLUsf61wQyg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Sectional Drawing of the apartments",
+                "filename": "APPROVED SECTPLAN.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=lDPbYUcAqN%2FGvK3ps5%2BAWQ%3D%3D",
+                "doc_id": "lDPbYUcAqN/GvK3ps5+AWQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Existing Layout Plan",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Existing Section Plan and Specification",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Change of Land Use",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Advocate Search Report",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Financial Document",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Financial Year",
+              "2015 - 2016",
+              "2014 - 2015",
+              "2013 - 2014"
+            ],
+            "table_rows": [
+              {
+                "Financial Year": "Balance Sheet",
+                "2015 - 2016": "Provisional Balance sheet 2016-17.pdf",
+                "2014 - 2015": "BALANCE SHEET.jpg",
+                "2013 - 2014": "Balance sheet.jpg"
+              },
+              {
+                "Financial Year": "Audited Profit and Loss Statement",
+                "2015 - 2016": "Provisional PL 2016-17.pdf",
+                "2014 - 2015": "PROFIT & LOSS.jpg",
+                "2013 - 2014": "Profit and loss.jpg"
+              },
+              {
+                "Financial Year": "Director's Report",
+                "2015 - 2016": "Directors Report.pdf",
+                "2014 - 2015": "Directors Report.pdf",
+                "2013 - 2014": "Directors Report.pdf"
+              },
+              {
+                "Financial Year": "Cash Flow Statement",
+                "2015 - 2016": "Cash Flow statement.pdf",
+                "2014 - 2015": "Cash Flow statement.pdf",
+                "2013 - 2014": "Cash Flow statement.pdf"
+              },
+              {
+                "Financial Year": "Auditor's Report",
+                "2015 - 2016": "Auditors Report16-17.pdf",
+                "2014 - 2015": "Auditorsreport15-16.pdf",
+                "2013 - 2014": "Auditors report14-15.pdf"
+              },
+              {
+                "Financial Year": "Income Tax Return Acknowledgement",
+                "2015 - 2016": "IT Ack2016-17.pdf",
+                "2014 - 2015": "ITRV ACK.jpg",
+                "2013 - 2014": "ITRV ACK.jpg"
+              }
+            ],
+            "documents": [
+              {
+                "category": "Balance Sheet [2015 - 2016]",
+                "filename": "Provisional Balance sheet 2016-17.pdf",
+                "url": "/download_jc?DOC_ID=bDDsGveXwt28nTuXoqLWlw%3D%3D",
+                "doc_id": "bDDsGveXwt28nTuXoqLWlw==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Balance Sheet [2014 - 2015]",
+                "filename": "BALANCE SHEET.jpg",
+                "url": "/download_jc?DOC_ID=edAeCoLTnd%2Bu5L9L1znX2Q%3D%3D",
+                "doc_id": "edAeCoLTnd+u5L9L1znX2Q==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Balance Sheet [2013 - 2014]",
+                "filename": "Balance sheet.jpg",
+                "url": "/download_jc?DOC_ID=8udHWFdAaf5OLwB6akVEng%3D%3D",
+                "doc_id": "8udHWFdAaf5OLwB6akVEng==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Audited Profit and Loss Statement [2015 - 2016]",
+                "filename": "Provisional PL 2016-17.pdf",
+                "url": "/download_jc?DOC_ID=FTGRf6uAeRZSt27MVbr1nA%3D%3D",
+                "doc_id": "FTGRf6uAeRZSt27MVbr1nA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Audited Profit and Loss Statement [2014 - 2015]",
+                "filename": "PROFIT & LOSS.jpg",
+                "url": "/download_jc?DOC_ID=JhM6nvdggBWLiWWWbZ1eQA%3D%3D",
+                "doc_id": "JhM6nvdggBWLiWWWbZ1eQA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Audited Profit and Loss Statement [2013 - 2014]",
+                "filename": "Profit and loss.jpg",
+                "url": "/download_jc?DOC_ID=XibW5EXPRyJXdmnXbdvnaA%3D%3D",
+                "doc_id": "XibW5EXPRyJXdmnXbdvnaA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Director's Report [2015 - 2016]",
+                "filename": "Directors Report.pdf",
+                "url": "/download_jc?DOC_ID=RGTid0HBb%2Bvt1eCUPxGn%2BQ%3D%3D",
+                "doc_id": "RGTid0HBb+vt1eCUPxGn+Q==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Director's Report [2014 - 2015]",
+                "filename": "Directors Report.pdf",
+                "url": "/download_jc?DOC_ID=A2H269SjIUdHRJnNl9QejA%3D%3D",
+                "doc_id": "A2H269SjIUdHRJnNl9QejA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Director's Report [2013 - 2014]",
+                "filename": "Directors Report.pdf",
+                "url": "/download_jc?DOC_ID=v4J67i%2FR71pBM%2BMqswR6tg%3D%3D",
+                "doc_id": "v4J67i/R71pBM+MqswR6tg==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Cash Flow Statement [2015 - 2016]",
+                "filename": "Cash Flow statement.pdf",
+                "url": "/download_jc?DOC_ID=YbpajWxw%2FpF4Q9M8dZTCdQ%3D%3D",
+                "doc_id": "YbpajWxw/pF4Q9M8dZTCdQ==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Cash Flow Statement [2014 - 2015]",
+                "filename": "Cash Flow statement.pdf",
+                "url": "/download_jc?DOC_ID=%2Fku%2F%2Bzt8rYvWNLPcM0imAA%3D%3D",
+                "doc_id": "/ku/+zt8rYvWNLPcM0imAA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Cash Flow Statement [2013 - 2014]",
+                "filename": "Cash Flow statement.pdf",
+                "url": "/download_jc?DOC_ID=%2Fku%2F%2Bzt8rYvWNLPcM0imAA%3D%3D",
+                "doc_id": "/ku/+zt8rYvWNLPcM0imAA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Auditor's Report [2015 - 2016]",
+                "filename": "Auditors Report16-17.pdf",
+                "url": "/download_jc?DOC_ID=ge3Ah1DK%2BngFe7vKVjGlGQ%3D%3D",
+                "doc_id": "ge3Ah1DK+ngFe7vKVjGlGQ==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Auditor's Report [2014 - 2015]",
+                "filename": "Auditorsreport15-16.pdf",
+                "url": "/download_jc?DOC_ID=%2BOl6E98A5iMuCo%2Btn0X9IA%3D%3D",
+                "doc_id": "+Ol6E98A5iMuCo+tn0X9IA==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Auditor's Report [2013 - 2014]",
+                "filename": "Auditors report14-15.pdf",
+                "url": "/download_jc?DOC_ID=DoCK3CSW2hQd9YBjPLqd%2BQ%3D%3D",
+                "doc_id": "DoCK3CSW2hQd9YBjPLqd+Q==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Income Tax Return Acknowledgement [2015 - 2016]",
+                "filename": "IT Ack2016-17.pdf",
+                "url": "/download_jc?DOC_ID=yFbrbkVDhlk35S5L%2BBjhVQ%3D%3D",
+                "doc_id": "yFbrbkVDhlk35S5L+BjhVQ==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Income Tax Return Acknowledgement [2014 - 2015]",
+                "filename": "ITRV ACK.jpg",
+                "url": "/download_jc?DOC_ID=iVEPq1U%2F5UjX3LIkQdy3uQ%3D%3D",
+                "doc_id": "iVEPq1U/5UjX3LIkQdy3uQ==",
+                "annexure_reference": null
+              },
+              {
+                "category": "Income Tax Return Acknowledgement [2013 - 2014]",
+                "filename": "ITRV ACK.jpg",
+                "url": "/download_jc?DOC_ID=ryZ20bczzCULp1g0Scz8vg%3D%3D",
+                "doc_id": "ryZ20bczzCULp1g0Scz8vg==",
+                "annexure_reference": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Declaration",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Declaration (Form B)",
+                "value": "FormB.pdf",
+                "source_link": "/download_jc?DOC_ID=A%2BWR4RmEtQt2Nxs4SMTREQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Declaration (Form B)",
+                "filename": "FormB.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=A%2BWR4RmEtQt2Nxs4SMTREQ%3D%3D",
+                "doc_id": "A+WR4RmEtQt2Nxs4SMTREQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Project Photo",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Project Photo Uploaded",
+                "value": "KritanIraphoto.jpg",
+                "source_link": "/download_jc?DOC_ID=sFoVDNI%2Bjp1pg02Ha7uRfA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Project Photo Uploaded",
+                "filename": "KritanIraphoto.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=sFoVDNI%2Bjp1pg02Ha7uRfA%3D%3D",
+                "doc_id": "sFoVDNI+jp1pg02Ha7uRfA==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Enquired Documents",
+        "id": "#menu4",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Enquired Documents",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Document Name",
+              "Uploaded Date",
+              "Document"
+            ],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Complaints",
+        "id": "#menu-complaints",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Complaints On this Promoter (0) — Complaints On this Promoter (0)",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": "No Complaints Found.",
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Complaints On this Project (0) — Complaints On this Project (0)",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": "No Complaints Found.",
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": [
+          {
+            "label": "Complaints On this Promoter (0)",
+            "id": "#menu-comp",
+            "is_nav_visible": true,
+            "dom_presence": "nested_sub_tab",
+            "is_empty": true,
+            "sections": [
+              {
+                "label": "Complaints On this Promoter (0)",
+                "type": "generic",
+                "is_empty": true,
+                "empty_message": "No Complaints Found.",
+                "fields": [],
+                "table_headers": [],
+                "table_rows": [],
+                "documents": [],
+                "excluded_images": [],
+                "excluded_pii": []
+              }
+            ],
+            "sub_tabs": []
+          },
+          {
+            "label": "Complaints On this Project (0)",
+            "id": "#menu-comp2",
+            "is_nav_visible": true,
+            "dom_presence": "nested_sub_tab",
+            "is_empty": true,
+            "sections": [
+              {
+                "label": "Complaints On this Project (0)",
+                "type": "generic",
+                "is_empty": true,
+                "empty_message": "No Complaints Found.",
+                "fields": [],
+                "table_headers": [],
+                "table_rows": [],
+                "documents": [],
+                "excluded_images": [],
+                "excluded_pii": []
+              }
+            ],
+            "sub_tabs": []
+          }
+        ]
+      },
+      {
+        "label": "Project Extension Details",
+        "id": "#extPlan",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": false,
+        "sections": [
+          {
+            "label": "Project Extension Details",
+            "type": "mixed",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Extension Applied On",
+                "value": "01-10-2019",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Extension Approved On",
+                "value": "26-02-2020",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Extension Registration Number",
+                "value": "EX/PRM/KA/RERA/1251/310/PR/200226/001046",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Proposed Project End Date at the time of registration",
+                "value": "31-12-2019",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project End Date provided under Section 6",
+                "value": "31-12-2020",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Project Photograph",
+                "value": "IRA SNAPS 2.jpg",
+                "source_link": "/download_jc?DOC_ID=DLDYuz%2FmWQAuHMkSUgONZw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [
+              "Sl. No.",
+              "Delay Reason"
+            ],
+            "table_rows": [
+              {
+                "Sl. No.": "1",
+                "Delay Reason": "Financial crunch"
+              }
+            ],
+            "documents": [
+              {
+                "category": "Project Photograph",
+                "filename": "IRA SNAPS 2.jpg",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=DLDYuz%2FmWQAuHMkSUgONZw%3D%3D",
+                "doc_id": "DLDYuz/mWQAuHMkSUgONZw==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Current Project Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Architect Certificate for Work Completion Schedule till Date",
+                "value": "ARCHI CFT - work completed.pdf",
+                "source_link": "/download_jc?DOC_ID=BHSypij2AmRLWd6okkj8vg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Engineer Certificate for Work Completion Schedule till Date",
+                "value": "ENG CFT - WORK COMPLETED.pdf",
+                "source_link": "/download_jc?DOC_ID=mDupKW1Z4UcDABUzUHK1DA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "CA Certificate for Funds Utilization",
+                "value": "Chartered Accountants fund utilization certificate.pdf",
+                "source_link": "/download_jc?DOC_ID=r1MgBHUUeCqJtW58bBrd3Q%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Architect Certificate for Work Completion Schedule till Date",
+                "filename": "ARCHI CFT - work completed.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=BHSypij2AmRLWd6okkj8vg%3D%3D",
+                "doc_id": "BHSypij2AmRLWd6okkj8vg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Engineer Certificate for Work Completion Schedule till Date",
+                "filename": "ENG CFT - WORK COMPLETED.pdf",
+                "approval_date": "ARCHI CFT - work completed.pdf",
+                "url": "/download_jc?DOC_ID=mDupKW1Z4UcDABUzUHK1DA%3D%3D",
+                "doc_id": "mDupKW1Z4UcDABUzUHK1DA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "CA Certificate for Funds Utilization",
+                "filename": "Chartered Accountants fund utilization certificate.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=r1MgBHUUeCqJtW58bBrd3Q%3D%3D",
+                "doc_id": "r1MgBHUUeCqJtW58bBrd3Q==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Proposed Project Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Architect Certificate for Pending Work Completion Schedule.",
+                "value": "ARCH CFT - PENDING WORK.pdf",
+                "source_link": "/download_jc?DOC_ID=Pm3B5e7Bl5F7y8z%2BmcC7qg%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Engineer Certificate for Pending Work Completion Schedule.",
+                "value": "ENG CFT - WORK PENDING.pdf",
+                "source_link": "/download_jc?DOC_ID=LD9Cjvqswks1YnEr5pmwIQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "CA Certificate for Funds required for Project Completion",
+                "value": "Charted Accountants Certificate for Funds Required.pdf",
+                "source_link": "/download_jc?DOC_ID=PCjCOkTyP5X3eePAP%2FnRPQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Affidavit",
+                "value": "RERA AFFIDAVI.pdf",
+                "source_link": "/download_jc?DOC_ID=7tfiQD5v8XNIIaNarqxP%2Bw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Latest Encumbrance Certificate",
+                "value": "EC 2017-2019.pdf",
+                "source_link": "/download_jc?DOC_ID=bXHoM1T3hjB6C%2FZ2PVhmrw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "whether 2/3rd concern from the allottees has taken?",
+                "value": "YES",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Consent letter from 2/3rd of Allottees",
+                "value": "Kritan Ira owners Concent letter.pdf",
+                "source_link": "/download_jc?DOC_ID=lroSrUOCAVdfCO1xGsDlYw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Whether any compensation is provided for the Buyer?",
+                "value": "NO",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Details Of Sold/ Un-sold Units",
+                "value": "SoldUnsoldDetails.xlsx",
+                "source_link": "/download_jc?DOC_ID=%2Fvhc7rOY58D%2BkKRMCNxW%2FQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Architect Certificate for Pending Work Completion Schedule.",
+                "filename": "ARCH CFT - PENDING WORK.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=Pm3B5e7Bl5F7y8z%2BmcC7qg%3D%3D",
+                "doc_id": "Pm3B5e7Bl5F7y8z+mcC7qg==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Engineer Certificate for Pending Work Completion Schedule.",
+                "filename": "ENG CFT - WORK PENDING.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=LD9Cjvqswks1YnEr5pmwIQ%3D%3D",
+                "doc_id": "LD9Cjvqswks1YnEr5pmwIQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "CA Certificate for Funds required for Project Completion",
+                "filename": "Charted Accountants Certificate for Funds Required.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=PCjCOkTyP5X3eePAP%2FnRPQ%3D%3D",
+                "doc_id": "PCjCOkTyP5X3eePAP/nRPQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Affidavit",
+                "filename": "RERA AFFIDAVI.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=7tfiQD5v8XNIIaNarqxP%2Bw%3D%3D",
+                "doc_id": "7tfiQD5v8XNIIaNarqxP+w==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Latest Encumbrance Certificate",
+                "filename": "EC 2017-2019.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=bXHoM1T3hjB6C%2FZ2PVhmrw%3D%3D",
+                "doc_id": "bXHoM1T3hjB6C/Z2PVhmrw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Consent letter from 2/3rd of Allottees",
+                "filename": "Kritan Ira owners Concent letter.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=lroSrUOCAVdfCO1xGsDlYw%3D%3D",
+                "doc_id": "lroSrUOCAVdfCO1xGsDlYw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Details Of Sold/ Un-sold Units",
+                "filename": "SoldUnsoldDetails.xlsx",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=%2Fvhc7rOY58D%2BkKRMCNxW%2FQ%3D%3D",
+                "doc_id": "/vhc7rOY58D+kKRMCNxW/Q==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "NOC Details",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Sl. No.",
+              "NOC Name",
+              "Expired Date",
+              "RENEWED ?",
+              "NOC Validity From",
+              "NOC Validity To",
+              "Document"
+            ],
+            "table_rows": [
+              {
+                "Sl. No.": "1",
+                "NOC Name": "KSPCB- PCB",
+                "Expired Date": "30-08-2021",
+                "RENEWED ?": "NO",
+                "NOC Validity From": "",
+                "NOC Validity To": "",
+                "Document": ""
+              }
+            ],
+            "documents": [
+              {
+                "category": "Document (1)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Other Documents ( Relevant )",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Document 1",
+                "value": "FEB 18 TO Jan 20 - KUL.pdf",
+                "source_link": "/download_jc?DOC_ID=UBGSxOwVHXwQeV7P8ngTug%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "Bank Statement",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document 2",
+                "value": "Affidavit-Notarized.pdf",
+                "source_link": "/download_jc?DOC_ID=vViYMdxo5zrOoPaDnt9nCw%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "notarized affidavit",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document 3",
+                "value": "Affidavit.pdf",
+                "source_link": "/download_jc?DOC_ID=AnjcTc1n%2F1gn6n357zub6A%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "Affidavit-sec18",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document 4",
+                "value": "CC.pdf",
+                "source_link": "/download_jc?DOC_ID=2%2BDAuszJfV9WoxFYlAJK6A%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "commence certificate",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document 5",
+                "value": "Affidavit-Notary.pdf",
+                "source_link": "/download_jc?DOC_ID=QCPTnzLA6RgOH1juSELagQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "Affidavit-Notarized",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document 6",
+                "value": "KUL-HDFC-STATEMENT-2018-2019.pdf",
+                "source_link": "/download_jc?DOC_ID=ltih7XurXWwEQ0I69T1svA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Document Name",
+                "value": "Bank Statement",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Document 1",
+                "filename": "FEB 18 TO Jan 20 - KUL.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=UBGSxOwVHXwQeV7P8ngTug%3D%3D",
+                "doc_id": "UBGSxOwVHXwQeV7P8ngTug==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Document 2",
+                "filename": "Affidavit-Notarized.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=vViYMdxo5zrOoPaDnt9nCw%3D%3D",
+                "doc_id": "vViYMdxo5zrOoPaDnt9nCw==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Document 3",
+                "filename": "Affidavit.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=AnjcTc1n%2F1gn6n357zub6A%3D%3D",
+                "doc_id": "AnjcTc1n/1gn6n357zub6A==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Document 4",
+                "filename": "CC.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=2%2BDAuszJfV9WoxFYlAJK6A%3D%3D",
+                "doc_id": "2+DAuszJfV9WoxFYlAJK6A==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Document 5",
+                "filename": "Affidavit-Notary.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=QCPTnzLA6RgOH1juSELagQ%3D%3D",
+                "doc_id": "QCPTnzLA6RgOH1juSELagQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Document 6",
+                "filename": "KUL-HDFC-STATEMENT-2018-2019.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=ltih7XurXWwEQ0I69T1svA%3D%3D",
+                "doc_id": "ltih7XurXWwEQ0I69T1svA==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Quarterly Updates",
+        "id": "#quarter",
+        "is_nav_visible": true,
+        "dom_presence": "visible_nav_tab",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Quarterly Update Details",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      }
+    ],
+    "unlinked_dom_panes": [
+      {
+        "label": "Modification of Plan Details",
+        "id": "#modPlan",
+        "is_nav_visible": false,
+        "dom_presence": "hidden_or_unlinked_dom_pane",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Modification of Plan Details",
+            "type": "table",
+            "is_empty": true,
+            "empty_message": "No Plan Modification Applied (Modification Applied On is blank)",
+            "fields": [
+              {
+                "label": "Modification Applied On",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Modification Approved On",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [
+              "",
+              "As Per Registered Plan",
+              "As Per Modified Plan"
+            ],
+            "table_rows": [
+              {
+                "Column_1": "Total Area of Land (Sq Mt)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Total Covered Area (Sq Mt)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Total Open Area (Sq Mt)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Estimation Cost of Construction (INR)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Cost of Land (INR)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Total Project Cost (INR)",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Project Plan",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Commencement Certificate",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              },
+              {
+                "Column_1": "Total units, Sold and Unsold units details",
+                "As Per Registered Plan": "",
+                "As Per Modified Plan": ""
+              }
+            ],
+            "documents": [
+              {
+                "category": "As Per Registered Plan (Project Plan)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              },
+              {
+                "category": "As Per Modified Plan (Project Plan)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              },
+              {
+                "category": "As Per Registered Plan (Commencement Certificate)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              },
+              {
+                "category": "As Per Modified Plan (Commencement Certificate)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              },
+              {
+                "category": "As Per Registered Plan (Total units, Sold and Unsold units details)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              },
+              {
+                "category": "As Per Modified Plan (Total units, Sold and Unsold units details)",
+                "filename": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Development Details",
+            "type": "key_value",
+            "is_empty": true,
+            "empty_message": "No Plan Modification Applied (Modification Applied On is blank)",
+            "fields": [
+              {
+                "label": "Details of Modification of plan sanction / layout brief description",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Modified plan applied date",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Modified plan approved date",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Extend of the work carried out till date of registered project ( % )",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Extend of the work pending of registered project ( % )",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total amount collected in respect of registered project ( INR )",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total amount spent for the project ( INR )",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Total balance amount lying with the promoter ( INR )",
+                "value": "",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Already registered project ongoing details",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Modified plan details site plan, floor plans, Plan Licence Letter",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Elevation, Sections, Specifications ( If changes are there )",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "List Of Allottees",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "List Of Complaints",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Consent Letter",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "List Of Pending Litigations",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Chartered Accountant Certificate",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Notarized Affidavit",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Engineer Certificate",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Architect Certificate",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "label": "Structural Engineer Certificate for stability of structure",
+                "value": "",
+                "source_link": "/download_jc?DOC_ID=",
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Already registered project ongoing details",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Modified plan details site plan, floor plans, Plan Licence Letter",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Elevation, Sections, Specifications ( If changes are there )",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "List Of Allottees",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "List Of Complaints",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Consent Letter",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "List Of Pending Litigations",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Chartered Accountant Certificate",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Notarized Affidavit",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Engineer Certificate",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Architect Certificate",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              },
+              {
+                "category": "Structural Engineer Certificate for stability of structure",
+                "filename": null,
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=",
+                "doc_id": null,
+                "annexure_reference": null,
+                "observation_state": "not_available"
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Appeal / FNH Details",
+        "id": "#menu5",
+        "is_nav_visible": false,
+        "dom_presence": "hidden_or_unlinked_dom_pane",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Appeal / FNH Details",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": "NO APPEALS / FNH",
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Project Details",
+        "id": "#postReg",
+        "is_nav_visible": false,
+        "dom_presence": "hidden_or_unlinked_dom_pane",
+        "is_empty": false,
+        "sections": [
+          {
+            "label": "Project Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Prospectus/Brochure",
+                "value": "Kritan Ira Brochure (1).pdf",
+                "source_link": "/download_jc?DOC_ID=vKH978IeosGfEhua%2Fnk5VA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "WebSite Link 1",
+                "value": "www.kritanliving.com",
+                "source_link": "http://www.kritanliving.com",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Agent Registration No 1",
+                "value": "NO AGENTS",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Advertisement Copy 1",
+                "value": "K.Ira C.floor Ad.pdf",
+                "source_link": "/download_jc?DOC_ID=ltYTIk7nF%2BswLqeRHrV%2FtA%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Tower Excel Sheet",
+                "value": "PRM-KA-RERA-1251-310-PR-171021-001046.xlsx",
+                "source_link": "/download_jc?DOC_ID=dHmmtW3HlBxRcX9MzC6qRQ%3D%3D",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [
+              {
+                "category": "Prospectus/Brochure",
+                "filename": "Kritan Ira Brochure (1).pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=vKH978IeosGfEhua%2Fnk5VA%3D%3D",
+                "doc_id": "vKH978IeosGfEhua/nk5VA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Advertisement Copy 1",
+                "filename": "K.Ira C.floor Ad.pdf",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=ltYTIk7nF%2BswLqeRHrV%2FtA%3D%3D",
+                "doc_id": "ltYTIk7nF+swLqeRHrV/tA==",
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "category": "Tower Excel Sheet",
+                "filename": "PRM-KA-RERA-1251-310-PR-171021-001046.xlsx",
+                "approval_date": null,
+                "url": "/download_jc?DOC_ID=dHmmtW3HlBxRcX9MzC6qRQ%3D%3D",
+                "doc_id": "dHmmtW3HlBxRcX9MzC6qRQ==",
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Tower Details",
+            "type": "key_value",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "FAR Sanctioned",
+                "value": "2.0",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              },
+              {
+                "label": "Number of Towers",
+                "value": "1",
+                "source_link": null,
+                "annexure_reference": null,
+                "observation_state": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Tower Details - Kritan Ira",
+            "type": "mixed",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [
+              {
+                "label": "Total No of Units",
+                "value": "75",
+                "annexure_reference": null
+              }
+            ],
+            "table_headers": [],
+            "table_rows": [
+              {
+                "Column_1": "Tower Name",
+                "Column_2": "Kritan Ira",
+                "Column_3": "Type",
+                "Column_4": "Residential"
+              },
+              {
+                "Column_1": "No. of Floors",
+                "Column_2": "5",
+                "Column_3": "Total No. of Units",
+                "Column_4": "75"
+              },
+              {
+                "Column_1": "No. of Stilts",
+                "Column_2": "0",
+                "Column_3": "No. of slab of super structure",
+                "Column_4": "6"
+              },
+              {
+                "Column_1": "No. of Basement",
+                "Column_2": "1",
+                "Column_3": "Total No. of Parking",
+                "Column_4": "75"
+              },
+              {
+                "Column_1": "0",
+                "Column_2": "0"
+              },
+              {
+                "Column_1": "1",
+                "Column_2": "15"
+              },
+              {
+                "Column_1": "2",
+                "Column_2": "15"
+              },
+              {
+                "Column_1": "3",
+                "Column_2": "15"
+              },
+              {
+                "Column_1": "4",
+                "Column_2": "15"
+              },
+              {
+                "Column_1": "5",
+                "Column_2": "15"
+              },
+              {
+                "Column_1": "1",
+                "Column_2": "1",
+                "Column_3": "G-01",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "2",
+                "Column_2": "1",
+                "Column_3": "G-02",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "3",
+                "Column_2": "1",
+                "Column_3": "G-03",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "4",
+                "Column_2": "1",
+                "Column_3": "G-04",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "5",
+                "Column_2": "1",
+                "Column_3": "G-05",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "6",
+                "Column_2": "1",
+                "Column_3": "G-06",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "7",
+                "Column_2": "1",
+                "Column_3": "G-07",
+                "Column_4": "2BHK",
+                "Column_5": "975",
+                "Column_6": "325",
+                "Column_7": "NA",
+                "Column_8": "390",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "8",
+                "Column_2": "1",
+                "Column_3": "G-08",
+                "Column_4": "3BHK",
+                "Column_5": "1350",
+                "Column_6": "450",
+                "Column_7": "NA",
+                "Column_8": "540",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "9",
+                "Column_2": "1",
+                "Column_3": "G-09",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "10",
+                "Column_2": "1",
+                "Column_3": "G-10",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "11",
+                "Column_2": "1",
+                "Column_3": "G-11",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "12",
+                "Column_2": "1",
+                "Column_3": "G-12",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "13",
+                "Column_2": "1",
+                "Column_3": "G-13",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "14",
+                "Column_2": "1",
+                "Column_3": "G-14",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "15",
+                "Column_2": "1",
+                "Column_3": "G-15",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "16",
+                "Column_2": "2",
+                "Column_3": "F-01",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "17",
+                "Column_2": "2",
+                "Column_3": "F-02",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "18",
+                "Column_2": "2",
+                "Column_3": "F-03",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "19",
+                "Column_2": "2",
+                "Column_3": "F-04",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "20",
+                "Column_2": "2",
+                "Column_3": "F-05",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "21",
+                "Column_2": "2",
+                "Column_3": "F-06",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "22",
+                "Column_2": "2",
+                "Column_3": "F-07",
+                "Column_4": "2BHK",
+                "Column_5": "975",
+                "Column_6": "325",
+                "Column_7": "NA",
+                "Column_8": "390",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "23",
+                "Column_2": "2",
+                "Column_3": "F-08",
+                "Column_4": "3BHK",
+                "Column_5": "1350",
+                "Column_6": "450",
+                "Column_7": "NA",
+                "Column_8": "540",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "24",
+                "Column_2": "2",
+                "Column_3": "F-09",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "25",
+                "Column_2": "2",
+                "Column_3": "F-10",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "26",
+                "Column_2": "2",
+                "Column_3": "F-11",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "27",
+                "Column_2": "2",
+                "Column_3": "F-12",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "28",
+                "Column_2": "2",
+                "Column_3": "F-13",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "29",
+                "Column_2": "2",
+                "Column_3": "F-14",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "30",
+                "Column_2": "2",
+                "Column_3": "F-15",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "31",
+                "Column_2": "3",
+                "Column_3": "S-01",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "32",
+                "Column_2": "3",
+                "Column_3": "S-02",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "33",
+                "Column_2": "3",
+                "Column_3": "S-03",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "34",
+                "Column_2": "3",
+                "Column_3": "S-04",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "35",
+                "Column_2": "3",
+                "Column_3": "S-05",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "36",
+                "Column_2": "3",
+                "Column_3": "S-06",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "37",
+                "Column_2": "3",
+                "Column_3": "S-07",
+                "Column_4": "2BHK",
+                "Column_5": "975",
+                "Column_6": "325",
+                "Column_7": "NA",
+                "Column_8": "390",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "38",
+                "Column_2": "3",
+                "Column_3": "S-08",
+                "Column_4": "3BHK",
+                "Column_5": "1350",
+                "Column_6": "450",
+                "Column_7": "NA",
+                "Column_8": "540",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "39",
+                "Column_2": "3",
+                "Column_3": "S-09",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "40",
+                "Column_2": "3",
+                "Column_3": "S-10",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "41",
+                "Column_2": "3",
+                "Column_3": "S-11",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "42",
+                "Column_2": "3",
+                "Column_3": "S-12",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "43",
+                "Column_2": "3",
+                "Column_3": "S-13",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "44",
+                "Column_2": "3",
+                "Column_3": "S-14",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "45",
+                "Column_2": "3",
+                "Column_3": "S-15",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "46",
+                "Column_2": "4",
+                "Column_3": "T-01",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "47",
+                "Column_2": "4",
+                "Column_3": "T-02",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "48",
+                "Column_2": "4",
+                "Column_3": "T-03",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "49",
+                "Column_2": "4",
+                "Column_3": "T-04",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "50",
+                "Column_2": "4",
+                "Column_3": "T-05",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "51",
+                "Column_2": "4",
+                "Column_3": "T-06",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "52",
+                "Column_2": "4",
+                "Column_3": "T-07",
+                "Column_4": "2BHK",
+                "Column_5": "975",
+                "Column_6": "325",
+                "Column_7": "NA",
+                "Column_8": "390",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "53",
+                "Column_2": "4",
+                "Column_3": "T-08",
+                "Column_4": "3BHK",
+                "Column_5": "1350",
+                "Column_6": "450",
+                "Column_7": "NA",
+                "Column_8": "540",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "54",
+                "Column_2": "4",
+                "Column_3": "T-09",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "55",
+                "Column_2": "4",
+                "Column_3": "T-10",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "56",
+                "Column_2": "4",
+                "Column_3": "T-11",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "57",
+                "Column_2": "4",
+                "Column_3": "T-12",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "58",
+                "Column_2": "4",
+                "Column_3": "T-13",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "59",
+                "Column_2": "4",
+                "Column_3": "T-14",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "60",
+                "Column_2": "4",
+                "Column_3": "T-15",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "61",
+                "Column_2": "5",
+                "Column_3": "FF-01",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "62",
+                "Column_2": "5",
+                "Column_3": "FF-02",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "63",
+                "Column_2": "5",
+                "Column_3": "FF-03",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "64",
+                "Column_2": "5",
+                "Column_3": "FF-04",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "65",
+                "Column_2": "5",
+                "Column_3": "FF-05",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "66",
+                "Column_2": "5",
+                "Column_3": "FF-06",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "67",
+                "Column_2": "5",
+                "Column_3": "FF-07",
+                "Column_4": "2BHK",
+                "Column_5": "975",
+                "Column_6": "325",
+                "Column_7": "NA",
+                "Column_8": "390",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "68",
+                "Column_2": "5",
+                "Column_3": "FF-08",
+                "Column_4": "3BHK",
+                "Column_5": "1350",
+                "Column_6": "450",
+                "Column_7": "NA",
+                "Column_8": "540",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "69",
+                "Column_2": "5",
+                "Column_3": "FF-09",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "70",
+                "Column_2": "5",
+                "Column_3": "FF-10",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "71",
+                "Column_2": "5",
+                "Column_3": "FF-11",
+                "Column_4": "2BHK",
+                "Column_5": "825",
+                "Column_6": "275",
+                "Column_7": "NA",
+                "Column_8": "330",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "72",
+                "Column_2": "5",
+                "Column_3": "FF-12",
+                "Column_4": "2BHK",
+                "Column_5": "900",
+                "Column_6": "300",
+                "Column_7": "NA",
+                "Column_8": "360",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "73",
+                "Column_2": "5",
+                "Column_3": "FF-13",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "74",
+                "Column_2": "5",
+                "Column_3": "FF-14",
+                "Column_4": "1BHK",
+                "Column_5": "563",
+                "Column_6": "187",
+                "Column_7": "NA",
+                "Column_8": "225",
+                "Column_9": "1"
+              },
+              {
+                "Column_1": "75",
+                "Column_2": "5",
+                "Column_3": "FF-15",
+                "Column_4": "3BHK",
+                "Column_5": "1238",
+                "Column_6": "412",
+                "Column_7": "NA",
+                "Column_8": "495",
+                "Column_9": "1"
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Sub-Structure",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Sl No",
+              "Project Work",
+              "Is Applicable ?",
+              "Estimated From Date",
+              "Estimated To Date"
+            ],
+            "table_rows": [
+              {
+                "Sl No": "1",
+                "Project Work": "Earth work and other leveling preparation work",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "03-08-2017",
+                "Estimated To Date": "25-11-2017"
+              },
+              {
+                "Sl No": "2",
+                "Project Work": "Foundation footing work",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "01-12-2017",
+                "Estimated To Date": "30-01-2018"
+              },
+              {
+                "Sl No": "3",
+                "Project Work": "Retaining wall (All types)",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "01-02-2018",
+                "Estimated To Date": "30-03-2018"
+              },
+              {
+                "Sl No": "4",
+                "Project Work": "Plinth level Beam",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "01-04-2018",
+                "Estimated To Date": "15-05-2018"
+              },
+              {
+                "Sl No": "5",
+                "Project Work": "Sub-structure flooring (Parking Floor, more than one floor below general ground level)",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "17-05-2018",
+                "Estimated To Date": "20-06-2018"
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Super-Structure",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Sl No",
+              "Project Work",
+              "Is Applicable ?",
+              "Estimated From Date",
+              "Estimated To Date"
+            ],
+            "table_rows": [
+              {
+                "Sl No": "1",
+                "Project Work": "RCC or MS Framed structure",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "25-06-2018",
+                "Estimated To Date": "30-07-2018"
+              },
+              {
+                "Sl No": "2",
+                "Project Work": "Masonry construction: Bricks, Concrete blocks etc",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "01-08-2018",
+                "Estimated To Date": "15-09-2018"
+              },
+              {
+                "Sl No": "3",
+                "Project Work": "Plastering inside , outside & Ceiling",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "4",
+                "Project Work": "Joinery: Doors, Windows, Ventilators etc",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "5",
+                "Project Work": "Basic work of Water supply, Sanitary and Electrification",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "6",
+                "Project Work": "Dadoing, Skirting, Flooring, Tiles work (All types)",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "7",
+                "Project Work": "Railing and Grill fixing",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Finishing Works (Fitting and Fixtures)",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "Sl No",
+              "Project Work",
+              "Is Applicable ?",
+              "Estimated From Date",
+              "Estimated To Date"
+            ],
+            "table_rows": [
+              {
+                "Sl No": "1",
+                "Project Work": "Electrification, Water supply and Sanitary Finishing",
+                "Is Applicable ?": "Yes",
+                "Estimated From Date": "30-08-2019",
+                "Estimated To Date": "31-12-2019"
+              },
+              {
+                "Sl No": "2",
+                "Project Work": "Wardrobe, Showcase, Kitchen cabinet, Puja work",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "3",
+                "Project Work": "Fire prevention and fire fighting fitting and fixture with network",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "4",
+                "Project Work": "Weather Proof work(tile,concrete)",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "5",
+                "Project Work": "Painting",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "6",
+                "Project Work": "Elevation work",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              },
+              {
+                "Sl No": "7",
+                "Project Work": "Internal and External work including landscapes as per santioned drawings",
+                "Is Applicable ?": "No",
+                "Estimated From Date": "",
+                "Estimated To Date": ""
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Internal Infrastructure",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "SlNo.",
+              "Work",
+              "Is Applicable ?"
+            ],
+            "table_rows": [
+              {
+                "SlNo.": "1",
+                "Work": "Water Supply",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "2",
+                "Work": "Internal Roads & Footpaths",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "3",
+                "Work": "Sewage and Drainage System",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "4",
+                "Work": "Parks & Tree planting",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "5",
+                "Work": "Street Lighting",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "6",
+                "Work": "Provision for community buildings and for treatment and disposal of sewage and sullage water",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "7",
+                "Work": "Solid waste management and disposal",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "8",
+                "Work": "Water conservation",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "9",
+                "Work": "Energy management",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "10",
+                "Work": "Fire protection and fire safety requirements",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "11",
+                "Work": "Education/Health/Other public amenities",
+                "Is Applicable ?": "No"
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "External Infrastructure",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "SlNo.",
+              "Work",
+              "Is Applicable ?"
+            ],
+            "table_rows": [
+              {
+                "SlNo.": "1",
+                "Work": "Water Supply",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "2",
+                "Work": "Internal Roads & Footpaths",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "3",
+                "Work": "Sewage and Drainage System",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "4",
+                "Work": "Electricity supply transformer and substation",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "5",
+                "Work": "Solid waste management and disposal",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "6",
+                "Work": "Emergency Evacuation services",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "7",
+                "Work": "Storm water drains",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "8",
+                "Work": "Use of renewable energy",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "9",
+                "Work": "Water conservation/rain water harvesting/recharge of ground water",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "10",
+                "Work": "Fire protection and fire safety requirements",
+                "Is Applicable ?": "No"
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Amenities",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "SlNo.",
+              "Work",
+              "Is Applicable ?"
+            ],
+            "table_rows": [
+              {
+                "SlNo.": "1",
+                "Work": "Electricity",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "2",
+                "Work": "Smart Home Automation",
+                "Is Applicable ?": ""
+              },
+              {
+                "SlNo.": "3",
+                "Work": "CCTV Surveillance",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "4",
+                "Work": "Club House",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "5",
+                "Work": "Community Hall",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "6",
+                "Work": "Outdoor Sports facility",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "7",
+                "Work": "Indoor Sports facility",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "8",
+                "Work": "Swimming Pool",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "9",
+                "Work": "Gym",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "10",
+                "Work": "Parks",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "11",
+                "Work": "Power Backup",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "12",
+                "Work": "Gas",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "13",
+                "Work": "Water and Sanitation",
+                "Is Applicable ?": "No"
+              },
+              {
+                "SlNo.": "14",
+                "Work": "Air Conditioning And incerntion",
+                "Is Applicable ?": "No"
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          },
+          {
+            "label": "Common Areas",
+            "type": "table",
+            "is_empty": false,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [
+              "SlNo.",
+              "Work",
+              "Is Applicable ?"
+            ],
+            "table_rows": [
+              {
+                "SlNo.": "1",
+                "Work": "Staircases",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "2",
+                "Work": "Lifts",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "3",
+                "Work": "Staircases and Lift lobbies, corridor,lobbies, corridor",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "4",
+                "Work": "Fire escapes",
+                "Is Applicable ?": ""
+              },
+              {
+                "SlNo.": "5",
+                "Work": "Common entrance and exit for the building / common portico/foyer/verandah",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "6",
+                "Work": "Basement",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "7",
+                "Work": "Terrace",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "8",
+                "Work": "Outer Wall",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "9",
+                "Work": "Open parking areas and common storage spaces",
+                "Is Applicable ?": ""
+              },
+              {
+                "SlNo.": "10",
+                "Work": "Provision for lodging of management staff and security staff",
+                "Is Applicable ?": "Yes"
+              },
+              {
+                "SlNo.": "11",
+                "Work": "Water conservation and renewable energy",
+                "Is Applicable ?": ""
+              }
+            ],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      },
+      {
+        "label": "Completion Details",
+        "id": "#completion",
+        "is_nav_visible": false,
+        "dom_presence": "hidden_or_unlinked_dom_pane",
+        "is_empty": true,
+        "sections": [
+          {
+            "label": "Completion Details",
+            "type": "generic",
+            "is_empty": true,
+            "empty_message": null,
+            "fields": [],
+            "table_headers": [],
+            "table_rows": [],
+            "documents": [],
+            "excluded_images": [],
+            "excluded_pii": []
+          }
+        ],
+        "sub_tabs": []
+      }
+    ],
+    "commented_out_nav_tabs": {
+      "menu5": "Appeal / FNH Details"
+    },
+    "checked_absent_tabs": [
+      "Promoter Details",
+      "Land Details",
+      "Project Details",
+      "Bank Details",
+      "Uploaded Documents",
+      "Enquired Documents",
+      "Complaints",
+      "Quarterly Updates",
+      "Completion Details"
+    ]
+  }
+}

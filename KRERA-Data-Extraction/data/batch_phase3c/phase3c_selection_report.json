@@ -1,0 +1,77 @@
+{
+  "phase": "Phase 3C — 250-Project Controlled Extraction Batch",
+  "generated_at_utc": "2026-11-07T11:21:43.510493+00:00",
+  "manifest_projects_sha256": "24c5a9794b70049f473a3b40049e3c4715cb90efe80624e8295d468a18212655",
+  "total_catalogue_rows_inspected": 4459,
+  "total_approved_with_complete_identity_in_catalogue": 4094,
+  "total_historical_phase3a_phase3b_excluded": 125,
+  "total_non_approved_or_incomplete_identifiers_excluded": 365,
+  "eligible_unprocessed_approved_pool_size": 3969,
+  "selected_projects_count": 250,
+  "internal_sub_batches_count": 10,
+  "projects_per_internal_sub_batch": 25,
+  "selection_methodology": {
+    "source_catalogue": "data/k_rera_extraction.sqlite (4,459 Bengaluru Urban application rows; 4,094 APPROVED rows)",
+    "deterministic_selection_rule": "Deterministic stratified midpoint-distance scoring across 12 (page_band x project_type) cells over the 3,969 eligible APPROVED rows, ordered by ascending (page_number, row_order).",
+    "cross_phase_exclusion_verification": {
+      "phase3a_projects_excluded_count": 25,
+      "phase3b_projects_excluded_count": 100,
+      "additional_checkpoint_excluded_count": 0,
+      "total_historical_projects_excluded_count": 125,
+      "non_approved_or_incomplete_identifiers_excluded_count": 365,
+      "overlap_with_phase3a_or_phase3b_reg_nos": 0,
+      "overlap_with_phase3a_or_phase3b_ack_nos": 0,
+      "overlap_with_phase3a_or_phase3b_vpd_ids": 0,
+      "overlap_with_existing_successful_sqlite_checkpoints": 0
+    },
+    "stratification_dimensions": [
+      "Catalogue page bands: Early (Pages 1-100: 83), Middle (Pages 101-300: 84), Late (Pages 301-446: 83)",
+      "Project types: Residential/Group Housing (120), Plotted Development (60), Commercial (35), Mixed Development (35)",
+      "Promoter diversity: 246 distinct promoters across 250 selected projects",
+      "Registration years: 10 approval years represented (2017–2026)",
+      "Execution grouping: 10 internal sub-batches of 25 projects each (Sub-Batches 1..10)",
+      "Note: This controlled 250-project stratified sample is designed for repeatability and scale validation; statistical representativeness of the full catalogue is not claimed."
+    ],
+    "remaining_candidate_approved_pool": 3969,
+    "page_band_distribution": {
+      "Early (Pages 1-100)": 83,
+      "Middle (Pages 101-300)": 84,
+      "Late (Pages 301-446)": 83
+    },
+    "project_type_distribution": {
+      "Residential/Group Housing": 120,
+      "Plotted Development": 60,
+      "Mixed Development": 35,
+      "Commercial": 35
+    },
+    "approval_year_distribution": {
+      "2017": 44,
+      "2018": 35,
+      "2019": 17,
+      "2020": 20,
+      "2021": 15,
+      "2022": 22,
+      "2023": 21,
+      "2024": 25,
+      "2025": 23,
+      "2026": 28
+    },
+    "distinct_promoters_count": 246,
+    "max_projects_per_single_promoter": 3,
+    "distinct_pages_count": 196
+  },
+  "band_by_type_matrix": {
+    "Early (Pages 1-100) | Residential/Group Housing": 40,
+    "Early (Pages 1-100) | Plotted Development": 20,
+    "Early (Pages 1-100) | Commercial": 11,
+    "Early (Pages 1-100) | Mixed Development": 12,
+    "Middle (Pages 101-300) | Residential/Group Housing": 40,
+    "Middle (Pages 101-300) | Plotted Development": 20,
+    "Middle (Pages 101-300) | Commercial": 14,
+    "Middle (Pages 101-300) | Mixed Development": 10,
+    "Late (Pages 301-446) | Residential/Group Housing": 40,
+    "Late (Pages 301-446) | Plotted Development": 20,
+    "Late (Pages 301-446) | Commercial": 10,
+    "Late (Pages 301-446) | Mixed Development": 13
+  }
+}
