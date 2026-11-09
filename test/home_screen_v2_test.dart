@@ -66,16 +66,21 @@ void main() {
   }
 
   Future<void> answerCurrentQuestion(WidgetTester tester) async {
-    final answerOption = find.byType(AnswerOption).first;
+    final yesOption = find.text('Yes').last;
 
-    expect(answerOption, findsOneWidget);
+    expect(yesOption, findsOneWidget);
 
-    await tester.ensureVisible(answerOption);
-
+    await tester.ensureVisible(yesOption);
+    await tester.pumpAndSettle();
+    await tester.tap(yesOption);
     await tester.pumpAndSettle();
 
-    await tester.tap(answerOption);
+    final nextButton = find.text('Next Question');
+    expect(nextButton, findsOneWidget);
 
+    await tester.ensureVisible(nextButton);
+    await tester.pumpAndSettle();
+    await tester.tap(nextButton);
     await tester.pumpAndSettle();
   }
 
@@ -85,19 +90,36 @@ void main() {
       selectedProperty: null,
     );
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('No property selected.'),
-      findsOneWidget,
-    );
+    expect(find.text('Let’s get your property started'), findsOneWidget);
+
+    expect(find.text('Find a Property'), findsOneWidget);
   });
+
+  testWidgets(
+    'shows saved assessment progress when no catalogue property is selected',
+    (tester) async {
+      PropertyState.instance.initialize(
+        properties: const [],
+        selectedProperty: null,
+      );
+
+      AssessmentState.instance.startAssessment(submissionId: 'submission-123');
+
+      await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Let’s get your property started'), findsOneWidget);
+      expect(find.byType(AssessmentProgressCard), findsOneWidget);
+      expect(find.text('Assessment in progress'), findsOneWidget);
+      expect(find.text('Continue Assessment'), findsOneWidget);
+      expect(find.text('Find a Property'), findsOneWidget);
+    },
+  );
 
   testWidgets('shows explicit not-started assessment state', (tester) async {
     final property = createProperty();
@@ -107,11 +129,7 @@ void main() {
       selectedProperty: property,
     );
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
@@ -124,21 +142,13 @@ void main() {
     );
 
     expect(
-      find.text(
-        'Your property health assessment has not started yet.',
-      ),
+      find.text('Your property health assessment has not started yet.'),
       findsAtLeastNWidgets(1),
     );
 
-    expect(
-      find.byType(AssessmentProgressCard),
-      findsOneWidget,
-    );
+    expect(find.byType(AssessmentProgressCard), findsOneWidget);
 
-    expect(
-      find.text('Assessment in progress'),
-      findsNothing,
-    );
+    expect(find.text('Assessment in progress'), findsNothing);
   });
 
   testWidgets(
@@ -151,37 +161,19 @@ void main() {
         selectedProperty: property,
       );
 
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
+      AssessmentState.instance.startAssessment(propertyId: property.id);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.byType(AssessmentProgressCard),
-        findsOneWidget,
-      );
+      expect(find.byType(AssessmentProgressCard), findsOneWidget);
 
-      expect(
-        find.byType(TodaysPrioritiesCard),
-        findsOneWidget,
-      );
+      expect(find.byType(TodaysPrioritiesCard), findsOneWidget);
 
-      expect(
-        find.text('Assessment in progress'),
-        findsOneWidget,
-      );
+      expect(find.text('Assessment in progress'), findsOneWidget);
 
-      expect(
-        find.text('Continue Assessment'),
-        findsOneWidget,
-      );
+      expect(find.text('Continue Assessment'), findsOneWidget);
     },
   );
 
@@ -193,22 +185,13 @@ void main() {
       selectedProperty: property,
     );
 
-    AssessmentState.instance.startAssessment(
-      propertyId: property.id,
-    );
+    AssessmentState.instance.startAssessment(propertyId: property.id);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
-    expect(
-      find.byType(EvidenceSnapshotCard),
-      findsOneWidget,
-    );
+    expect(find.byType(EvidenceSnapshotCard), findsOneWidget);
   });
 
   testWidgets('shows dashboard property name', (tester) async {
@@ -219,48 +202,31 @@ void main() {
       selectedProperty: property,
     );
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Casagrand Aquene'),
-      findsOneWidget,
-    );
+    expect(find.text('Casagrand Aquene'), findsOneWidget);
   });
 
-  testWidgets(
-    'shows property health score when assessment is complete',
-    (tester) async {
-      final property = createProperty();
+  testWidgets('shows property health score when assessment is complete', (
+    tester,
+  ) async {
+    final property = createProperty();
 
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
 
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
+    AssessmentState.instance.startAssessment(propertyId: property.id);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      expect(
-        find.byType(HeroScoreCard),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.byType(HeroScoreCard), findsOneWidget);
+  });
 
   testWidgets('shows priorities card', (tester) async {
     final property = createProperty();
@@ -270,18 +236,11 @@ void main() {
       selectedProperty: property,
     );
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
-    expect(
-      find.byType(TodaysPrioritiesCard),
-      findsOneWidget,
-    );
+    expect(find.byType(TodaysPrioritiesCard), findsOneWidget);
   });
 
   testWidgets('renders dashboard data correctly', (tester) async {
@@ -292,157 +251,93 @@ void main() {
       selectedProperty: property,
     );
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: HomeScreenV2(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Casagrand Aquene'),
-      findsOneWidget,
-    );
+    expect(find.text('Casagrand Aquene'), findsOneWidget);
 
-    expect(
-      find.byType(HeroScoreCard),
-      findsOneWidget,
-    );
+    expect(find.byType(HeroScoreCard), findsOneWidget);
 
-    expect(
-      find.byType(EvidenceSnapshotCard),
-      findsOneWidget,
-    );
+    expect(find.byType(EvidenceSnapshotCard), findsOneWidget);
   });
 
-  testWidgets(
-    'shows dashboard cards for selected property',
-    (tester) async {
-      final property = createProperty();
+  testWidgets('shows dashboard cards for selected property', (tester) async {
+    final property = createProperty();
 
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      expect(
-        find.byType(HeroScoreCard),
-        findsOneWidget,
-      );
+    expect(find.byType(HeroScoreCard), findsOneWidget);
 
-      expect(
-        find.byType(AssessmentProgressCard),
-        findsOneWidget,
-      );
+    expect(find.byType(AssessmentProgressCard), findsOneWidget);
 
-      expect(
-        find.byType(EvidenceSnapshotCard),
-        findsOneWidget,
-      );
+    expect(find.byType(EvidenceSnapshotCard), findsOneWidget);
 
-      expect(
-        find.byType(TodaysPrioritiesCard),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.byType(TodaysPrioritiesCard), findsOneWidget);
+  });
 
-  testWidgets(
-    'shows continue assessment action for an active session',
-    (tester) async {
-      final property = createProperty();
+  testWidgets('shows continue assessment action for an active session', (
+    tester,
+  ) async {
+    final property = createProperty();
 
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
 
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
+    AssessmentState.instance.startAssessment(propertyId: property.id);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      expect(
-        find.text('Assessment in progress'),
-        findsOneWidget,
-      );
+    expect(find.text('Assessment in progress'), findsOneWidget);
 
-      expect(
-        find.text('Continue Assessment'),
-        findsOneWidget,
-      );
+    expect(find.text('Continue Assessment'), findsOneWidget);
 
-      expect(
-        find.text('0 of 33 questions'),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.text('0 of 33 questions'), findsOneWidget);
+  });
 
-  testWidgets(
-    'opens assessment when continue assessment is tapped',
-    (tester) async {
-      final property = createProperty();
+  testWidgets('opens assessment when continue assessment is tapped', (
+    tester,
+  ) async {
+    final property = createProperty();
 
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
 
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
+    AssessmentState.instance.startAssessment(propertyId: property.id);
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      final continueButton = find.text('Continue Assessment');
+    final continueButton = find.text('Continue Assessment');
 
-      expect(
-        continueButton,
-        findsOneWidget,
-      );
+    expect(continueButton, findsOneWidget);
 
-      await tester.ensureVisible(continueButton);
+    await tester.ensureVisible(continueButton);
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      await tester.tap(continueButton);
+    await tester.tap(continueButton);
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      expect(
-        find.byType(AssessmentScreen),
-        findsOneWidget,
-      );
+    expect(find.byType(AssessmentScreen), findsOneWidget);
 
-      expect(
-        find.text('Property Assessment'),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.text('Property Assessment'), findsOneWidget);
+  });
 
   testWidgets(
     'resumes assessment from the next unanswered question after save and exit',
@@ -454,18 +349,11 @@ void main() {
         selectedProperty: property,
       );
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.byType(HomeScreenV2),
-        findsOneWidget,
-      );
+      expect(find.byType(HomeScreenV2), findsOneWidget);
 
       final startAssessmentButton = find.text('Start Assessment');
 
@@ -478,18 +366,13 @@ void main() {
 
         await tester.pumpAndSettle();
       } else {
-        AssessmentState.instance.startAssessment(
-          propertyId: property.id,
-        );
+        AssessmentState.instance.startAssessment(propertyId: property.id);
 
         await tester.pumpAndSettle();
 
         final continueButton = find.text('Continue Assessment');
 
-        expect(
-          continueButton,
-          findsOneWidget,
-        );
+        expect(continueButton, findsOneWidget);
 
         await tester.ensureVisible(continueButton);
 
@@ -500,25 +383,13 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      expect(
-        find.byType(AssessmentScreen),
-        findsOneWidget,
-      );
+      expect(find.byType(AssessmentScreen), findsOneWidget);
 
-      expect(
-        find.text('Property Assessment'),
-        findsOneWidget,
-      );
+      expect(find.text('Property Assessment'), findsOneWidget);
 
-      expect(
-        AssessmentState.instance.answeredQuestionCount,
-        0,
-      );
+      expect(AssessmentState.instance.answeredQuestionCount, 0);
 
-      expect(
-        AssessmentState.instance.hasActiveSession,
-        isTrue,
-      );
+      expect(AssessmentState.instance.hasActiveSession, isTrue);
 
       await answerCurrentQuestion(tester);
 
@@ -526,44 +397,26 @@ void main() {
 
       await answerCurrentQuestion(tester);
 
-      expect(
-        AssessmentState.instance.answeredQuestionCount,
-        3,
-      );
+      expect(AssessmentState.instance.answeredQuestionCount, 3);
 
       final currentQuestionBeforeExit =
           AssessmentState.instance.currentQuestionId;
 
-      expect(
-        currentQuestionBeforeExit,
-        isNotNull,
-      );
+      expect(currentQuestionBeforeExit, isNotNull);
 
       await tester.pageBack();
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.byType(HomeScreenV2),
-        findsOneWidget,
-      );
+      expect(find.byType(HomeScreenV2), findsOneWidget);
 
-      expect(
-        find.text('Assessment in progress'),
-        findsOneWidget,
-      );
+      expect(find.text('Assessment in progress'), findsOneWidget);
 
-      expect(
-        find.text('Continue Assessment'),
-        findsOneWidget,
-      );
+      expect(find.text('Continue Assessment'), findsOneWidget);
 
       final continueButton = find.text('Continue Assessment');
 
-      expect(
-        continueButton,
-        findsOneWidget,
-      );
+      expect(continueButton, findsOneWidget);
 
       await tester.ensureVisible(continueButton);
 
@@ -573,43 +426,21 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.byType(AssessmentScreen),
-        findsOneWidget,
-      );
+      expect(find.byType(AssessmentScreen), findsOneWidget);
 
-      expect(
-        find.text('Property Assessment'),
-        findsOneWidget,
-      );
+      expect(find.text('Property Assessment'), findsOneWidget);
 
-      expect(
-        find.byType(HomeScreenV2),
-        findsNothing,
-      );
+      expect(find.byType(HomeScreenV2), findsNothing);
 
-      expect(
-        AssessmentState.instance.answeredQuestionCount,
-        3,
-      );
+      expect(AssessmentState.instance.answeredQuestionCount, 3);
 
-      expect(
-        AssessmentState.instance.hasActiveSession,
-        isTrue,
-      );
+      expect(AssessmentState.instance.hasActiveSession, isTrue);
 
-      final sessionAfterResume =
-          AssessmentState.instance.session;
+      final sessionAfterResume = AssessmentState.instance.session;
 
-      expect(
-        sessionAfterResume,
-        isNotNull,
-      );
+      expect(sessionAfterResume, isNotNull);
 
-      expect(
-        sessionAfterResume!.answers.length,
-        3,
-      );
+      expect(sessionAfterResume!.answers.length, 3);
 
       expect(
         AssessmentState.instance.currentQuestionId,
@@ -618,356 +449,257 @@ void main() {
     },
   );
 
-  testWidgets(
-    'opens priority detail when a dashboard priority is tapped',
-    (tester) async {
-      final property = createProperty();
-
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
-
-      // ------------------------------------------------------------
-      // Start the assessment session.
-      // ------------------------------------------------------------
-
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
-
-      // ------------------------------------------------------------
-      // Save a real assessment answer.
-      //
-      // LEGAL_SD + NO is handled by the production SaleDeedRule
-      // and produces the "Obtain Registered Sale Deed"
-      // recommendation.
-      // ------------------------------------------------------------
-
-      const saleDeedAnswer = PHSAnswer(
-        questionId: 'LEGAL_SD',
-        response: PHSResponse.no,
-      );
-
-      AssessmentState.instance.saveAnswer(
-        saleDeedAnswer,
-        currentQuestionId: 'LEGAL_SD',
-      );
-
-      // ------------------------------------------------------------
-      // Open the real Dashboard.
-      // ------------------------------------------------------------
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Verify the real dashboard priority exists.
-      // ------------------------------------------------------------
-
-      final priorityCard = find.byType(TodaysPrioritiesCard);
-
-      expect(
-        priorityCard,
-        findsOneWidget,
-      );
-
-      final priorityTitle = find.descendant(
-        of: priorityCard,
-        matching: find.text('Obtain Registered Sale Deed'),
-      );
-
-      expect(
-        priorityTitle,
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Scroll the Dashboard until the priority is visible.
-      // ------------------------------------------------------------
-
-      await tester.ensureVisible(priorityTitle);
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Tap the actual dashboard priority.
-      // ------------------------------------------------------------
-
-      await tester.tap(priorityTitle);
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Verify Dashboard -> PriorityDetailScreen navigation.
-      // ------------------------------------------------------------
-
-      expect(
-        find.byType(PriorityDetailScreen),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Priority Details'),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify the correct priority was passed to the detail screen.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('Obtain Registered Sale Deed'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('What needs your attention'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Potential PHI impact'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('CRITICAL'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('+25'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('PHI'),
-        findsOneWidget,
-      );
-    },
-  );
-
-  testWidgets(
-    'opens AI Advisor with dashboard-derived SureBot context',
-    (tester) async {
-      final property = createProperty();
-
-      PropertyState.instance.initialize(
-        properties: [property],
-        selectedProperty: property,
-      );
-
-      // ------------------------------------------------------------
-      // Start the real assessment session.
-      // ------------------------------------------------------------
-
-      AssessmentState.instance.startAssessment(
-        propertyId: property.id,
-      );
-
-      // ------------------------------------------------------------
-      // Save a real assessment answer.
-      //
-      // LEGAL_SD + NO is handled by the production SaleDeedRule
-      // and produces the "Obtain Registered Sale Deed"
-      // recommendation.
-      // ------------------------------------------------------------
-
-      const saleDeedAnswer = PHSAnswer(
-        questionId: 'LEGAL_SD',
-        response: PHSResponse.no,
-      );
-
-      AssessmentState.instance.saveAnswer(
-        saleDeedAnswer,
-        currentQuestionId: 'LEGAL_SD',
-      );
-
-      // ------------------------------------------------------------
-      // Open the real Dashboard.
-      // ------------------------------------------------------------
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreenV2(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Verify the Quick Actions section.
-      // ------------------------------------------------------------
-
-      final quickActionGrid = find.byType(QuickActionGrid);
-
-      expect(
-        quickActionGrid,
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify all four Quick Action cards exist.
-      // ------------------------------------------------------------
-
-      final quickActionCards = find.descendant(
-        of: quickActionGrid,
-        matching: find.byType(QuickActionCard),
-      );
-
-      expect(
-        quickActionCards,
-        findsNWidgets(4),
-      );
-
-      // ------------------------------------------------------------
-      // Verify the AI Advisor action exists.
-      // ------------------------------------------------------------
-
-      final aiAdvisorTitle = find.descendant(
-        of: quickActionGrid,
-        matching: find.text('AI Advisor'),
-      );
-
-      expect(
-        aiAdvisorTitle,
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Make the AI Advisor card visible.
-      // ------------------------------------------------------------
-
-      await tester.ensureVisible(aiAdvisorTitle);
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Tap the actual AI Advisor action.
-      // ------------------------------------------------------------
-
-      await tester.tap(aiAdvisorTitle);
-
-      await tester.pumpAndSettle();
-
-      // ------------------------------------------------------------
-      // Verify Dashboard -> SureBotScreen navigation.
-      // ------------------------------------------------------------
-
-      expect(
-        find.byType(SureBotScreen),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify contextual SureBot UI.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('SureBot'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text("I'm SureBot. I already have some context about your property."),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify property context.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('Casagrand Aquene'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Casagrand'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Bangalore, Karnataka'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Apartment'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('2025'),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify health context.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('Property Health'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('In progress'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('1/33'),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify evidence context.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('Evidence'),
-        findsOneWidget,
-      );
-
-      // ------------------------------------------------------------
-      // Verify the current priority.
-      //
-      // This assertion validates the complete
-      // Dashboard -> SureBotContextBuilder -> SureBotScreen
-      // integration.
-      // ------------------------------------------------------------
-
-      expect(
-        find.text('Current Priority'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Obtain Registered Sale Deed'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Potential PHI improvement: +25'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('Required documents'),
-        findsOneWidget,
-      );
-
-      expect(
-        find.text('• Registered Sale Deed'),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgets('opens priority detail when a dashboard priority is tapped', (
+    tester,
+  ) async {
+    final property = createProperty();
+
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
+
+    // ------------------------------------------------------------
+    // Start the assessment session.
+    // ------------------------------------------------------------
+
+    AssessmentState.instance.startAssessment(propertyId: property.id);
+
+    // ------------------------------------------------------------
+    // Save a real assessment answer.
+    //
+    // LEGAL_SD + NO is handled by the production SaleDeedRule
+    // and produces the "Obtain Registered Sale Deed"
+    // recommendation.
+    // ------------------------------------------------------------
+
+    const saleDeedAnswer = PHSAnswer(
+      questionId: 'LEGAL_SD',
+      response: PHSResponse.no,
+    );
+
+    AssessmentState.instance.saveAnswer(
+      saleDeedAnswer,
+      currentQuestionId: 'LEGAL_SD',
+    );
+
+    // ------------------------------------------------------------
+    // Open the real Dashboard.
+    // ------------------------------------------------------------
+
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Verify the real dashboard priority exists.
+    // ------------------------------------------------------------
+
+    final priorityCard = find.byType(TodaysPrioritiesCard);
+
+    expect(priorityCard, findsOneWidget);
+
+    final priorityTitle = find.descendant(
+      of: priorityCard,
+      matching: find.text('Obtain Registered Sale Deed'),
+    );
+
+    expect(priorityTitle, findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Scroll the Dashboard until the priority is visible.
+    // ------------------------------------------------------------
+
+    await tester.ensureVisible(priorityTitle);
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Tap the actual dashboard priority.
+    // ------------------------------------------------------------
+
+    await tester.tap(priorityTitle);
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Verify Dashboard -> PriorityDetailScreen navigation.
+    // ------------------------------------------------------------
+
+    expect(find.byType(PriorityDetailScreen), findsOneWidget);
+
+    expect(find.text('Priority Details'), findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify the correct priority was passed to the detail screen.
+    // ------------------------------------------------------------
+
+    expect(find.text('Obtain Registered Sale Deed'), findsOneWidget);
+
+    expect(find.text('What needs your attention'), findsOneWidget);
+
+    expect(find.text('Potential PHI impact'), findsOneWidget);
+
+    expect(find.text('CRITICAL'), findsOneWidget);
+
+    expect(find.text('+25'), findsOneWidget);
+
+    expect(find.text('PHI'), findsOneWidget);
+  });
+
+  testWidgets('opens AI Advisor with dashboard-derived SureBot context', (
+    tester,
+  ) async {
+    final property = createProperty();
+
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
+
+    // ------------------------------------------------------------
+    // Start the real assessment session.
+    // ------------------------------------------------------------
+
+    AssessmentState.instance.startAssessment(propertyId: property.id);
+
+    // ------------------------------------------------------------
+    // Save a real assessment answer.
+    //
+    // LEGAL_SD + NO is handled by the production SaleDeedRule
+    // and produces the "Obtain Registered Sale Deed"
+    // recommendation.
+    // ------------------------------------------------------------
+
+    const saleDeedAnswer = PHSAnswer(
+      questionId: 'LEGAL_SD',
+      response: PHSResponse.no,
+    );
+
+    AssessmentState.instance.saveAnswer(
+      saleDeedAnswer,
+      currentQuestionId: 'LEGAL_SD',
+    );
+
+    // ------------------------------------------------------------
+    // Open the real Dashboard.
+    // ------------------------------------------------------------
+
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Verify the Quick Actions section.
+    // ------------------------------------------------------------
+
+    final quickActionGrid = find.byType(QuickActionGrid);
+
+    expect(quickActionGrid, findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify all four Quick Action cards exist.
+    // ------------------------------------------------------------
+
+    final quickActionCards = find.descendant(
+      of: quickActionGrid,
+      matching: find.byType(QuickActionCard),
+    );
+
+    expect(quickActionCards, findsNWidgets(4));
+
+    // ------------------------------------------------------------
+    // Verify the AI Advisor action exists.
+    // ------------------------------------------------------------
+
+    final aiAdvisorTitle = find.descendant(
+      of: quickActionGrid,
+      matching: find.text('AI Advisor'),
+    );
+
+    expect(aiAdvisorTitle, findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Make the AI Advisor card visible.
+    // ------------------------------------------------------------
+
+    await tester.ensureVisible(aiAdvisorTitle);
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Tap the actual AI Advisor action.
+    // ------------------------------------------------------------
+
+    await tester.tap(aiAdvisorTitle);
+
+    await tester.pumpAndSettle();
+
+    // ------------------------------------------------------------
+    // Verify Dashboard -> SureBotScreen navigation.
+    // ------------------------------------------------------------
+
+    expect(find.byType(SureBotScreen), findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify contextual SureBot UI.
+    // ------------------------------------------------------------
+
+    expect(find.text('SureBot'), findsOneWidget);
+
+    expect(
+      find.text(
+        "I'm SureBot. I already have some context about your property.",
+      ),
+      findsOneWidget,
+    );
+
+    // ------------------------------------------------------------
+    // Verify property context.
+    // ------------------------------------------------------------
+
+    expect(find.text('Casagrand Aquene'), findsOneWidget);
+
+    expect(find.text('Casagrand'), findsOneWidget);
+
+    expect(find.text('Bangalore, Karnataka'), findsOneWidget);
+
+    expect(find.text('Apartment'), findsOneWidget);
+
+    expect(find.text('2025'), findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify health context.
+    // ------------------------------------------------------------
+
+    expect(find.text('Property Health'), findsOneWidget);
+
+    expect(find.text('In progress'), findsOneWidget);
+
+    expect(find.text('1/33'), findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify evidence context.
+    // ------------------------------------------------------------
+
+    expect(find.text('Evidence'), findsOneWidget);
+
+    // ------------------------------------------------------------
+    // Verify the current priority.
+    //
+    // This assertion validates the complete
+    // Dashboard -> SureBotContextBuilder -> SureBotScreen
+    // integration.
+    // ------------------------------------------------------------
+
+    expect(find.text('Current Priority'), findsOneWidget);
+
+    expect(find.text('Obtain Registered Sale Deed'), findsOneWidget);
+
+    expect(find.text('Potential PHI improvement: +25'), findsOneWidget);
+
+    expect(find.text('Required documents'), findsOneWidget);
+
+    expect(find.text('• Registered Sale Deed'), findsOneWidget);
+  });
 }

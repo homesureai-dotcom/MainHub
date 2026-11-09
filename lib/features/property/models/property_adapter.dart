@@ -9,25 +9,20 @@ import 'property.dart';
 /// the canonical feature Property model used by
 /// PropertyState and the dashboard.
 ///
-/// This adapter is retained for legacy properties that
-/// do not yet exist in the canonical PropertyState.
-///
-/// When a canonical property already exists, the onboarding
-/// flow should use that canonical property directly instead
-/// of creating a reduced copy through this adapter.
+/// Catalogue inclusion and the legacy verification flag
+/// are not proof of legal or regulatory compliance.
+/// Compliance must be based on independently reviewed evidence.
 class PropertyAdapter {
   const PropertyAdapter._();
 
-  static Property fromLegacy(
-    legacy.Property property,
-  ) {
+  static Property fromLegacy(legacy.Property property) {
     return Property(
       id: property.id,
       name: property.name,
       builderName: property.builder,
       ownerName: '',
       address: Address(
-        line1: '',
+        line1: property.locality,
         city: property.city,
         state: '',
         pincode: '',
@@ -36,12 +31,11 @@ class PropertyAdapter {
       yearOfConstruction: 0,
       carpetArea: 0,
       totalUnits: 0,
-      compliance: ComplianceSummary(
-        verifiedCount: property.verified ? 1 : 0,
-        pendingCount: 0,
+      compliance: const ComplianceSummary(
+        verifiedCount: 0,
+        pendingCount: 1,
         issueCount: 0,
-        compliancePercentage:
-            property.verified ? 100 : 0,
+        compliancePercentage: 0,
       ),
       assessment: const AssessmentSummary(),
       documents: const DocumentSummary(

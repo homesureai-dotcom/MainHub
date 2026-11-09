@@ -1,3 +1,6 @@
+import '../../features/assessment/localization/assessment_translations.dart';
+import '../../features/assessment/localization/assessment_content_translations.dart';
+import '../../core/localization/app_locale_controller.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/evidence/evidence.dart';
@@ -6,7 +9,6 @@ import '../../core/evidence/evidence_requirement.dart';
 import '../../core/evidence/evidence_requirement_catalog.dart';
 import '../../core/evidence/evidence_requirement_resolver.dart';
 import '../../core/evidence/evidence_type_mapper.dart';
-import '../../core/phs/phs_categories.dart';
 import '../../core/phs/phs_question.dart';
 import '../common/hs_info_bottom_sheet.dart';
 import 'add_evidence_button.dart';
@@ -33,23 +35,15 @@ class QuestionCard extends StatelessWidget {
   List<EvidenceRequirement> _resolveEvidenceRequirements() {
     final typeMapper = const EvidenceTypeMapper();
 
-    final resolver = EvidenceRequirementResolver(
-      typeMapper: typeMapper,
-    );
+    final resolver = EvidenceRequirementResolver(typeMapper: typeMapper);
 
-    final catalog = EvidenceRequirementCatalog(
-      resolver: resolver,
-    );
+    final catalog = EvidenceRequirementCatalog(resolver: resolver);
 
     return catalog.getForQuestion(question);
   }
 
-  Future<void> _handleAddEvidence(
-    BuildContext context,
-  ) async {
-    final evidenceType = await EvidenceActionSheet.show(
-      context,
-    );
+  Future<void> _handleAddEvidence(BuildContext context) async {
+    final evidenceType = await EvidenceActionSheet.show(context);
 
     if (evidenceType == null) {
       return;
@@ -58,12 +52,8 @@ class QuestionCard extends StatelessWidget {
     onEvidenceTypeSelected?.call(evidenceType);
   }
 
-  Widget _buildEvidenceCoverage(
-    EvidenceCompleteness completeness,
-  ) {
-    final percentage = completeness.coveragePercentage
-        .clamp(0, 100)
-        .toDouble();
+  Widget _buildEvidenceCoverage(EvidenceCompleteness completeness) {
+    final percentage = completeness.coveragePercentage.clamp(0, 100).toDouble();
 
     final isComplete = completeness.isComplete;
 
@@ -71,14 +61,10 @@ class QuestionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isComplete
-            ? const Color(0xFFF0FDF4)
-            : const Color(0xFFFFFBEB),
+        color: isComplete ? const Color(0xFFF0FDF4) : const Color(0xFFFFFBEB),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isComplete
-              ? const Color(0xFFBBF7D0)
-              : const Color(0xFFFDE68A),
+          color: isComplete ? const Color(0xFFBBF7D0) : const Color(0xFFFDE68A),
         ),
       ),
       child: Column(
@@ -99,10 +85,7 @@ class QuestionCard extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'Evidence coverage',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
               Text(
@@ -130,12 +113,12 @@ class QuestionCard extends StatelessWidget {
           Text(
             isComplete
                 ? '${completeness.matchedRequirements} of '
-                    '${completeness.totalRequirements} evidence '
-                    'requirements met'
+                      '${completeness.totalRequirements} evidence '
+                      'requirements met'
                 : '${completeness.matchedRequirements} of '
-                    '${completeness.totalRequirements} evidence '
-                    'requirements met · '
-                    '${completeness.missingRequirements} missing',
+                      '${completeness.totalRequirements} evidence '
+                      'requirements met · '
+                      '${completeness.missingRequirements} missing',
             style: TextStyle(
               fontSize: 14,
               color: isComplete
@@ -164,9 +147,7 @@ class QuestionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-        ),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -181,18 +162,16 @@ class QuestionCard extends StatelessWidget {
           //----------------------------------------
           // Category Badge
           //----------------------------------------
-
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFEFF6FF),
               borderRadius: BorderRadius.circular(100),
             ),
             child: Text(
-              question.category.displayName,
+              AssessmentTranslations(
+                AppLocaleController.instance.languageCode,
+              ).categoryName(question.category),
               style: const TextStyle(
                 color: Color(0xFF2563EB),
                 fontWeight: FontWeight.w700,
@@ -205,9 +184,10 @@ class QuestionCard extends StatelessWidget {
           //----------------------------------------
           // Question
           //----------------------------------------
-
           Text(
-            question.title,
+            AssessmentTranslations(
+              AppLocaleController.instance.languageCode,
+            ).questionTitle(question),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -218,7 +198,9 @@ class QuestionCard extends StatelessWidget {
           const SizedBox(height: 18),
 
           Text(
-            question.helpText,
+            AssessmentContentTranslations(
+              AppLocaleController.instance.languageCode,
+            ).helpText(question),
             style: const TextStyle(
               fontSize: 16,
               color: Colors.grey,
@@ -229,16 +211,12 @@ class QuestionCard extends StatelessWidget {
           //----------------------------------------
           // Evidence Requirements
           //----------------------------------------
-
           if (evidenceRequirements.isNotEmpty) ...[
             const SizedBox(height: 28),
 
             const Text(
               'Evidence you may need',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
 
             const SizedBox(height: 8),
@@ -257,9 +235,7 @@ class QuestionCard extends StatelessWidget {
             ...evidenceRequirements.map(
               (requirement) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: EvidenceRequirementCard(
-                  requirement: requirement,
-                ),
+                child: EvidenceRequirementCard(requirement: requirement),
               ),
             ),
 
@@ -268,25 +244,18 @@ class QuestionCard extends StatelessWidget {
             //----------------------------------------
             // Evidence Coverage
             //----------------------------------------
-
-            _buildEvidenceCoverage(
-              evidenceCompleteness,
-            ),
+            _buildEvidenceCoverage(evidenceCompleteness),
           ],
 
           //----------------------------------------
           // Supplied Evidence
           //----------------------------------------
-
           if (suppliedEvidence.isNotEmpty) ...[
             const SizedBox(height: 28),
 
             const Text(
               'Evidence provided',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
 
             const SizedBox(height: 8),
@@ -311,9 +280,7 @@ class QuestionCard extends StatelessWidget {
                       ? null
                       : (status) {
                           onEvidenceStatusChange!(
-                            evidence.copyWith(
-                              status: status,
-                            ),
+                            evidence.copyWith(status: status),
                           );
                         },
                   onDelete: onEvidenceDelete == null
@@ -329,17 +296,13 @@ class QuestionCard extends StatelessWidget {
           //----------------------------------------
           // Add Evidence
           //----------------------------------------
-
           const SizedBox(height: 18),
 
-          AddEvidenceButton(
-            onPressed: () => _handleAddEvidence(context),
-          ),
+          AddEvidenceButton(onPressed: () => _handleAddEvidence(context)),
 
           //----------------------------------------
           // Learn More Card
           //----------------------------------------
-
           if (question.whyItMatters != null) ...[
             const SizedBox(height: 28),
 
@@ -348,14 +311,23 @@ class QuestionCard extends StatelessWidget {
               onTap: () {
                 HSInfoBottomSheet.show(
                   context,
-                  title: question.title,
-                  category: question.category.displayName,
-                  whyItMatters: question.whyItMatters!,
-                  impact: question.impact ?? '',
-                  priority:
-                      question.priority?.name.toUpperCase() ?? '',
+                  title: AssessmentTranslations(
+                    AppLocaleController.instance.languageCode,
+                  ).questionTitle(question),
+                  category: AssessmentTranslations(
+                    AppLocaleController.instance.languageCode,
+                  ).categoryName(question.category),
+                  whyItMatters: AssessmentContentTranslations(
+                    AppLocaleController.instance.languageCode,
+                  ).whyItMatters(question),
+                  impact: AssessmentContentTranslations(
+                    AppLocaleController.instance.languageCode,
+                  ).impact(question),
+                  priority: question.priority?.name.toUpperCase() ?? '',
                   phiGain: question.potentialPHIGain ?? 0,
-                  evidence: question.requiredEvidence,
+                  evidence: AssessmentContentTranslations(
+                    AppLocaleController.instance.languageCode,
+                  ).requiredEvidence(question),
                 );
               },
               child: Container(
@@ -363,9 +335,7 @@ class QuestionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xFFE2E8F0),
-                  ),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: const Row(
                   children: [
@@ -381,8 +351,7 @@ class QuestionCard extends StatelessWidget {
                     SizedBox(width: 14),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Learn why this matters',
@@ -394,18 +363,12 @@ class QuestionCard extends StatelessWidget {
                           SizedBox(height: 4),
                           Text(
                             'Understand the impact on your Property Health Score',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
                           ),
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Colors.grey,
-                    ),
+                    Icon(Icons.chevron_right, color: Colors.grey),
                   ],
                 ),
               ),

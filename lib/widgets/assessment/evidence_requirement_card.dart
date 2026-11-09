@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 
 import '../../core/evidence/evidence_requirement.dart';
+import '../../core/localization/app_locale_controller.dart';
 
 class EvidenceRequirementCard extends StatelessWidget {
   final EvidenceRequirement requirement;
@@ -26,24 +28,64 @@ class EvidenceRequirementCard extends StatelessWidget {
     return Icons.edit_note_outlined;
   }
 
-  String get _typeLabel {
+  String _typeLabel(String languageCode) {
+    const labels = <String, Map<String, String>>{
+      'en': {
+        'document': 'Document',
+        'photograph': 'Photograph',
+        'video': 'Video',
+        'manual': 'Manual',
+      },
+      'hi': {
+        'document': 'दस्तावेज़',
+        'photograph': 'फोटोग्राफ',
+        'video': 'वीडियो',
+        'manual': 'मैन्युअल',
+      },
+      'kn': {
+        'document': 'ದಾಖಲೆ',
+        'photograph': 'ಛಾಯಾಚಿತ್ರ',
+        'video': 'ವೀಡಿಯೊ',
+        'manual': 'ಕೈಯಾರೆ ನಮೂದಿಸಿದ ಮಾಹಿತಿ',
+      },
+      'te': {
+        'document': 'పత్రం',
+        'photograph': 'ఫోటో',
+        'video': 'వీడియో',
+        'manual': 'మాన్యువల్',
+      },
+      'ta': {
+        'document': 'ஆவணம்',
+        'photograph': 'புகைப்படம்',
+        'video': 'காணொளி',
+        'manual': 'கைமுறை',
+      },
+      'ml': {
+        'document': 'രേഖ',
+        'photograph': 'ഫോട്ടോ',
+        'video': 'വീഡിയോ',
+        'manual': 'മാനുവൽ',
+      },
+    };
+
+    final languageLabels = labels[languageCode] ?? labels['en']!;
     if (requirement.isDocument) {
-      return 'Document';
+      return languageLabels['document']!;
     }
-
     if (requirement.isPhotograph) {
-      return 'Photograph';
+      return languageLabels['photograph']!;
     }
-
     if (requirement.isVideo) {
-      return 'Video';
+      return languageLabels['video']!;
     }
-
-    return 'Manual';
+    return languageLabels['manual']!;
   }
 
   @override
   Widget build(BuildContext context) {
+    final languageCode =
+        AppLocaleController.instance.languageCode;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -70,9 +112,7 @@ class EvidenceRequirementCard extends StatelessWidget {
               size: 21,
             ),
           ),
-
           const SizedBox(width: 14),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,11 +125,9 @@ class EvidenceRequirementCard extends StatelessWidget {
                     height: 1.3,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text(
-                  _typeLabel,
+                  _typeLabel(languageCode),
                   style: const TextStyle(
                     fontSize: 13,
                     color: Colors.blueGrey,

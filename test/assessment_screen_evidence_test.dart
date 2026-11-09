@@ -39,11 +39,8 @@ void main() {
 
     final addEvidenceButton = find.byType(AddEvidenceButton);
 
-    await tester.scrollUntilVisible(
-      addEvidenceButton,
-      300,
-      scrollable: find.byType(Scrollable),
-    );
+    await tester.ensureVisible(addEvidenceButton);
+    await tester.pumpAndSettle();
 
     await tester.tap(addEvidenceButton);
     await tester.pumpAndSettle();

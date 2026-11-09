@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/engine/engine.dart';
 import '../../core/engine/models/property_health_result.dart';
+import '../../features/property/state/property_state.dart';
+import '../../features/report/services/current_engine_report_adapter.dart';
 import '../../core/evidence/assessment_evidence_summary.dart';
 import '../../core/evidence/assessment_evidence_summary_builder.dart';
 import '../../core/evidence/evidence_repository.dart';
@@ -103,6 +105,35 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
         await _assessmentEvidenceContextService.buildForQuestions(
       phsQuestions,
     );
+
+    // Create a report only when the current engine has a final six-category
+    // score and a property is selected. Do not run a second scoring engine.
+    final selectedProperty = PropertyState.instance.selectedProperty;
+
+    debugPrint(
+      'HOMESURE_REPORT_DIAGNOSTIC: '
+      'finalScore=${result.hasFinalScore}, '
+      'evaluatedCategories=${result.evaluatedCategoryCount}/'
+      '${result.totalCategoryCount}, '
+      'answerCount=${state.answers.length}, '
+      'propertySelected=${selectedProperty != null}',
+    );
+
+    if (result.hasFinalScore && selectedProperty != null) {
+      final report = CurrentEngineReportAdapter.build(
+        property: selectedProperty,
+        result: result,
+      );
+      state.saveReport(report);
+      debugPrint(
+        'HOMESURE_REPORT_DIAGNOSTIC: '
+        'reportSaved=${state.latestReport != null}',
+      );
+    } else {
+      debugPrint(
+        'HOMESURE_REPORT_DIAGNOSTIC: reportNotSaved',
+      );
+    }
 
     final integration = PHSAssessmentEvidenceIntegration(
       healthResult: result,

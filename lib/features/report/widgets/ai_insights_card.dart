@@ -1,43 +1,37 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../widgets/common/app_card.dart';
 import '../../../widgets/common/app_section_header.dart';
-import '../../../widgets/common/app_status_chip.dart';
 import '../models/property_health_report.dart';
+import '../../surebot/services/property_health_explainer.dart';
 
 class AIInsightsCard extends StatelessWidget {
   final PropertyHealthReport report;
 
-  const AIInsightsCard({
-    super.key,
-    required this.report,
-  });
+  const AIInsightsCard({super.key, required this.report});
 
   @override
   Widget build(BuildContext context) {
-    final int currentScore = report.assessment.overallScore.round();
-
-    final int potentialScore = ((currentScore +
-            report.recommendations.fold<int>(
-              0,
-              (sum, item) => sum + item.expectedScoreIncrease,
-            ))
-        .clamp(0, 100))
-        .toInt();
+    final l10n = AppLocalizations.of(context);
+    final explanation = const PropertyHealthExplainer().explain(
+      report,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
+    final currentScore = explanation.score.round();
 
     return AppCard(
       type: AppCardType.elevated,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppSectionHeader(
-            title: "SureBot AI",
-            subtitle:
-                "AI-generated insights based on your Property Health Assessment",
+          AppSectionHeader(
+            title: l10n.sureBotExplainerTitle,
+            subtitle: l10n.sureBotExplainerSubtitle,
           ),
-
+          const SizedBox(height: AppSpacing.md),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -48,112 +42,119 @@ class AIInsightsCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
                     CircleAvatar(
                       radius: 22,
-                      child: Icon(Icons.smart_toy),
+                      child: Icon(Icons.smart_toy_outlined),
                     ),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        "SureBot Analysis",
+                        l10n.assessmentExplanation,
                         style: AppTextStyles.title,
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: AppSpacing.lg),
-
-                Text(
-                  "Based on your assessment, your property has a solid foundation. Completing the recommended actions below can significantly improve your Property Health Score.",
-                  style: AppTextStyles.body,
-                ),
-
+                Text(explanation.summary, style: AppTextStyles.body),
                 const SizedBox(height: AppSpacing.lg),
-
                 Row(
                   children: [
                     Expanded(
                       child: _ScoreCard(
-                        title: "Current Score",
-                        value: "$currentScore",
+                        title: l10n.currentScore,
+                        value: '$currentScore/100',
                       ),
                     ),
-
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.arrow_forward),
-                    ),
-
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _ScoreCard(
-                        title: "Potential Score",
-                        value: "$potentialScore",
+                        title: l10n.categories,
+                        value: '${explanation.categories.length}',
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                const AppStatusChip(
-                  label: "94% Confidence",
-                  status: StatusType.success,
-                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(l10n.ruleBasedDisclaimer, style: AppTextStyles.bodySmall),
               ],
             ),
           ),
-
           const SizedBox(height: AppSpacing.xl),
-
-          const Text(
-            "Key Insights",
-            style: AppTextStyles.title,
-          ),
-
+          Text(l10n.categoryExplanations, style: AppTextStyles.title),
           const SizedBox(height: AppSpacing.md),
-
-          if (report.aiInsights.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Text(
-                "No AI insights available.",
-                style: AppTextStyles.body,
-              ),
-            )
+          if (explanation.categories.isEmpty)
+            Text(l10n.noCategoryResults, style: AppTextStyles.body)
           else
-            ...report.aiInsights.map(
-              (insight) => Padding(
-                padding: const EdgeInsets.only(
-                  bottom: AppSpacing.md,
-                ),
-                child: _InsightTile(
-                  insight: insight,
+            ...explanation.categories.map(
+              (category) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _DetailTile(
+                  title: '${category.name} · ${category.score.round()}%',
+                  description: category.explanation,
+                  icon: Icons.analytics_outlined,
                 ),
               ),
             ),
-
           const Divider(height: 40),
-
-          const Text(
-            "Recommended Next Action",
-            style: AppTextStyles.title,
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          Text(
-            report.recommendations.isEmpty
-                ? "No further action required."
-                : report.recommendations.first.title,
-            style: AppTextStyles.body,
+          Text(l10n.risksToReview, style: AppTextStyles.title),
+          const SizedBox(height: AppSpacing.md),
+          if (explanation.risks.isEmpty)
+            Text(l10n.noRisksListed, style: AppTextStyles.body)
+          else
+            ...explanation.risks.map(
+              (risk) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _DetailTile(
+                  title: l10n.assessmentRisk,
+                  description: risk,
+                  icon: Icons.warning_amber_outlined,
+                ),
+              ),
+            ),
+          const Divider(height: 40),
+          Text(l10n.recommendedNextActions, style: AppTextStyles.title),
+          const SizedBox(height: AppSpacing.md),
+          if (explanation.priorityActions.isEmpty)
+            Text(l10n.noRecommendationsListed, style: AppTextStyles.body)
+          else
+            ...explanation.priorityActions.map(
+              (action) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _DetailTile(
+                  title: l10n.recommendedAction,
+                  description: action,
+                  icon: Icons.checklist_outlined,
+                ),
+              ),
+            ),
+          const Divider(height: 40),
+          Text(l10n.evidenceToFollowUp, style: AppTextStyles.title),
+          const SizedBox(height: AppSpacing.md),
+          if (explanation.missingEvidence.isEmpty)
+            Text(l10n.noMissingDocuments, style: AppTextStyles.body)
+          else
+            ...explanation.missingEvidence.map(
+              (document) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _DetailTile(
+                  title: l10n.evidenceCheck,
+                  description: document,
+                  icon: Icons.description_outlined,
+                ),
+              ),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(explanation.disclaimer, style: AppTextStyles.bodySmall),
           ),
         ],
       ),
@@ -161,16 +162,21 @@ class AIInsightsCard extends StatelessWidget {
   }
 }
 
-class _InsightTile extends StatelessWidget {
-  final String insight;
+class _DetailTile extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
 
-  const _InsightTile({
-    required this.insight,
+  const _DetailTile({
+    required this.title,
+    required this.description,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
@@ -179,17 +185,16 @@ class _InsightTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.lightbulb,
-            color: Colors.amber,
-          ),
-
+          Icon(icon, color: Colors.blueGrey),
           const SizedBox(width: 12),
-
           Expanded(
-            child: Text(
-              insight,
-              style: AppTextStyles.body,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.title),
+                const SizedBox(height: 4),
+                Text(description, style: AppTextStyles.body),
+              ],
             ),
           ),
         ],
@@ -202,10 +207,7 @@ class _ScoreCard extends StatelessWidget {
   final String title;
   final String value;
 
-  const _ScoreCard({
-    required this.title,
-    required this.value,
-  });
+  const _ScoreCard({required this.title, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -217,16 +219,12 @@ class _ScoreCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            value,
-            style: AppTextStyles.h2,
-          ),
-
+          Text(value, style: AppTextStyles.h2, textAlign: TextAlign.center),
           const SizedBox(height: 4),
-
           Text(
             title,
             style: AppTextStyles.bodySmall,
+            textAlign: TextAlign.center,
           ),
         ],
       ),

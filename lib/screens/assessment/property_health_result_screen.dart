@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/engine/models/property_health_result.dart';
+import '../../features/report/screens/property_health_report_screen.dart';
+import '../../state/assessment_state.dart';
 import '../../core/evidence/assessment_evidence_summary.dart';
 import '../../core/phs/phs_categories.dart';
 import '../../widgets/common/app_button.dart';
@@ -225,6 +227,26 @@ class PropertyHealthResultScreen extends StatelessWidget {
                 ),
 
               const SizedBox(height: 40),
+
+              if (result.hasFinalScore &&
+                  AssessmentState.instance.latestReport != null) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.description_outlined),
+                    label: const Text('View Full Property Report'),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              const PropertyHealthReportScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // -------------------------------------------------
               // Dashboard

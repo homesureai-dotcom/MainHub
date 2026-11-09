@@ -12,31 +12,6 @@ class PropertyCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Widget _scoreChip(String label, int score) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Text(
-            "$score",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -60,11 +35,10 @@ class PropertyCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Row(
               children: [
-
                 Container(
                   width: 64,
                   height: 64,
@@ -78,15 +52,11 @@ class PropertyCard extends StatelessWidget {
                     color: Color(0xff2563EB),
                   ),
                 ),
-
                 const SizedBox(width: 16),
-
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       Text(
                         property.name,
                         style: const TextStyle(
@@ -94,85 +64,69 @@ class PropertyCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 4),
-
                       Text(
                         property.builder,
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
                       ),
+                      if (property.locality.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          property.locality,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ],
-                  ),
-                ),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff2563EB),
-                    borderRadius:
-                        BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    "${property.overallScore}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 22),
-
-            _scoreChip(
-              "Legal",
-              property.legalScore,
-            ),
-
-            _scoreChip(
-              "Utilities",
-              property.utilityScore,
-            ),
-
-            _scoreChip(
-              "Safety",
-              property.safetyScore,
-            ),
-
-            _scoreChip(
-              "Builder",
-              property.builderScore,
-            ),
-
-            const SizedBox(height: 18),
-
-            if (property.verified)
-              Row(
-                children: const [
-
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xffFFF7ED),
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: const Color(0xffFED7AA),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Icon(
-                    Icons.verified,
-                    color: Colors.green,
-                    size: 18,
+                    Icons.pending_outlined,
+                    color: Color(0xffC2410C),
+                    size: 17,
                   ),
-
                   SizedBox(width: 8),
-
                   Text(
-                    "Verified Property",
+                    'Not yet assessed by HomeSureAI',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Color(0xffC2410C),
                       fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Select this project to view its details and start an assessment.',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
       ),

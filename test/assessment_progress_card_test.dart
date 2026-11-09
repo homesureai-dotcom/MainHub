@@ -37,7 +37,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('18'), findsOneWidget);
-        expect(find.text('of 33 questions'), findsOneWidget);
+        expect(find.text('of 33 questions completed'), findsOneWidget);
         expect(find.text('55%'), findsOneWidget);
         expect(
           find.text('5 of 6 categories started'),
@@ -93,7 +93,7 @@ void main() {
 
         expect(find.text('33'), findsOneWidget);
         expect(
-          find.text('of 33 questions'),
+          find.text('of 33 questions completed'),
           findsOneWidget,
         );
         expect(find.text('100%'), findsOneWidget);

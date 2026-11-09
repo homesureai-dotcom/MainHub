@@ -5,6 +5,7 @@ import '../features/dashboard/coordinators/dashboard_data_coordinator.dart';
 import '../features/dashboard/models/dashboard_data.dart';
 import '../features/dashboard/models/dashboard_priority.dart';
 import '../features/property/state/property_state.dart';
+import '../features/property_submission/services/property_submission_service.dart';
 import '../features/surebot/builders/surebot_context_builder.dart';
 import '../screens/assessment/assessment_screen.dart';
 import '../screens/assessment/evidence_details_screen.dart';
@@ -23,6 +24,7 @@ import '../widgets/dashboard/quick_action_grid.dart';
 import '../widgets/dashboard/recent_alerts_card.dart';
 import '../widgets/dashboard/todays_priorities_card.dart';
 import '../widgets/hero_score_card.dart';
+import 'onboarding/property_search_screen.dart';
 
 class HomeScreenV2 extends StatefulWidget {
   const HomeScreenV2({super.key});
@@ -43,6 +45,39 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
   DashboardData? _dashboardData;
   bool _isLoading = true;
+  bool _dashboardSessionRestoreAttempted = false;
+
+  Future<void> _restoreDashboardSessionIfNeeded() async {
+    if (_dashboardSessionRestoreAttempted) return;
+    _dashboardSessionRestoreAttempted = true;
+
+    // Do not replace an assessment already active in this app session.
+    if (assessmentState.hasActiveSession) return;
+
+    try {
+      final candidate = await assessmentState.loadLatestInProgressCandidate();
+
+      if (!mounted || candidate == null) return;
+
+      final submissionId = candidate.submissionId?.trim();
+      if (submissionId != null && submissionId.isNotEmpty) {
+        // A saved session is not proof that the property remains approved.
+        final approved = await PropertySubmissionService().isSubmissionApproved(
+          submissionId,
+        );
+
+        if (!mounted || !approved) return;
+      }
+
+      await assessmentState.restoreInProgress(
+        propertyId: candidate.propertyId,
+        submissionId: candidate.submissionId,
+      );
+    } catch (error) {
+      // Keep the dashboard usable if saved progress cannot be checked.
+      debugPrint('HOMESURE_DASHBOARD_RESTORE_ERROR: $error');
+    }
+  }
 
   @override
   void initState() {
@@ -75,6 +110,10 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   }
 
   Future<void> _loadDashboardData() async {
+    await _restoreDashboardSessionIfNeeded();
+
+    if (!mounted) return;
+
     final data = await _dashboardCoordinator.build();
 
     if (!mounted) {
@@ -96,9 +135,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => EvidenceDetailsScreen(
-          summary: summary,
-        ),
+        builder: (_) => EvidenceDetailsScreen(summary: summary),
       ),
     );
   }
@@ -121,9 +158,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => SureBotScreen(
-          sureBotContext: sureBotContext,
-        ),
+        builder: (_) => SureBotScreen(sureBotContext: sureBotContext),
       ),
     );
   }
@@ -154,12 +189,17 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     // Timeline screen is not implemented yet.
   }
 
+  void _findProperty() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const PropertySearchScreen()),
+    );
+  }
+
   void _continueAssessment() {
-    Navigator.of(
-      context,
-    ).push(
+    Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => const AssessmentScreen(),
+        builder: (_) =>
+            AssessmentScreen(submissionId: assessmentState.submissionId),
       ),
     );
   }
@@ -167,9 +207,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   void _openPriorityDetail(DashboardPriority priority) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PriorityDetailScreen(
-          priority: priority,
-        ),
+        builder: (_) => PriorityDetailScreen(priority: priority),
       ),
     );
   }
@@ -201,9 +239,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFDBEAFE),
-        ),
+        border: Border.all(color: const Color(0xFFDBEAFE)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -245,10 +281,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                     SizedBox(height: 4),
                     Text(
                       'Continue your Property Health Assessment',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                      ),
+                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -295,10 +328,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                 ? '$remainingQuestions '
                       '${remainingQuestions == 1 ? 'question' : 'questions'} remaining'
                 : 'Assessment ready to complete',
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF64748B),
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -317,22 +347,84 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final data = _dashboardData;
 
     if (data == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text(
-            'No property selected.',
-            style: TextStyle(
-              fontSize: 18,
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.apartment_rounded,
+                      size: 64,
+                      color: Color(0xFF64748B),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Let’s get your property started',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Choose your apartment to explore its details '
+                      'and begin your HomeSureAI journey.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF64748B),
+                        height: 1.5,
+                      ),
+                    ),
+                    if (assessmentState.hasActiveSession) ...[
+                      const SizedBox(height: 24),
+                      _buildAssessmentResumeCard(),
+                      const SizedBox(height: 24),
+                      AssessmentProgressCard(
+                        completedQuestions: assessmentState
+                            .assessmentProgress
+                            .answeredQuestions,
+                        totalQuestions:
+                            assessmentState.assessmentProgress.totalQuestions,
+                        completionPercentage: assessmentState
+                            .assessmentProgress
+                            .completionPercentage
+                            .toDouble(),
+                        completedCategories: assessmentState
+                            .assessmentProgress
+                            .completedCategoryCount,
+                        totalCategories: assessmentState
+                            .assessmentProgress
+                            .totalCategoryCount,
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _findProperty,
+                        icon: const Icon(Icons.search),
+                        label: const Text('Find a Property'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -349,18 +441,11 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            24,
-            20,
-            24,
-            32,
-          ),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const GreetingHeader(
-                userName: 'Vinod',
-              ),
+              const GreetingHeader(userName: 'Vinod'),
               const SizedBox(height: 24),
               PropertySelectorCard(
                 propertyName: property.name,
@@ -376,31 +461,25 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                 issueCount: property.compliance.issueCount,
                 onPressed: _openCompliance,
               ),
-              if (data.healthResult != null) ...[
-                const SizedBox(height: 24),
-                PropertyHealthBreakdownCard(
-                  result: data.healthResult!,
-                ),
-              ],
-              const SizedBox(height: 24),
-              _buildAssessmentResumeCard(),
-              if (assessmentState.hasActiveSession)
-                const SizedBox(height: 24),
-              AssessmentProgressCard(
-                completedQuestions: data.evaluatedQuestionCount,
-                totalQuestions: data.totalQuestionCount,
-                completionPercentage:
-                    data.questionCompletionPercentage,
-                completedCategories:
-                    data.evaluatedCategoryCount,
-                totalCategories:
-                    data.totalCategoryCount,
-              ),
               const SizedBox(height: 24),
               TodaysPrioritiesCard(
                 data: data,
                 onPriorityTap: _openPriorityDetail,
               ),
+              const SizedBox(height: 24),
+              _buildAssessmentResumeCard(),
+              if (assessmentState.hasActiveSession) const SizedBox(height: 24),
+              AssessmentProgressCard(
+                completedQuestions: data.evaluatedQuestionCount,
+                totalQuestions: data.totalQuestionCount,
+                completionPercentage: data.questionCompletionPercentage,
+                completedCategories: data.evaluatedCategoryCount,
+                totalCategories: data.totalCategoryCount,
+              ),
+              if (data.healthResult != null) ...[
+                const SizedBox(height: 24),
+                PropertyHealthBreakdownCard(result: data.healthResult!),
+              ],
               const SizedBox(height: 24),
               EvidenceSnapshotCard(
                 data: data,
@@ -416,9 +495,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
               const SizedBox(height: 32),
               const RecentAlertsCard(),
               const SizedBox(height: 32),
-              AIInsightsCard(
-                data: data,
-              ),
+              AIInsightsCard(data: data),
             ],
           ),
         ),

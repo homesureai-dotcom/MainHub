@@ -1,0 +1,399 @@
+[
+  {
+    "id": "LEGAL_OC",
+    "title": "Is the Occupancy Certificate (OC) available?",
+    "helpText": "Verify that the competent authority has issued an Occupancy Certificate for the property/project.",
+    "whyItMatters": "An Occupancy Certificate indicates that the completed development has received the required occupancy approval.",
+    "impact": "Missing or unavailable occupancy approval can create significant legal, financing, resale, and possession-related risk.",
+    "requiredEvidence": [
+      "Occupancy Certificate",
+      "OC approval/reference details"
+    ]
+  },
+  {
+    "id": "LEGAL_SD",
+    "title": "Is the Sale Deed registered?",
+    "helpText": "Verify that the property ownership document has been executed and registered with the appropriate authority.",
+    "whyItMatters": "A registered Sale Deed is a key document establishing legal ownership of the property.",
+    "impact": "An unregistered or incomplete ownership document can create ownership and transaction risks.",
+    "requiredEvidence": [
+      "Registered Sale Deed",
+      "Registration details"
+    ]
+  },
+  {
+    "id": "LEGAL_KHATA",
+    "title": "Is the property Khata available and correctly recorded?",
+    "helpText": "Verify that the applicable Khata/e-Khata record exists and reflects the property correctly.",
+    "whyItMatters": "A valid property record supports taxation, municipal administration, financing, and future transactions.",
+    "impact": "Incorrect, incomplete, or unavailable Khata records can create administrative and transaction-related risk.",
+    "requiredEvidence": [
+      "Khata certificate",
+      "Khata extract",
+      "e-Khata record"
+    ]
+  },
+  {
+    "id": "LEGAL_EC",
+    "title": "Is the Encumbrance Certificate (EC) available?",
+    "helpText": "Verify the availability of an Encumbrance Certificate covering the relevant property period.",
+    "whyItMatters": "An EC provides information about registered transactions or encumbrances reflected in the relevant records.",
+    "impact": "Missing or incomplete EC documentation can make ownership due diligence less complete.",
+    "requiredEvidence": [
+      "Encumbrance Certificate",
+      "Relevant EC period"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_CRACKS",
+    "title": "Are there no significant structural cracks?",
+    "helpText": "Inspect visible walls, slabs, beams, columns, balconies, and other relevant structural areas for significant cracks.",
+    "whyItMatters": "Significant cracks may indicate construction defects, movement, water ingress, or other issues requiring professional assessment.",
+    "impact": "Unresolved significant cracks can result in safety concerns, property damage, and future repair costs.",
+    "requiredEvidence": [
+      "Inspection photographs",
+      "Builder inspection report where applicable",
+      "Structural engineer report for suspected structural cracks"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_LEAKAGE",
+    "title": "Is the property free from significant water leakage?",
+    "helpText": "Check ceilings, walls, bathrooms, balconies, utility areas, parking areas, and other relevant locations for water leakage.",
+    "whyItMatters": "Water leakage can damage finishes, electrical systems, structures, and personal property.",
+    "impact": "Persistent leakage can result in deterioration, mould, repair costs, and disputes over responsibility.",
+    "requiredEvidence": [
+      "Inspection photographs",
+      "Leakage complaint records",
+      "Builder rectification records where applicable"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_DAMPNESS",
+    "title": "Is the property free from significant dampness?",
+    "helpText": "Inspect walls, ceilings, corners, bathrooms, balconies, and other areas for persistent dampness or moisture marks.",
+    "whyItMatters": "Dampness may indicate water ingress, plumbing problems, waterproofing failure, or ventilation issues.",
+    "impact": "Persistent dampness can deteriorate finishes and contribute to recurring maintenance problems.",
+    "requiredEvidence": [
+      "Inspection photographs",
+      "Moisture inspection where applicable",
+      "Rectification records"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_FLOORING",
+    "title": "Is the flooring quality satisfactory?",
+    "helpText": "Check flooring for cracks, hollow tiles, uneven surfaces, damaged tiles, or significant workmanship defects.",
+    "whyItMatters": "Flooring defects can affect usability, safety, appearance, and long-term maintenance.",
+    "impact": "Unresolved flooring defects can lead to replacement costs and recurring maintenance issues.",
+    "requiredEvidence": [
+      "Inspection photographs",
+      "Snag list",
+      "Rectification records"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_PAINT",
+    "title": "Is the paint and surface finish quality satisfactory?",
+    "helpText": "Check internal and external painted surfaces for peeling, patchiness, cracks, stains, or poor workmanship.",
+    "whyItMatters": "Paint and surface finishes provide protection as well as contributing to property condition and appearance.",
+    "impact": "Poor finishes can indicate workmanship issues and may require premature repainting or repair.",
+    "requiredEvidence": [
+      "Inspection photographs",
+      "Snag list",
+      "Warranty/rectification records where applicable"
+    ]
+  },
+  {
+    "id": "CONSTRUCTION_WATERPROOFING",
+    "title": "Is waterproofing satisfactory in critical areas?",
+    "helpText": "Verify waterproofing performance in bathrooms, balconies, terraces, wet areas, basements, and other relevant locations.",
+    "whyItMatters": "Effective waterproofing protects the building from water ingress and associated deterioration.",
+    "impact": "Waterproofing failures can cause leakage, dampness, structural deterioration, and expensive repairs.",
+    "requiredEvidence": [
+      "Waterproofing warranty",
+      "Inspection records",
+      "Rectification records"
+    ]
+  },
+  {
+    "id": "UTILITY_BESCOM",
+    "title": "Is the BESCOM electricity connection and metering operational?",
+    "helpText": "Verify electricity connection, individual/common metering, and relevant BESCOM documentation where applicable.",
+    "whyItMatters": "Reliable electricity supply and appropriate metering are essential for normal property operation.",
+    "impact": "Incomplete electrical infrastructure or documentation can create operational and financial risk.",
+    "requiredEvidence": [
+      "BESCOM documents",
+      "Meter details",
+      "Connection records"
+    ]
+  },
+  {
+    "id": "UTILITY_BWSSB",
+    "title": "Is the BWSSB water and sewerage connection operational?",
+    "helpText": "Verify applicable water and sewerage connections, approvals, billing arrangements, and supporting records.",
+    "whyItMatters": "Reliable water and sewerage infrastructure is fundamental to property habitability and long-term operation.",
+    "impact": "Incomplete or unavailable water and sewerage arrangements can result in operational, financial, and compliance risks.",
+    "requiredEvidence": [
+      "BWSSB documents",
+      "Connection details",
+      "Demand/payment records where applicable"
+    ]
+  },
+  {
+    "id": "UTILITY_STP",
+    "title": "Is the Sewage Treatment Plant (STP) operational and maintained?",
+    "helpText": "Verify that the STP is operational, maintained, and supported by relevant operating or maintenance records.",
+    "whyItMatters": "Proper sewage treatment is important for environmental compliance and community infrastructure.",
+    "impact": "Poorly maintained or non-operational STP infrastructure can create environmental, regulatory, and maintenance risks.",
+    "requiredEvidence": [
+      "STP operation records",
+      "Maintenance records",
+      "Relevant test reports"
+    ]
+  },
+  {
+    "id": "UTILITY_WTP",
+    "title": "Is the Water Treatment Plant (WTP) operational where applicable?",
+    "helpText": "Verify WTP operation, maintenance, and relevant water-quality records where a WTP forms part of the property infrastructure.",
+    "whyItMatters": "Appropriate water treatment infrastructure supports reliable and suitable water availability.",
+    "impact": "Non-operational or poorly maintained treatment infrastructure can affect water quality and availability.",
+    "requiredEvidence": [
+      "WTP operation records",
+      "Water-quality reports",
+      "Maintenance records"
+    ]
+  },
+  {
+    "id": "UTILITY_DG",
+    "title": "Is DG backup operational where applicable?",
+    "helpText": "Verify diesel generator backup availability, operational status, maintenance, and relevant records where applicable.",
+    "whyItMatters": "Backup power can support critical common-area infrastructure during electricity interruptions.",
+    "impact": "Non-operational backup power may affect lifts, pumps, security systems, and other common services during outages.",
+    "requiredEvidence": [
+      "DG maintenance records",
+      "AMC documents",
+      "Operational test records"
+    ]
+  },
+  {
+    "id": "UTILITY_LIFTS",
+    "title": "Are the lifts operational and appropriately maintained?",
+    "helpText": "Verify lift operation, maintenance arrangements, inspection records, and applicable certifications.",
+    "whyItMatters": "Lift reliability and maintenance are important for accessibility, convenience, and resident safety.",
+    "impact": "Poorly maintained lifts can result in service interruptions and safety concerns.",
+    "requiredEvidence": [
+      "Lift maintenance records",
+      "AMC documents",
+      "Inspection/certification records where applicable"
+    ]
+  },
+  {
+    "id": "UTILITY_WATER",
+    "title": "Is adequate water availability maintained?",
+    "helpText": "Assess whether the property has reliable water availability through its applicable water sources and storage systems.",
+    "whyItMatters": "Reliable water availability is essential for everyday residential use and community operations.",
+    "impact": "Frequent water shortages can create significant operational and resident-management challenges.",
+    "requiredEvidence": [
+      "Water availability records",
+      "Water source details",
+      "Water-quality reports where applicable"
+    ]
+  },
+  {
+    "id": "SAFETY_FIRE_NOC",
+    "title": "Is the Fire NOC available and valid where applicable?",
+    "helpText": "Verify the applicable Fire Department approval/NOC and supporting compliance records.",
+    "whyItMatters": "Fire-safety approvals and compliance arrangements are important for resident safety and statutory requirements.",
+    "impact": "Missing or unclear fire approvals can create significant safety and compliance risk.",
+    "requiredEvidence": [
+      "Fire NOC",
+      "Fire Department approval documents",
+      "Renewal/compliance records where applicable"
+    ]
+  },
+  {
+    "id": "SAFETY_EMERGENCY_EXITS",
+    "title": "Are emergency exits accessible and clearly identified?",
+    "helpText": "Check that designated emergency exits are accessible, unobstructed, and appropriately identified.",
+    "whyItMatters": "Accessible emergency exits support safe evacuation during fires and other emergencies.",
+    "impact": "Blocked, unclear, or inaccessible exits can increase evacuation risk.",
+    "requiredEvidence": [
+      "Site inspection photographs",
+      "Emergency evacuation plan",
+      "Fire-safety inspection records where applicable"
+    ]
+  },
+  {
+    "id": "SAFETY_FIRE_SYSTEM",
+    "title": "Is the fire-fighting system operational and maintained?",
+    "helpText": "Verify fire pumps, hydrants, alarms, extinguishers, sprinklers, and other applicable fire-fighting systems.",
+    "whyItMatters": "Operational fire-fighting systems are critical to responding to fire emergencies.",
+    "impact": "Non-operational or poorly maintained fire systems can materially increase safety risk.",
+    "requiredEvidence": [
+      "Fire system maintenance records",
+      "Inspection reports",
+      "AMC/service records"
+    ]
+  },
+  {
+    "id": "SAFETY_CCTV",
+    "title": "Is CCTV coverage operational in relevant common areas?",
+    "helpText": "Verify that installed CCTV systems cover relevant common areas and are operational where applicable.",
+    "whyItMatters": "CCTV can support incident investigation, monitoring, and community security processes.",
+    "impact": "Non-operational or inadequate CCTV coverage can reduce monitoring capability in common areas.",
+    "requiredEvidence": [
+      "CCTV system details",
+      "Maintenance records",
+      "Sample operational verification"
+    ]
+  },
+  {
+    "id": "SAFETY_SECURITY",
+    "title": "Is an adequate security arrangement in place?",
+    "helpText": "Assess whether the property has documented security arrangements appropriate to the community and property type.",
+    "whyItMatters": "Defined security procedures can help manage access, incidents, visitors, and common-area safety.",
+    "impact": "Weak or undocumented security arrangements may increase operational and resident-safety risks.",
+    "requiredEvidence": [
+      "Security contract",
+      "Security procedures",
+      "Visitor/access records where applicable"
+    ]
+  },
+  {
+    "id": "SAFETY_LIGHTNING",
+    "title": "Is lightning protection installed and maintained where applicable?",
+    "helpText": "Verify the presence and maintenance of applicable lightning protection systems.",
+    "whyItMatters": "Lightning protection can help reduce risks associated with lightning strikes to buildings and infrastructure.",
+    "impact": "Missing or poorly maintained lightning protection may increase exposure to lightning-related damage and safety risks.",
+    "requiredEvidence": [
+      "Lightning protection installation details",
+      "Inspection records",
+      "Maintenance records"
+    ]
+  },
+  {
+    "id": "COMMUNITY_ASSOCIATION",
+    "title": "Has the apartment association been formally formed?",
+    "helpText": "Verify whether the apartment owners association or resident welfare association has been formally established.",
+    "whyItMatters": "A formally established association is important for managing common areas, maintenance, contracts, utilities, and community responsibilities.",
+    "impact": "An unformed association can create gaps in maintenance governance and ownership of common responsibilities.",
+    "requiredEvidence": [
+      "Association registration certificate",
+      "Association formation documents",
+      "Registered bye-laws"
+    ]
+  },
+  {
+    "id": "COMMUNITY_CORPUS",
+    "title": "Is the corpus fund established and documented?",
+    "helpText": "Check whether a corpus or sinking fund has been collected and whether the amount and purpose are documented.",
+    "whyItMatters": "A corpus fund provides financial preparedness for major repairs, replacements, and long-term common-area maintenance.",
+    "impact": "Absence of a documented corpus fund may increase the risk of unexpected maintenance contributions.",
+    "requiredEvidence": [
+      "Corpus fund statement",
+      "Association financial records",
+      "Builder handover or collection records"
+    ]
+  },
+  {
+    "id": "COMMUNITY_AMC",
+    "title": "Are required Annual Maintenance Contracts (AMCs) in place?",
+    "helpText": "Verify whether critical systems and equipment have active maintenance contracts where applicable.",
+    "whyItMatters": "AMCs help ensure critical equipment and infrastructure receive scheduled maintenance and servicing.",
+    "impact": "Missing or expired AMCs can increase equipment downtime, maintenance risk, and unexpected repair costs.",
+    "requiredEvidence": [
+      "AMC agreements",
+      "AMC validity details",
+      "Maintenance schedules"
+    ]
+  },
+  {
+    "id": "COMMUNITY_VENDOR_CONTRACTS",
+    "title": "Are key community vendor contracts documented?",
+    "helpText": "Check whether contracts with important service providers are documented and currently valid.",
+    "whyItMatters": "Clear vendor contracts establish service expectations, responsibilities, pricing, duration, and escalation mechanisms.",
+    "impact": "Undocumented vendor arrangements can create service continuity, accountability, and cost-management risks.",
+    "requiredEvidence": [
+      "Vendor contracts",
+      "Service agreements",
+      "Vendor scope and pricing documents"
+    ]
+  },
+  {
+    "id": "COMMUNITY_COMPLAINTS",
+    "title": "Is there a documented complaint resolution process?",
+    "helpText": "Verify whether residents have a defined process for registering, tracking, escalating, and closing complaints.",
+    "whyItMatters": "A structured complaint process improves accountability and helps ensure resident issues are tracked through resolution.",
+    "impact": "Without a documented process, complaints may be missed, delayed, or difficult to escalate and close.",
+    "requiredEvidence": [
+      "Complaint register or tracking system",
+      "Complaint resolution process",
+      "Escalation mechanism"
+    ]
+  },
+  {
+    "id": "DOCUMENTATION_PROPERTY_TAX",
+    "title": "Are the property tax records available and up to date?",
+    "helpText": "Verify that the applicable property tax records are available and that the property tax status can be confirmed.",
+    "whyItMatters": "Property tax records provide supporting evidence of municipal tax compliance and help maintain an organized property record.",
+    "impact": "Missing or unclear property tax records can create documentation and administrative gaps.",
+    "requiredEvidence": [
+      "Property tax receipt",
+      "Latest tax payment record",
+      "Property tax assessment details where applicable"
+    ]
+  },
+  {
+    "id": "DOCUMENTATION_BESCOM",
+    "title": "Are the BESCOM electricity documents available?",
+    "helpText": "Verify that relevant electricity connection, metering, billing, and supporting BESCOM records are available.",
+    "whyItMatters": "Maintaining electricity documentation helps establish the status of the connection and supports future service or ownership-related requirements.",
+    "impact": "Missing electricity documentation can make utility verification and future issue resolution more difficult.",
+    "requiredEvidence": [
+      "BESCOM connection document",
+      "Latest electricity bill",
+      "Meter details",
+      "Relevant correspondence or approvals where applicable"
+    ]
+  },
+  {
+    "id": "DOCUMENTATION_BWSSB",
+    "title": "Are the BWSSB water and sewerage documents available?",
+    "helpText": "Verify that relevant BWSSB connection, billing, approval, demand, and payment records are available where applicable.",
+    "whyItMatters": "Water and sewerage documentation supports verification of the property infrastructure and ongoing utility arrangements.",
+    "impact": "Missing or incomplete BWSSB records can create utility verification and administrative gaps.",
+    "requiredEvidence": [
+      "BWSSB connection documents",
+      "Latest bills or demand records",
+      "Payment records where applicable",
+      "Relevant approvals or correspondence where applicable"
+    ]
+  },
+  {
+    "id": "DOCUMENTATION_WARRANTY",
+    "title": "Are property and equipment warranty documents available?",
+    "helpText": "Verify that applicable builder, equipment, appliance, waterproofing, and system warranty documents are retained.",
+    "whyItMatters": "Warranty records help owners identify coverage periods, responsible parties, and available remedies when defects or failures occur.",
+    "impact": "Missing warranty documentation can make it harder to establish coverage and pursue eligible rectification or service.",
+    "requiredEvidence": [
+      "Builder warranty documents",
+      "Waterproofing warranty",
+      "Equipment warranty documents",
+      "Warranty terms and validity details"
+    ]
+  },
+  {
+    "id": "DOCUMENTATION_MANUALS",
+    "title": "Are maintenance manuals and relevant property records available?",
+    "helpText": "Verify that applicable operation manuals, maintenance manuals, asset records, handover documents, and service information are retained.",
+    "whyItMatters": "Maintenance manuals and property records help owners and associations operate, maintain, and service building systems correctly.",
+    "impact": "Missing manuals and handover records can increase maintenance dependency, delay troubleshooting, and reduce continuity of property management.",
+    "requiredEvidence": [
+      "Operation and maintenance manuals",
+      "Asset register where applicable",
+      "Handover documentation",
+      "Equipment service records"
+    ]
+  }
+]

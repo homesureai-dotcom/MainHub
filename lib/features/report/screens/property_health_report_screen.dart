@@ -24,24 +24,19 @@ class PropertyHealthReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PropertyHealthReport? report =
-        AssessmentState.instance.latestReport;
-        final executiveSummary = report == null
+    final PropertyHealthReport? report = AssessmentState.instance.latestReport;
+    final executiveSummary = report == null
         ? null
-       : ReportComponentFactory.buildExecutiveSummary(report);
+        : ReportComponentFactory.buildExecutiveSummary(report);
 
     if (report == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text("Property Health Report"),
-        ),
+        appBar: AppBar(title: const Text("Property Health Report")),
         body: const Center(
           child: Text(
             "No Property Health Report found.\nPlease complete an assessment first.",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-            ),
+            style: TextStyle(fontSize: 18),
           ),
         ),
       );
@@ -49,9 +44,7 @@ class PropertyHealthReportScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text("Property Health Report"),
-      ),
+      appBar: AppBar(title: const Text("Property Health Report")),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -61,80 +54,56 @@ class PropertyHealthReportScreen extends StatelessWidget {
               //--------------------------------------------------
               // REPORT COVER
               //--------------------------------------------------
-
-              ReportCoverCard(
-                report: report,
-              ),
+              ReportCoverCard(report: report),
 
               const SizedBox(height: 32),
 
               //--------------------------------------------------
               // REPORT HEADER
               //--------------------------------------------------
-
-              ReportHeader(
-                report: report,
-              ),
+              ReportHeader(report: report),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // PROPERTY DETAILS
               //--------------------------------------------------
-
-              PropertyDetailsCard(
-                report: report,
-              ),
+              PropertyDetailsCard(report: report),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // EXECUTIVE SUMMARY
               //--------------------------------------------------
-
-              ExecutiveSummaryCard(
-               summary: executiveSummary!,
-              ),
+              ExecutiveSummaryCard(summary: executiveSummary!),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // CATEGORY ANALYSIS
               //--------------------------------------------------
-
-              CategoryAnalysisCard(
-                report: report,
-              ),
+              CategoryAnalysisCard(report: report),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // RISK ANALYSIS
               //--------------------------------------------------
-
-              RiskAnalysisCard(
-                report: report,
-              ),
+              RiskAnalysisCard(report: report),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // RECOMMENDATIONS
               //--------------------------------------------------
-
-              RecommendationsCard(
-                report: report,
-              ),
+              RecommendationsCard(report: report),
 
               const SizedBox(height: 24),
 
               //--------------------------------------------------
               // MISSING DOCUMENTS
               //--------------------------------------------------
-
-              MissingDocumentsCard(
-                report: report,
-              ),
+              MissingDocumentsCard(report: report),
 
               const SizedBox(height: 24),
 
@@ -143,44 +112,41 @@ class PropertyHealthReportScreen extends StatelessWidget {
               //--------------------------------------------------
 
               //--------------------------------------------------
-               // AI INSIGHTS
-             //--------------------------------------------------
+              // AI INSIGHTS
+              //--------------------------------------------------
+              AIInsightsCard(report: report),
 
-             AIInsightsCard(
-             report: report,
-               ),
+              const SizedBox(height: 24),
 
-             const SizedBox(height: 24),
-
-                //--------------------------------------------------
+              //--------------------------------------------------
               // REPORT FOOTER
-                //--------------------------------------------------
-
+              //--------------------------------------------------
               ReportFooter(
-             reportId: ReportExportMapper.fromReport(report).reportId,
+                reportId: ReportExportMapper.fromReport(report).reportId,
               ),
 
               //--------------------------------------------------
               // PDF EXPORT
               //--------------------------------------------------
-
               SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-               onPressed: () async {
-              final exportModel =
-                ReportExportMapper.fromReport(report);
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    final exportModel = ReportExportMapper.fromReport(
+                      report,
+                      languageCode: Localizations.localeOf(
+                        context,
+                      ).languageCode,
+                    );
 
-              await ReportExportService.export(
-               exportModel,
-             );
-         },
-            icon: const Icon(Icons.picture_as_pdf),
-            label: const Text(
-             "Download Property Intelligence Report (PDF)",
-             ),
-          ),
-            ),
+                    await ReportExportService.export(exportModel);
+                  },
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text(
+                    "Download Property Intelligence Report (PDF)",
+                  ),
+                ),
+              ),
             ],
           ),
         ),

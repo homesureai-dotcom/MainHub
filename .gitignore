@@ -43,3 +43,53 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Node.js security test harness
+/security-tests/node_modules/
+/security-tests/npm-debug.log*
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+*.keystore
+*service-account*.json
+*credentials*.json
+secrets/
+
+# Local Firebase cache and debug logs
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Local backups - retained on developer machine
+*.bak
+*.backup
+*.old
+*~
+.sprint1_backups/
+
+# HomeSureAI Functions local backups
+*.backup-homesureai
+
+# Node.js dependencies in any project folder
+**/node_modules/
+
+# Local project backups
+/backups/
+
+# Historical editor and test backups
+*.before_*
+*.bak-*
+.gitignore.backup_*
+
+# Generated Flutter and Xcode environment files
+.flutter-plugins-dependencies*
+/ios/Flutter/Generated*
+/ios/Flutter/flutter_export_environment*
+
+# Duplicate network scaffold retained locally
+/homesureai_network_scaffold /

@@ -1,0 +1,164 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // --------------------------------------------------
+    // USER DATA
+    // --------------------------------------------------
+
+    match /users/{userId} {
+      allow read, write: if signedIn()
+                         && request.auth.uid == userId;
+
+      match /assessment_sessions/{assessmentId} {
+        function isOwner() {
+          return signedIn()
+                 && request.auth.uid == userId;
+        }
+
+        allow get, list: if isOwner();
+        allow create, update: if isOwner();
+        allow delete: if false;
+      }
+    }
+
+    // --------------------------------------------------
+    // PROPERTY SUBMISSIONS
+    // --------------------------------------------------
+
+    match /property_submissions/{submissionId} {
+
+      function isOwner() {
+        return signedIn()
+               && resource.data.submittedBy == request.auth.uid;
+      }
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll([
+          'name', 'builder', 'locality', 'city', 'reraNumber',
+          'submittedBy', 'status', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'name', 'builder', 'locality', 'city', 'reraNumber',
+          'submittedBy', 'status', 'createdAt'
+        ])
+        && request.resource.data.submittedBy == request.auth.uid
+        && request.resource.data.status == 'pending_review'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && request.resource.data.builder is string
+        && request.resource.data.builder.size() <= 200
+        && request.resource.data.locality is string
+        && request.resource.data.locality.size() > 0
+        && request.resource.data.locality.size() <= 200
+        && request.resource.data.city is string
+        && request.resource.data.city.size() > 0
+        && request.resource.data.city.size() <= 100
+        && request.resource.data.reraNumber is string
+        && request.resource.data.reraNumber.size() <= 100;
+
+      allow get, list: if isOwner();
+      allow update, delete: if false;
+    }
+
+    // --------------------------------------------------
+    // NETWORK MEMBERSHIP REQUESTS
+    // --------------------------------------------------
+
+    match /properties/{propertyId}/community/main/membership_requests/{userId} {
+
+      function isRequestOwner() {
+        return signedIn()
+               && request.auth.uid == userId;
+      }
+
+      function validMembershipRequest() {
+        return request.resource.data.keys().hasAll([
+          'userId',
+          'propertyId',
+          'relationship',
+          'status',
+          'requestedAt',
+          'displayName',
+          'message'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'userId',
+          'propertyId',
+          'relationship',
+          'status',
+          'requestedAt',
+          'displayName',
+          'message'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.propertyId == propertyId
+        && request.resource.data.relationship
+             in ['owner', 'tenant', 'familyMember']
+        && request.resource.data.status == 'pending'
+        && request.resource.data.requestedAt == request.time
+        && (
+          request.resource.data.displayName == null
+          || (
+            request.resource.data.displayName is string
+            && request.resource.data.displayName.size() <= 100
+          )
+        )
+        && (
+          request.resource.data.message == null
+          || (
+            request.resource.data.message is string
+            && request.resource.data.message.size() <= 300
+          )
+        );
+      }
+
+      allow get: if isRequestOwner();
+      allow list: if false;
+
+      allow create: if isRequestOwner()
+                    && validMembershipRequest();
+
+      // A user may resubmit after rejection or leaving.
+      allow update: if isRequestOwner()
+                    && resource.data.userId == request.auth.uid
+                    && resource.data.propertyId == propertyId
+                    && resource.data.status in ['rejected', 'left']
+                    && validMembershipRequest();
+
+      allow delete: if false;
+    }
+
+    // --------------------------------------------------
+    // NETWORK APPROVED MEMBERS
+    // --------------------------------------------------
+
+    match /properties/{propertyId}/community/main/members/{userId} {
+
+      // A user can read their own membership record.
+      allow get: if signedIn()
+                 && request.auth.uid == userId;
+
+      allow list: if false;
+
+      // Membership approval is reserved for trusted server code.
+      allow create, update, delete: if false;
+    }
+
+    // --------------------------------------------------
+    // DEFAULT DENY
+    // --------------------------------------------------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
