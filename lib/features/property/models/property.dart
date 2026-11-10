@@ -1,6 +1,7 @@
 import 'assessment_summary.dart';
 import 'compliance_summary.dart';
 import 'document_summary.dart';
+import 'krera_project_models.dart';
 
 class Property {
   final String id;
@@ -21,6 +22,27 @@ class Property {
 
   final int totalUnits;
 
+  /// Official K-RERA registration number (`PRM/KA/RERA/...`).
+  final String reraNumber;
+
+  /// Official K-RERA acknowledgement number (`PR/KN/...`).
+  final String acknowledgementNumber;
+
+  /// Official K-RERA status (`APPROVED`, `EXTENDED`, etc.).
+  final String regulatoryStatus;
+
+  /// Proposed completion date from K-RERA (`YYYY-MM-DD`).
+  final String proposedCompletionDate;
+
+  /// Extracted K-RERA summary metrics with explicit [ObservationState].
+  final Map<String, RegulatoryMetric> summaryMetrics;
+
+  /// Unit-hierarchy availability status (`Project -> Phase -> Tower -> Unit`).
+  final UnitHierarchyStatus unitHierarchyStatus;
+
+  /// Optional specific unit being evaluated by the buyer.
+  final ProjectUnitRecord? selectedUnit;
+
   /// Current compliance status
   final ComplianceSummary compliance;
 
@@ -40,10 +62,46 @@ class Property {
     required this.yearOfConstruction,
     required this.carpetArea,
     required this.totalUnits,
+    this.reraNumber = '',
+    this.acknowledgementNumber = '',
+    this.regulatoryStatus = '',
+    this.proposedCompletionDate = '',
+    this.summaryMetrics = const {},
+    this.unitHierarchyStatus = const UnitHierarchyStatus(),
+    this.selectedUnit,
     required this.compliance,
     required this.assessment,
     required this.documents,
   });
+
+  Property copyWith({
+    ProjectUnitRecord? selectedUnit,
+    ComplianceSummary? compliance,
+    AssessmentSummary? assessment,
+    DocumentSummary? documents,
+  }) {
+    return Property(
+      id: id,
+      name: name,
+      builderName: builderName,
+      ownerName: ownerName,
+      address: address,
+      type: type,
+      yearOfConstruction: yearOfConstruction,
+      carpetArea: carpetArea,
+      totalUnits: totalUnits,
+      reraNumber: reraNumber,
+      acknowledgementNumber: acknowledgementNumber,
+      regulatoryStatus: regulatoryStatus,
+      proposedCompletionDate: proposedCompletionDate,
+      summaryMetrics: summaryMetrics,
+      unitHierarchyStatus: unitHierarchyStatus,
+      selectedUnit: selectedUnit ?? this.selectedUnit,
+      compliance: compliance ?? this.compliance,
+      assessment: assessment ?? this.assessment,
+      documents: documents ?? this.documents,
+    );
+  }
 }
 
 class Address {
@@ -62,13 +120,7 @@ class Address {
     required this.pincode,
   });
 
-  String get formatted =>
-      "$line1, $city, $state - $pincode";
+  String get formatted => "$line1, $city, $state - $pincode";
 }
 
-enum PropertyType {
-  apartment,
-  villa,
-  plot,
-  commercial,
-}
+enum PropertyType { apartment, villa, plot, commercial }

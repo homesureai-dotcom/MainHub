@@ -97,8 +97,6 @@ class ScoreHeatmapLegend extends StatelessWidget {
   }
 
   Widget _buildCompactLegend(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Wrap(
       spacing: 12,
       runSpacing: 8,

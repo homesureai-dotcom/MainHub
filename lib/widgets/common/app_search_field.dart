@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class AppSearchField extends StatelessWidget {
   final String hintText;
   final ValueChanged<String>? onChanged;
@@ -14,18 +16,38 @@ class AppSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
+      style: HomeSureTypography.bodyPrimary,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: const Icon(Icons.search),
+        hintStyle: const TextStyle(
+          fontSize: 13.5,
+          color: HomeSureColors.textSecondary,
+        ),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          color: HomeSureColors.primaryNavy,
+          size: 20,
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: HomeSureColors.surfaceWhite,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 18,
+          horizontal: 16,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(HomeSureRadius.md),
+          borderSide: const BorderSide(color: HomeSureColors.borderDivider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(HomeSureRadius.md),
+          borderSide: const BorderSide(color: HomeSureColors.borderDivider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(HomeSureRadius.md),
+          borderSide: const BorderSide(
+            color: HomeSureColors.primaryNavy,
+            width: 1.4,
+          ),
         ),
       ),
     );

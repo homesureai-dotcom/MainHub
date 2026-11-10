@@ -1,71 +1,228 @@
-
 rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model (HomeSure Phase 1 — Canonical Firestore Schema)
+// ===============================================================
+//
+// 1. Collection: /projects/{projectId}
+//    - Canonical K-RERA project catalogue & summary intelligence record
+//    - Public/Client read (`allow read: if true`), Admin/Importer write only (`allow write: if false`)
+//    - Subcollections (Official K-RERA read-only records):
+//      - /projects/{projectId}/regulatory_tabs/{tabId}
+//      - /projects/{projectId}/documents/{documentId}
+//      - /projects/{projectId}/complaints/{complaintId}
+//      - /projects/{projectId}/phases/{phaseId}
+//      - /projects/{projectId}/towers/{towerId}
+//    - Subcollection (Unit-level records):
+//      - /projects/{projectId}/units/{unitId}
+//        - Public/Client read (`allow read: if true`)
+//        - Authenticated buyer create/update/delete only when `source_type == 'BUYER_PROVIDED'`
+//          and `created_by_user_id == request.auth.uid` and `project_id == projectId`
+//
+// 1b. Collection: /builders/{builderId}
+//    - Canonical K-RERA builder / promoter entity record
+//    - Public/Client read (`allow read: if true`), Admin/Importer write only (`allow write: if false`)
+//
+// 2. Collection: /users/{userId}
+//    - Authenticated buyer profile and private subcollections:
+//      - /users/{userId}/assessment_sessions/{assessmentId}
+//      - /users/{userId}/assessments/{sessionId}
+//      - /users/{userId}/workspace/{itemId}
+//      - /users/{userId}/documents/{docId}
+//    - Strictly owner-only (`isOwner(userId)`)
+//
+// 3. Collection: /property_submissions/{submissionId}
+//    - Buyer-submitted requests for unlisted/missing projects
+//    - Authenticated create (bound to `request.auth.uid`), owner-only read, no client update/delete
+//
+// 4. Collection: /properties/{propertyId}/community/main/...
+//    - Community membership requests and approved member records
+// ===============================================================
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() {
+    // --------------------------------------------------
+    // HELPER FUNCTIONS
+    // --------------------------------------------------
+
+    function isAuthenticated() {
       return request.auth != null;
     }
 
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
     // --------------------------------------------------
-    // USER DATA
+    // CANONICAL K-RERA PROPERTY CATALOGUE (/projects)
     // --------------------------------------------------
 
-    match /users/{userId} {
-      allow read, write: if signedIn()
-                         && request.auth.uid == userId;
+    match /projects/{projectId} {
+      // Public/client read access so PropertySearchScreen and PropertyDetailsScreen
+      // can read official K-RERA project catalogue records during onboarding and post-login.
+      // Official K-RERA catalogue records are written exclusively by backend/admin pipelines.
+      allow read: if true;
+      allow write: if false;
 
-      match /assessment_sessions/{assessmentId} {
-        function isOwner() {
-          return signedIn()
-                 && request.auth.uid == userId;
+      match /regulatory_tabs/{tabId} {
+        allow read: if true;
+        allow write: if false;
+      }
+
+      match /documents/{documentId} {
+        allow read: if true;
+        allow write: if false;
+      }
+
+      match /complaints/{complaintId} {
+        allow read: if true;
+        allow write: if false;
+      }
+
+      match /phases/{phaseId} {
+        allow read: if true;
+        allow write: if false;
+      }
+
+      match /towers/{towerId} {
+        allow read: if true;
+        allow write: if false;
+      }
+
+      match /units/{unitId} {
+        function isValidBuyerUnit() {
+          return request.resource.data.keys().hasAll([
+              'unit_id',
+              'project_id',
+              'unit_number',
+              'source_type',
+              'created_by_user_id',
+              'observation_state'
+            ])
+            && request.resource.data.project_id == projectId
+            && request.resource.data.source_type == 'BUYER_PROVIDED'
+            && request.resource.data.created_by_user_id == request.auth.uid
+            && request.resource.data.unit_number is string
+            && request.resource.data.unit_number.size() > 0
+            && request.resource.data.unit_number.size() <= 100;
         }
 
-        allow get, list: if isOwner();
-        allow create, update: if isOwner();
-        allow delete: if false;
+        allow read: if true;
+
+        allow create: if isAuthenticated()
+                      && isValidBuyerUnit();
+
+        allow update: if isAuthenticated()
+                      && resource.data.source_type == 'BUYER_PROVIDED'
+                      && resource.data.created_by_user_id == request.auth.uid
+                      && request.resource.data.source_type == 'BUYER_PROVIDED'
+                      && request.resource.data.created_by_user_id == request.auth.uid
+                      && request.resource.data.project_id == projectId
+                      && request.resource.data.unit_number is string
+                      && request.resource.data.unit_number.size() > 0
+                      && request.resource.data.unit_number.size() <= 100;
+
+        allow delete: if isAuthenticated()
+                      && resource.data.source_type == 'BUYER_PROVIDED'
+                      && resource.data.created_by_user_id == request.auth.uid;
       }
     }
 
     // --------------------------------------------------
-    // PROPERTY SUBMISSIONS
+    // CANONICAL K-RERA BUILDER RECORDS (/builders)
+    // --------------------------------------------------
+
+    match /builders/{builderId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --------------------------------------------------
+    // USER DATA (/users/{userId})
+    // --------------------------------------------------
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /assessment_sessions/{assessmentId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      match /assessments/{sessionId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /workspace/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /documents/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // --------------------------------------------------
+    // PROPERTY SUBMISSIONS (/property_submissions/{submissionId})
     // --------------------------------------------------
 
     match /property_submissions/{submissionId} {
 
-      function isOwner() {
-        return signedIn()
-               && resource.data.submittedBy == request.auth.uid;
+      function isSubmissionOwner() {
+        return isAuthenticated()
+               && (
+                 ('submittedBy' in resource.data && resource.data.submittedBy == request.auth.uid)
+                 || ('userId' in resource.data && resource.data.userId == request.auth.uid)
+               );
       }
 
-      allow create: if signedIn()
-        && request.resource.data.keys().hasAll([
-          'name', 'builder', 'locality', 'city', 'reraNumber',
-          'submittedBy', 'status', 'createdAt'
-        ])
-        && request.resource.data.keys().hasOnly([
-          'name', 'builder', 'locality', 'city', 'reraNumber',
-          'submittedBy', 'status', 'createdAt'
-        ])
-        && request.resource.data.submittedBy == request.auth.uid
-        && request.resource.data.status == 'pending_review'
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 200
-        && request.resource.data.builder is string
-        && request.resource.data.builder.size() <= 200
-        && request.resource.data.locality is string
-        && request.resource.data.locality.size() > 0
-        && request.resource.data.locality.size() <= 200
-        && request.resource.data.city is string
-        && request.resource.data.city.size() > 0
-        && request.resource.data.city.size() <= 100
-        && request.resource.data.reraNumber is string
-        && request.resource.data.reraNumber.size() <= 100;
+      function isValidDetailedSubmission() {
+        return request.resource.data.keys().hasAll([
+            'name', 'builder', 'locality', 'city', 'reraNumber',
+            'submittedBy', 'status', 'createdAt'
+          ])
+          && request.resource.data.keys().hasOnly([
+            'name', 'builder', 'locality', 'city', 'reraNumber',
+            'submittedBy', 'status', 'createdAt'
+          ])
+          && request.resource.data.submittedBy == request.auth.uid
+          && request.resource.data.status == 'pending_review'
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 200
+          && request.resource.data.builder is string
+          && request.resource.data.builder.size() <= 200
+          && request.resource.data.locality is string
+          && request.resource.data.locality.size() > 0
+          && request.resource.data.locality.size() <= 200
+          && request.resource.data.city is string
+          && request.resource.data.city.size() > 0
+          && request.resource.data.city.size() <= 100
+          && request.resource.data.reraNumber is string
+          && request.resource.data.reraNumber.size() <= 100;
+      }
 
-      allow get, list: if isOwner();
+      function isValidPhase1Submission() {
+        return request.resource.data.keys().hasAll([
+            'name', 'location', 'userId', 'status'
+          ])
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.status == 'pending_verification'
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 200
+          && request.resource.data.location is string
+          && request.resource.data.location.size() > 0
+          && request.resource.data.location.size() <= 300;
+      }
+
+      allow create: if isAuthenticated()
+                    && (isValidDetailedSubmission() || isValidPhase1Submission());
+
+      allow read: if isSubmissionOwner();
       allow update, delete: if false;
     }
 
@@ -76,7 +233,7 @@ service cloud.firestore {
     match /properties/{propertyId}/community/main/membership_requests/{userId} {
 
       function isRequestOwner() {
-        return signedIn()
+        return isAuthenticated()
                && request.auth.uid == userId;
       }
 
@@ -144,7 +301,7 @@ service cloud.firestore {
     match /properties/{propertyId}/community/main/members/{userId} {
 
       // A user can read their own membership record.
-      allow get: if signedIn()
+      allow get: if isAuthenticated()
                  && request.auth.uid == userId;
 
       allow list: if false;

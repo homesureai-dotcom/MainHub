@@ -16,10 +16,14 @@ import 'state/assessment_state.dart';
 import 'theme/app_theme.dart';
 
 /// Set to true only when intentionally testing against
-/// local Firebase Authentication and Firestore Emulators.
+/// local Firebase Authentication and Firestore Emulators
+/// (e.g. `--dart-define=USE_FIREBASE_EMULATORS=true`).
 ///
-/// Keep false for normal and production builds.
-const bool kUseFirebaseEmulators = true;
+/// Defaults to false so builds connect to live Cloud Firestore (`homesureai-51893`).
+const bool kUseFirebaseEmulators = bool.fromEnvironment(
+  'USE_FIREBASE_EMULATORS',
+  defaultValue: false,
+);
 
 /// Toggle this to true whenever you want to test
 /// the Property Intelligence Engine.

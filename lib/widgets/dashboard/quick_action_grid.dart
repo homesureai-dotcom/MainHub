@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import 'quick_action_card.dart';
 
 class QuickActionGrid extends StatelessWidget {
@@ -21,45 +22,43 @@ class QuickActionGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Quick Actions',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: HomeSureTypography.sectionTitle,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 18,
-          mainAxisSpacing: 18,
-          childAspectRatio: 0.85,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.05,
           children: [
             QuickActionCard(
               icon: Icons.psychology_alt_rounded,
-              color: Colors.deepPurple,
+              color: HomeSureColors.primaryNavy,
               title: 'AI Advisor',
               subtitle: 'Smart property insights',
               onTap: onAiAdvisor ?? () {},
             ),
             QuickActionCard(
               icon: Icons.description_outlined,
-              color: Colors.blue,
+              color: HomeSureColors.accentTealDark,
               title: 'Documents',
               subtitle: 'View property records',
               onTap: onDocuments ?? () {},
             ),
             QuickActionCard(
               icon: Icons.verified_user_outlined,
-              color: Colors.green,
+              color: HomeSureColors.statusPositiveText,
               title: 'Compliance',
               subtitle: 'Legal & approvals',
               onTap: onCompliance ?? () {},
             ),
             QuickActionCard(
               icon: Icons.timeline_rounded,
-              color: Colors.orange,
+              color: HomeSureColors.statusWarningText,
               title: 'Timeline',
               subtitle: 'Project journey',
               onTap: onTimeline ?? () {},

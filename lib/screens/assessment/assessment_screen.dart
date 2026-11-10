@@ -40,8 +40,6 @@ import '../../core/phs/phs_categories.dart';
 
 import '../../core/phs/phs_category_question_resolver.dart';
 
-import '../../core/phs/phs_question_progress.dart';
-
 import '../../core/phs/phs_question_progress_resolver.dart';
 
 import '../../data/phs_questions.dart';
@@ -130,17 +128,6 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   bool _approvalCheckFailed = false;
 
   PHSCategory? _selectedPremiumCategory;
-
-  PHSQuestionProgress? get _currentQuestionProgress =>
-      _questionProgressResolver.resolve(
-        questionId: phsQuestions[currentQuestion].id,
-
-        questions: phsQuestions,
-
-        answeredQuestionIds: assessmentState.answers
-            .map((answer) => answer.questionId)
-            .toSet(),
-      );
 
   List<CategoryScore> get _categoryScores =>
       _scoreCalculator.calculate(assessmentState.answers);

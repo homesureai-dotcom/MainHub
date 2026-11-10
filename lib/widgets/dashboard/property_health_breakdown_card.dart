@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/engine/models/property_health_result.dart';
 import '../../core/phs/phs_categories.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../property_health/score_heatmap_legend.dart';
 
 class PropertyHealthBreakdownCard extends StatelessWidget {
@@ -16,40 +17,32 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.12),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderDivider),
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Property Health Breakdown',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: HomeSureTypography.sectionTitle,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 3),
                       Text(
                         'Health across your six property pillars',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                        style: HomeSureTypography.bodySecondary,
                       ),
                     ],
                   ),
@@ -57,7 +50,8 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
                 if (result.hasFinalScore)
                   Text(
                     '${result.overallScore.round()}/100',
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: ScoreHeatmapLegend.scoreColor(
                         result.overallScore,
@@ -66,7 +60,7 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             ...PHSCategory.values.map(
               (category) => _buildCategoryRow(
                 context,
@@ -85,32 +79,29 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
     PHSCategory category,
     double? score,
   ) {
-    final theme = Theme.of(context);
     final isAssessed = score != null;
     final status = ScoreHeatmapLegend.scoreLabel(score);
     final statusColor = ScoreHeatmapLegend.scoreColor(score);
     final range = ScoreHeatmapLegend.scoreRange(score);
 
     return InkWell(
-      onTap: onCategoryTap == null
-          ? null
-          : () => onCategoryTap!(category),
-      borderRadius: BorderRadius.circular(14),
+      onTap: onCategoryTap == null ? null : () => onCategoryTap!(category),
+      borderRadius: BorderRadius.circular(HomeSureRadius.md),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 9),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 38,
+              height: 38,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                color: HomeSureColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(HomeSureRadius.sm),
               ),
               child: Text(
                 category.icon,
-                style: const TextStyle(fontSize: 19),
+                style: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(width: 12),
@@ -123,29 +114,27 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           category.displayName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: HomeSureTypography.bodyMedium,
                         ),
                       ),
                       Text(
                         isAssessed ? '${score.round()}' : '—',
-                        style: theme.textTheme.titleSmall?.copyWith(
+                        style: TextStyle(
+                          fontSize: 14,
                           fontWeight: FontWeight.w800,
                           color: statusColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          isAssessed
-                              ? '$status • $range'
-                              : 'Not Assessed',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          isAssessed ? '$status • $range' : 'Not Assessed',
+                          style: TextStyle(
+                            fontSize: 12,
                             color: statusColor,
                             fontWeight: FontWeight.w500,
                           ),
@@ -153,20 +142,17 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
                       ),
                       Text(
                         '${category.weight.round()}% weight',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                        style: HomeSureTypography.caption,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 7),
+                  const SizedBox(height: 6),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: isAssessed ? score / 100 : 0,
                       minHeight: 5,
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor: HomeSureColors.surfaceSubtle,
                       valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                     ),
                   ),
@@ -175,10 +161,10 @@ class PropertyHealthBreakdownCard extends StatelessWidget {
             ),
             if (onCategoryTap != null) ...[
               const SizedBox(width: 8),
-              Icon(
+              const Icon(
                 Icons.chevron_right,
-                size: 20,
-                color: theme.colorScheme.onSurfaceVariant,
+                size: 18,
+                color: HomeSureColors.textMuted,
               ),
             ],
           ],

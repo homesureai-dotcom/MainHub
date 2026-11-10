@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../features/dashboard/models/dashboard_data.dart';
 import '../../features/dashboard/models/dashboard_priority.dart';
 import '../../models/property_health/recommendation.dart';
@@ -24,29 +25,38 @@ class TodaysPrioritiesCard extends StatelessWidget {
         .take(_maxVisiblePriorities)
         .toList(growable: false);
 
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+    return Container(
+      decoration: BoxDecoration(
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderDivider),
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(
-                  Icons.priority_high_rounded,
-                  size: 22,
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: HomeSureColors.statusWarningBg,
+                    borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                  ),
+                  child: const Icon(
+                    Icons.priority_high_rounded,
+                    size: 19,
+                    color: HomeSureColors.statusWarningText,
+                  ),
                 ),
-                SizedBox(width: 8),
-                Text(
-                  'Today’s Priorities',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Today’s Priorities',
+                    style: HomeSureTypography.sectionTitle,
                   ),
                 ),
               ],
@@ -56,12 +66,9 @@ class TodaysPrioritiesCard extends StatelessWidget {
               data.hasAssessment
                   ? 'What needs your attention'
                   : 'Complete your assessment to see priorities',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
-              ),
+              style: HomeSureTypography.bodySecondary,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             if (!data.hasAssessment)
               const _EmptyPrioritiesState(
                 message:
@@ -69,8 +76,7 @@ class TodaysPrioritiesCard extends StatelessWidget {
               )
             else if (data.priorities.isEmpty)
               const _EmptyPrioritiesState(
-                message:
-                    'No priority actions have been identified yet.',
+                message: 'No priority actions have been identified yet.',
               )
             else ...[
               for (var index = 0; index < priorities.length; index++) ...[
@@ -81,10 +87,10 @@ class TodaysPrioritiesCard extends StatelessWidget {
                       : () => onPriorityTap!(priorities[index]),
                 ),
                 if (index < priorities.length - 1)
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
               ],
               if (data.priorities.length > _maxVisiblePriorities) ...[
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -114,18 +120,20 @@ class _PriorityItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final priorityLabel = _priorityLabel(priority.priority);
     final priorityIcon = _priorityIcon(priority.priority);
+    final priorityColor = _priorityColor(priority.priority);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(HomeSureRadius.md),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            color: HomeSureColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(HomeSureRadius.md),
             border: Border.all(
-              color: Colors.grey.shade200,
+              color: HomeSureColors.borderDivider,
             ),
           ),
           child: Row(
@@ -133,7 +141,8 @@ class _PriorityItem extends StatelessWidget {
             children: [
               Icon(
                 priorityIcon,
-                size: 22,
+                size: 20,
+                color: priorityColor,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -142,29 +151,26 @@ class _PriorityItem extends StatelessWidget {
                   children: [
                     Text(
                       priority.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: HomeSureTypography.bodyMedium,
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 4),
                     Text(
                       priority.description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.35,
-                        color: Colors.grey.shade700,
-                      ),
+                      style: HomeSureTypography.bodySecondary,
                     ),
-                    const SizedBox(height: 9),
+                    const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 6,
                       children: [
-                        _PriorityBadge(label: priorityLabel),
+                        _PriorityBadge(
+                          label: priorityLabel,
+                          color: priorityColor,
+                        ),
                         if (priority.estimatedPHIGain > 0)
                           _PriorityBadge(
                             label: '+${priority.estimatedPHIGain} PHI',
+                            color: HomeSureColors.accentTealDark,
                           ),
                       ],
                     ),
@@ -177,7 +183,8 @@ class _PriorityItem extends StatelessWidget {
                   padding: EdgeInsets.only(top: 2),
                   child: Icon(
                     Icons.chevron_right_rounded,
-                    size: 22,
+                    size: 20,
+                    color: HomeSureColors.textMuted,
                   ),
                 ),
               ],
@@ -213,32 +220,49 @@ class _PriorityItem extends StatelessWidget {
         return Icons.lightbulb_outline_rounded;
     }
   }
+
+  Color _priorityColor(RecommendationPriority priority) {
+    switch (priority) {
+      case RecommendationPriority.critical:
+        return HomeSureColors.statusCriticalText;
+      case RecommendationPriority.high:
+        return HomeSureColors.statusWarningText;
+      case RecommendationPriority.medium:
+        return HomeSureColors.primaryNavy;
+      case RecommendationPriority.low:
+        return HomeSureColors.accentTealDark;
+    }
+  }
 }
 
 class _PriorityBadge extends StatelessWidget {
   final String label;
+  final Color color;
 
   const _PriorityBadge({
     required this.label,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 5,
+        horizontal: 8,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+        color: color.withValues(alpha: 0.10),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.4,
+          color: color,
         ),
       ),
     );
@@ -258,19 +282,16 @@ class _EmptyPrioritiesState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 20,
+        vertical: 16,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(HomeSureRadius.md),
+        color: HomeSureColors.surfaceSubtle,
       ),
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 13,
-          color: Colors.grey.shade600,
-        ),
+        style: HomeSureTypography.bodySecondary,
       ),
     );
   }

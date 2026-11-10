@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/homesure_tokens.dart';
 import '../theme/app_gradients.dart';
 import 'common/health_score_indicator.dart';
 
@@ -27,26 +28,45 @@ class HeroScoreCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: AppGradients.hero,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(HomeSureRadius.xl),
+        boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'PROPERTY HEALTH SCORE',
-            style: TextStyle(
-              color: Colors.white70,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'PROPERTY HEALTH SCORE',
+                style: TextStyle(
+                  color: Color(0xFFB8C7DC),
+                  letterSpacing: 1.4,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11.5,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+                ),
+                child: Text(
+                  hasScore ? status : 'Due Diligence Pending',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 20),
           Center(
             child: hasScore
                 ? HealthScoreIndicator(
@@ -55,60 +75,59 @@ class HeroScoreCard extends StatelessWidget {
                   )
                 : const _NotAssessedState(),
           ),
-
-          const SizedBox(height: 28),
-
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: _StatusCard(
-                  icon: Icons.check_circle,
-                  color: Colors.greenAccent,
+                  icon: Icons.check_circle_outline_rounded,
+                  color: const Color(0xFF4ADE80),
                   value: verifiedCount,
                   label: 'Verified',
                 ),
               ),
-
-              const SizedBox(width: 12),
-
+              const SizedBox(width: 10),
               Expanded(
                 child: _StatusCard(
-                  icon: Icons.schedule,
-                  color: Colors.orangeAccent,
+                  icon: Icons.schedule_rounded,
+                  color: const Color(0xFFFBBF24),
                   value: pendingCount,
                   label: 'Pending',
                 ),
               ),
-
-              const SizedBox(width: 12),
-
+              const SizedBox(width: 10),
               Expanded(
                 child: _StatusCard(
-                  icon: Icons.error_outline,
-                  color: Colors.redAccent,
+                  icon: Icons.error_outline_rounded,
+                  color: const Color(0xFFF87171),
                   value: issueCount,
                   label: 'Issues',
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 28),
-
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: const Color(0xff0F172A),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                foregroundColor: HomeSureColors.primaryNavy,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(HomeSureRadius.md),
+                ),
               ),
               onPressed: onPressed,
-              icon: const Icon(Icons.description_outlined),
+              icon: const Icon(Icons.description_outlined, size: 19),
               label: Text(
                 hasScore
                     ? 'View Property Health Report'
                     : 'Start Property Health Assessment',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -124,40 +143,43 @@ class _NotAssessedState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
-      height: 180,
+      width: 164,
+      height: 164,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: .08),
+        color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(
-          color: Colors.white.withValues(alpha: .25),
-          width: 2,
+          color: Colors.white.withValues(alpha: 0.22),
+          width: 1.5,
         ),
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.health_and_safety_outlined,
-            color: Colors.white70,
-            size: 42,
+            Icons.shield_outlined,
+            color: Color(0xFF8CE0D8),
+            size: 36,
           ),
-          SizedBox(height: 12),
+          SizedBox(height: 10),
           Text(
             'Not Assessed',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: 4),
-          Text(
-            'Complete your assessment',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14),
+            child: Text(
+              'Complete your assessment',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFFB8C7DC),
+                fontSize: 11.5,
+              ),
             ),
           ),
         ],
@@ -183,39 +205,36 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: 14,
-        horizontal: 10,
+        vertical: 11,
+        horizontal: 8,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .08),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(HomeSureRadius.md),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Column(
         children: [
           Icon(
             icon,
             color: color,
-            size: 22,
+            size: 19,
           ),
-
-          const SizedBox(height: 8),
-
+          const SizedBox(height: 6),
           Text(
             '$value',
             style: const TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
             ),
           ),
-
-          const SizedBox(height: 4),
-
+          const SizedBox(height: 2),
           Text(
             label,
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
+              color: Color(0xFFB8C7DC),
+              fontSize: 11.5,
             ),
           ),
         ],

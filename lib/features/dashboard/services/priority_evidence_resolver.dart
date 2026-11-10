@@ -1,10 +1,8 @@
-import '../../../core/evidence/evidence.dart';
 import '../../../core/evidence/evidence_repository.dart';
 import '../../../core/evidence/evidence_requirement.dart';
 import '../../../core/evidence/evidence_requirement_catalog.dart';
 import '../../../core/evidence/evidence_requirement_resolver.dart';
 import '../../../core/evidence/evidence_type_mapper.dart';
-import '../../../core/evidence/evidence_validation_result.dart';
 import '../../../core/evidence/evidence_validator.dart';
 import '../../../data/phs_questions.dart';
 import '../models/dashboard_priority.dart';

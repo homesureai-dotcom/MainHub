@@ -1,86 +1,106 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../../data/properties.dart';
-import '../../models/property.dart' as legacy;
-import '../../features/property/models/property.dart' as feature;
-import '../../features/property/models/property_adapter.dart';
-import '../../features/property/state/property_state.dart';
-import '../../widgets/common/app_button.dart';
-import '../../widgets/common/app_search_field.dart';
-import '../../widgets/common/onboarding_scaffold.dart';
-import '../../widgets/property/property_card.dart';
-import '../property/property_details_screen.dart';
+import '../../core/theme/homesure_components.dart';
+import '../../core/theme/homesure_tokens.dart';
+import '../../features/property/models/krera_project_models.dart';
+import '../../features/property/services/property_repository.dart';
 import '../../features/property_submission/services/property_submission_service.dart';
+import '../../widgets/common/app_search_field.dart';
+import '../../widgets/property/builder_card.dart';
+import 'builder_projects_screen.dart';
 import 'my_property_requests_screen.dart';
 
 class PropertySearchScreen extends StatefulWidget {
   final PropertySubmissionGateway? submissionGateway;
+  final PropertyCatalogueGateway? catalogueGateway;
 
-  const PropertySearchScreen({super.key, this.submissionGateway});
+  const PropertySearchScreen({
+    super.key,
+    this.submissionGateway,
+    this.catalogueGateway,
+  });
 
   @override
   State<PropertySearchScreen> createState() => _PropertySearchScreenState();
 }
 
 class _PropertySearchScreenState extends State<PropertySearchScreen> {
-  final PropertyState propertyState = PropertyState.instance;
-
-  List<legacy.Property> filteredProperties = properties;
-  legacy.Property? selectedProperty;
+  List<BuilderCatalogueEntry> filteredBuilders = [];
   String searchQuery = '';
+  bool isLoadingCatalogue = true;
+  String? catalogueError;
   bool isSubmitting = false;
+  Timer? _searchDebounce;
 
   PropertySubmissionGateway get _submissionGateway =>
       widget.submissionGateway ?? PropertySubmissionService();
 
+  PropertyCatalogueGateway get _catalogueGateway =>
+      widget.catalogueGateway ?? PropertyRepository.instance;
+
   @override
   void initState() {
     super.initState();
+    _loadBuilders(query: '');
+  }
 
-    final feature.Property? sharedProperty = propertyState.selectedProperty;
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
 
-    if (sharedProperty == null) return;
+  Future<void> _loadBuilders({required String query}) async {
+    if (!mounted) return;
+    setState(() {
+      isLoadingCatalogue = true;
+      catalogueError = null;
+    });
 
-    for (final property in properties) {
-      if (property.id == sharedProperty.id ||
-          property.name == sharedProperty.name) {
-        selectedProperty = property;
-        break;
-      }
+    try {
+      final results = await _catalogueGateway.fetchBuilders(
+        searchQuery: query,
+      );
+      if (!mounted) return;
+
+      setState(() {
+        filteredBuilders = results;
+        isLoadingCatalogue = false;
+        catalogueError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        filteredBuilders = [];
+        isLoadingCatalogue = false;
+        catalogueError = 'Unable to load K-RERA builder catalogue: $error';
+      });
     }
   }
 
   void _search(String value) {
-    final query = value.trim().toLowerCase();
-
+    final query = value.trim();
     setState(() {
       searchQuery = query;
+    });
 
-      filteredProperties = properties.where((property) {
-        return property.name.toLowerCase().contains(query) ||
-            property.builder.toLowerCase().contains(query) ||
-            property.city.toLowerCase().contains(query) ||
-            property.locality.toLowerCase().contains(query) ||
-            property.reraNumber.toLowerCase().contains(query);
-      }).toList();
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 180), () {
+      _loadBuilders(query: query);
     });
   }
 
-  void _persistSelectedProperty(legacy.Property property) {
-    feature.Property? canonicalProperty;
-
-    for (final candidate in propertyState.properties) {
-      if (candidate.id == property.id || candidate.name == property.name) {
-        canonicalProperty = candidate;
-        break;
-      }
-    }
-
-    if (canonicalProperty != null) {
-      propertyState.selectProperty(canonicalProperty);
-    } else {
-      propertyState.selectProperty(PropertyAdapter.fromLegacy(property));
-    }
+  void _openBuilderProjects(BuilderCatalogueEntry builder) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BuilderProjectsScreen(
+          builder: builder,
+          catalogueGateway: widget.catalogueGateway,
+        ),
+      ),
+    );
   }
 
   Future<Map<String, String>?> _showPropertyForm({required bool requestOnly}) {
@@ -173,109 +193,248 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
     }
   }
 
-  void _continue() {
-    final property = selectedProperty;
-
-    if (property == null) return;
-
-    _persistSelectedProperty(property);
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PropertyDetailsScreen(property: property),
+  void _showUnlistedPropertySheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: HomeSureColors.surfaceWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(HomeSureRadius.xl),
+        ),
       ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Property or Builder Not Listed?',
+                  style: HomeSureTypography.sectionTitle,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Submit your project details or check the status of your existing requests.',
+                  style: HomeSureTypography.bodySecondary,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _addManualProperty();
+                    },
+                    icon: const Icon(Icons.add_home_outlined),
+                    label: const Text("My project isn't listed"),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _requestProjectAddition();
+                    },
+                    icon: const Icon(Icons.playlist_add),
+                    label: const Text('Request catalogue addition'),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MyPropertyRequestsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.receipt_long_outlined),
+                    label: const Text('My Property Requests'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBuildersBody() {
+    if (isLoadingCatalogue) {
+      return const Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: HomeSureColors.primaryNavy,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (catalogueError != null) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: HomeSureColors.statusCriticalText,
+                size: 28,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                catalogueError!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: HomeSureColors.statusCriticalText,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => _loadBuilders(query: searchQuery),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (filteredBuilders.isEmpty) {
+      return Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                searchQuery.isEmpty
+                    ? 'No builders available.'
+                    : 'No matching builder found for "$searchQuery".',
+                textAlign: TextAlign.center,
+                style: HomeSureTypography.bodySecondary,
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _addManualProperty,
+                icon: const Icon(Icons.add_home_outlined),
+                label: const Text("My project isn't listed"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: filteredBuilders.length,
+      itemBuilder: (context, index) {
+        final builder = filteredBuilders[index];
+        return BuilderCard(
+          builder: builder,
+          onTap: () => _openBuilderProjects(builder),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return OnboardingScaffold(
-      title: 'Find Your Property',
-      subtitle: 'Search projects by name, builder, locality or RERA number.',
-      bottom: AppButton(
-        text: 'Continue',
-        enabled: selectedProperty != null,
-        onPressed: _continue,
-      ),
-      child: Column(
-        children: [
-          AppSearchField(
-            hintText: 'Project, builder, locality or RERA number',
-            onChanged: _search,
-          ),
-          const SizedBox(height: 20),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Projects in the catalogue',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: filteredProperties.isEmpty
-                ? Center(
+    return Scaffold(
+      backgroundColor: HomeSureColors.backgroundWarm,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
                     child: Text(
-                      searchQuery.isEmpty
-                          ? 'No projects available.'
-                          : 'No matching project found.',
-                      textAlign: TextAlign.center,
+                      'Find Your Property',
+                      style: HomeSureTypography.screenTitle,
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: filteredProperties.length,
-                    itemBuilder: (context, index) {
-                      final property = filteredProperties[index];
-
-                      return PropertyCard(
-                        property: property,
-                        onTap: () {
-                          setState(() {
-                            selectedProperty = property;
-                          });
-
-                          _persistSelectedProperty(property);
-                        },
-                      );
-                    },
                   ),
+                  TextButton.icon(
+                    onPressed: _showUnlistedPropertySheet,
+                    style: TextButton.styleFrom(
+                      foregroundColor: HomeSureColors.accentTealDark,
+                      backgroundColor: HomeSureColors.accentTealTint,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          HomeSureRadius.pill,
+                        ),
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.add_home_outlined, size: 15),
+                    label: const Text(
+                      'Not listed?',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Start with the builder behind your project.',
+                style: HomeSureTypography.bodySecondary,
+              ),
+              const SizedBox(height: 12),
+              AppSearchField(
+                hintText: 'Search builders (e.g. Godrej, Prestige, Brigade)...',
+                onChanged: _search,
+              ),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Builders in the catalogue',
+                    style: HomeSureTypography.cardTitle,
+                  ),
+                  if (!isLoadingCatalogue)
+                    HomeSureStatusBadge(
+                      label: '${filteredBuilders.length} Builders',
+                      tone: HomeSureBadgeTone.navy,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Expanded(child: _buildBuildersBody()),
+            ],
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _addManualProperty,
-              icon: const Icon(Icons.add_home_outlined),
-              label: const Text("My project isn't listed"),
-            ),
-          ),
-          TextButton.icon(
-            onPressed: _requestProjectAddition,
-            icon: const Icon(Icons.playlist_add),
-            label: const Text('Request catalogue addition'),
-          ),
-          TextButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => const MyPropertyRequestsScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.receipt_long_outlined),
-            label: const Text('My Property Requests'),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text(
-              'A catalogue listing is not a guarantee of legal compliance.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -363,22 +522,26 @@ class _PropertyFormDialogState extends State<_PropertyFormDialog> {
                 validator: (value) =>
                     _validateRequired(value, 'Enter the project name'),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _builderController,
                 decoration: const InputDecoration(labelText: 'Builder name'),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _localityController,
                 decoration: const InputDecoration(labelText: 'Locality *'),
                 validator: (value) =>
                     _validateRequired(value, 'Enter the locality'),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _cityController,
                 decoration: const InputDecoration(labelText: 'City *'),
                 validator: (value) =>
                     _validateRequired(value, 'Enter the city'),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _reraController,
                 decoration: const InputDecoration(
@@ -389,7 +552,7 @@ class _PropertyFormDialogState extends State<_PropertyFormDialog> {
               const Text(
                 'Catalogue inclusion does not establish legal compliance. '
                 'Project details must be independently reviewed.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: HomeSureTypography.caption,
               ),
             ],
           ),

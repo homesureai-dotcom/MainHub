@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class AssessmentProgressCard extends StatelessWidget {
   final int completedQuestions;
   final int totalQuestions;
@@ -25,16 +27,10 @@ class AssessmentProgressCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderDivider),
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,12 +41,12 @@ class AssessmentProgressCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(10),
+                  color: HomeSureColors.accentTealTint,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
                 ),
                 child: const Icon(
                   Icons.assignment_outlined,
-                  color: Color(0xFF2563EB),
+                  color: HomeSureColors.accentTealDark,
                   size: 19,
                 ),
               ),
@@ -58,11 +54,7 @@ class AssessmentProgressCard extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'Assessment Progress',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
-                  ),
+                  style: HomeSureTypography.cardTitle,
                 ),
               ),
               if (hasStarted)
@@ -71,20 +63,16 @@ class AssessmentProgressCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF2563EB),
+                    color: HomeSureColors.accentTealDark,
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           if (!hasStarted)
             const Text(
               'Your property health assessment has not started yet.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF64748B),
-                height: 1.4,
-              ),
+              style: HomeSureTypography.bodySecondary,
             )
           else ...[
             Row(
@@ -93,36 +81,36 @@ class AssessmentProgressCard extends StatelessWidget {
                 Text(
                   '$completedQuestions',
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
+                    color: HomeSureColors.textPrimary,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 3),
+                  padding: const EdgeInsets.only(left: 5, bottom: 2),
                   child: Text(
                     'of $totalQuestions questions completed',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                    ),
+                    style: HomeSureTypography.caption,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 9),
+            const SizedBox(height: 8),
             ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(HomeSureRadius.pill),
               child: LinearProgressIndicator(
                 value: progress,
-                minHeight: 7,
-                backgroundColor: const Color(0xFFE2E8F0),
+                minHeight: 6,
+                backgroundColor: HomeSureColors.surfaceSubtle,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  HomeSureColors.accentTeal,
+                ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               '$completedCategories of $totalCategories categories started',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              style: HomeSureTypography.caption,
             ),
           ],
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../features/dashboard/models/dashboard_data.dart';
 import '../app_card.dart';
 
@@ -26,44 +27,38 @@ class EvidenceSnapshotCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(14),
+                  color: HomeSureColors.primaryNavyTint,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
                 ),
                 child: const Icon(
                   Icons.fact_check_outlined,
-                  color: Color(0xFF2563EB),
+                  color: HomeSureColors.primaryNavy,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Evidence Snapshot',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
-                      ),
+                      style: HomeSureTypography.sectionTitle,
                     ),
-                    SizedBox(height: 3),
+                    SizedBox(height: 2),
                     Text(
                       'Supporting documents and proof',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                      ),
+                      style: HomeSureTypography.bodySecondary,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           if (!hasEvidence)
             const _NoEvidenceState()
           else ...[
@@ -73,36 +68,33 @@ class EvidenceSnapshotCard extends StatelessWidget {
                 Text(
                   '${coverage.round()}%',
                   style: const TextStyle(
-                    fontSize: 32,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
+                    color: HomeSureColors.textPrimary,
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.only(
-                    left: 6,
-                    bottom: 5,
-                  ),
+                  padding: EdgeInsets.only(left: 6, bottom: 4),
                   child: Text(
                     'coverage',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF64748B),
-                    ),
+                    style: HomeSureTypography.bodySecondary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(HomeSureRadius.pill),
               child: LinearProgressIndicator(
                 value: coverageProgress,
-                minHeight: 9,
-                backgroundColor: const Color(0xFFE2E8F0),
+                minHeight: 7,
+                backgroundColor: HomeSureColors.surfaceSubtle,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  HomeSureColors.accentTeal,
+                ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -110,7 +102,7 @@ class EvidenceSnapshotCard extends StatelessWidget {
                     value: data.satisfiedEvidenceRequirements,
                     label: 'Satisfied',
                     icon: Icons.check_circle_outline,
-                    iconColor: Colors.green,
+                    iconColor: HomeSureColors.statusPositiveText,
                   ),
                 ),
                 Expanded(
@@ -118,7 +110,7 @@ class EvidenceSnapshotCard extends StatelessWidget {
                     value: data.evidenceNeedsReviewCount,
                     label: 'Review',
                     icon: Icons.rate_review_outlined,
-                    iconColor: Colors.orange,
+                    iconColor: HomeSureColors.statusWarningText,
                   ),
                 ),
                 Expanded(
@@ -126,23 +118,23 @@ class EvidenceSnapshotCard extends StatelessWidget {
                     value: data.missingEvidenceCount,
                     label: 'Missing',
                     icon: Icons.help_outline,
-                    iconColor: Colors.red,
+                    iconColor: HomeSureColors.statusCriticalText,
                   ),
                 ),
               ],
             ),
             if (data.rejectedEvidenceCount > 0) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               _RejectedEvidenceNotice(
                 count: data.rejectedEvidenceCount,
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onViewDetails,
-                icon: const Icon(Icons.open_in_new),
+                icon: const Icon(Icons.open_in_new, size: 17),
                 label: const Text('View Evidence Details'),
               ),
             ),
@@ -160,27 +152,24 @@ class _NoEvidenceState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
+        color: HomeSureColors.surfaceSubtle,
+        borderRadius: BorderRadius.circular(HomeSureRadius.md),
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             Icons.upload_file_outlined,
-            color: Color(0xFF64748B),
+            color: HomeSureColors.textSecondary,
+            size: 20,
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               'No evidence has been added yet. Add supporting documents, photographs, videos, or other evidence to strengthen your assessment.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF64748B),
-                height: 1.4,
-              ),
+              style: HomeSureTypography.bodySecondary,
             ),
           ),
         ],
@@ -209,24 +198,21 @@ class _EvidenceMetric extends StatelessWidget {
         Icon(
           icon,
           color: iconColor,
-          size: 21,
+          size: 19,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 5),
         Text(
           '$value',
           style: const TextStyle(
-            fontSize: 19,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF0F172A),
+            color: HomeSureColors.textPrimary,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF64748B),
-          ),
+          style: HomeSureTypography.caption,
         ),
       ],
     );
@@ -249,24 +235,25 @@ class _RejectedEvidenceNotice extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
-        borderRadius: BorderRadius.circular(12),
+        color: HomeSureColors.statusCriticalBg,
+        borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+        border: Border.all(color: HomeSureColors.statusCriticalBorder),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.error_outline,
-            color: Colors.red,
-            size: 20,
+            color: HomeSureColors.statusCriticalText,
+            size: 18,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               '$count evidence ${count == 1 ? 'item needs' : 'items need'} attention.',
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF991B1B),
+                color: HomeSureColors.statusCriticalText,
               ),
             ),
           ),

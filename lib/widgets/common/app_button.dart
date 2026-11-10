@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
+import '../../core/theme/homesure_tokens.dart';
 
 class AppButton extends StatelessWidget {
   final String text;
@@ -20,23 +20,26 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 52,
       child: FilledButton.icon(
         onPressed: enabled ? onPressed : null,
-        icon: icon != null ? Icon(icon, size: 20) : const SizedBox.shrink(),
+        icon: icon != null ? Icon(icon, size: 19) : const SizedBox.shrink(),
         label: Text(
           text,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
           ),
         ),
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: HomeSureColors.primaryNavy,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey.shade300,
+          disabledBackgroundColor: HomeSureColors.disabledBg,
+          disabledForegroundColor: HomeSureColors.disabledText,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(HomeSureRadius.md),
           ),
         ),
       ),

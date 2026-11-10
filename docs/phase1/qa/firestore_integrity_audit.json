@@ -1,0 +1,51 @@
+{
+  "total_builders": 680,
+  "unique_builder_ids": 680,
+  "duplicates": [],
+  "empty_names": [],
+  "zero_projects": [],
+  "total_mapped_projects": 875,
+  "unique_projects_covered": 875,
+  "top_brand_verification": {
+    "builder_brigade_group": {
+      "name": "Brigade Group",
+      "count": 15,
+      "expected": 15
+    },
+    "builder_prestige_group": {
+      "name": "Prestige Group",
+      "count": 13,
+      "expected": 13
+    },
+    "builder_shriram_properties": {
+      "name": "Shriram Properties",
+      "count": 10,
+      "expected": 10
+    },
+    "builder_godrej_properties": {
+      "name": "Godrej Properties",
+      "count": 9,
+      "expected": 9
+    },
+    "builder_puravankara_group": {
+      "name": "Puravankara & Provident",
+      "count": 7,
+      "expected": 7
+    },
+    "builder_sattva_group": {
+      "name": "Sattva Group (Salarpuria Sattva)",
+      "count": 7,
+      "expected": 7
+    },
+    "builder_total_environment": {
+      "name": "Total Environment",
+      "count": 7,
+      "expected": 7
+    }
+  },
+  "security_rules": {
+    "write_projects_status": 403,
+    "write_builders_status": 403,
+    "read_project_status": 200
+  }
+}

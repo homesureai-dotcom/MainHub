@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_components.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/property.dart';
 
 class PropertyCard extends StatelessWidget {
@@ -12,123 +14,219 @@ class PropertyCard extends StatelessWidget {
     required this.onTap,
   });
 
+  HomeSureBadgeTone _statusTone(String status) {
+    final normalized = status.trim().toUpperCase();
+    if (normalized.contains('APPROVED') || normalized.contains('ACTIVE')) {
+      return HomeSureBadgeTone.positive;
+    }
+    if (normalized.contains('REVOKED') ||
+        normalized.contains('EXPIRED') ||
+        normalized.contains('REJECTED')) {
+      return HomeSureBadgeTone.critical;
+    }
+    return HomeSureBadgeTone.warning;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(24),
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xffE2E8F0),
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 18,
-              offset: Offset(0, 8),
+    final statusText = property.regulatoryStatus.trim().isNotEmpty
+        ? property.regulatoryStatus.trim()
+        : 'K-RERA Registered';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+              border: Border.all(color: HomeSureColors.borderDivider),
+              boxShadow: HomeSureShadows.cardSubtle,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffEEF4FF),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Icon(
-                    Icons.apartment_rounded,
-                    size: 34,
-                    color: Color(0xff2563EB),
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: HomeSureColors.primaryNavyTint,
+                        borderRadius: BorderRadius.circular(HomeSureRadius.md),
+                      ),
+                      child: const Icon(
+                        Icons.apartment_rounded,
+                        size: 22,
+                        color: HomeSureColors.primaryNavy,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            property.name,
+                            style: HomeSureTypography.cardTitle.copyWith(
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            property.builder,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: HomeSureTypography.bodySecondary.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    HomeSureStatusBadge(
+                      label: statusText,
+                      tone: _statusTone(statusText),
+                      icon: Icons.verified_outlined,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        property.name,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    if (property.locality.isNotEmpty)
+                      _MetaChip(
+                        icon: Icons.location_on_outlined,
+                        label: property.locality,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        property.builder,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                        ),
+                    if (property.projectType.isNotEmpty)
+                      _MetaChip(
+                        icon: Icons.layers_outlined,
+                        label: property.projectType,
                       ),
-                      if (property.locality.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          property.locality,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
+                  ],
+                ),
+                if (property.reraNumber.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: HomeSureColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                      border: Border.all(color: HomeSureColors.borderDivider),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.badge_outlined,
+                          size: 14,
+                          color: HomeSureColors.primaryNavy,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'RERA: ${property.reraNumber}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: HomeSureColors.textPrimary,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.15,
+                            ),
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xffFFF7ED),
-                borderRadius: BorderRadius.circular(100),
-                border: Border.all(
-                  color: const Color(0xffFED7AA),
-                ),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.pending_outlined,
-                    color: Color(0xffC2410C),
-                    size: 17,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Not yet assessed by HomeSureAI',
-                    style: TextStyle(
-                      color: Color(0xffC2410C),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
                     ),
                   ),
                 ],
-              ),
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Flexible(
+                      child: HomeSureStatusBadge(
+                        label: 'Not yet assessed by HomeSureAI',
+                        tone: HomeSureBadgeTone.warning,
+                        icon: Icons.pending_outlined,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Inspect Dossier',
+                          style: HomeSureTypography.caption.copyWith(
+                            color: HomeSureColors.primaryNavy,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: HomeSureColors.primaryNavy,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            const Text(
-              'Select this project to view its details and start an assessment.',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 13,
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: HomeSureColors.surfaceSubtle,
+        borderRadius: BorderRadius.circular(HomeSureRadius.xs),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12.5, color: HomeSureColors.textSecondary),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: HomeSureTypography.caption,
+            ),
+          ),
+        ],
       ),
     );
   }

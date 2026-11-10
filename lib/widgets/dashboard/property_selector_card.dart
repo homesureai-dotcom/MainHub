@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../app_card.dart';
 
 class PropertySelectorCard extends StatelessWidget {
@@ -18,55 +19,61 @@ class PropertySelectorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-
           Container(
-            width: 52,
-            height: 52,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xffEEF4FF),
-              borderRadius: BorderRadius.circular(16),
+              color: HomeSureColors.primaryNavyTint,
+              borderRadius: BorderRadius.circular(HomeSureRadius.md),
             ),
             child: const Icon(
               Icons.apartment_rounded,
-              color: Color(0xff2563EB),
+              color: HomeSureColors.primaryNavy,
+              size: 22,
             ),
           ),
-
-          const SizedBox(width: 16),
-
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
+                const Text(
+                  'ACTIVE PROJECT DOSSIER',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: HomeSureColors.accentTealDark,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   propertyName,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: HomeSureTypography.cardTitle,
                 ),
-
-                const SizedBox(height: 4),
-
+                const SizedBox(height: 2),
                 Text(
                   location,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: HomeSureTypography.bodySecondary,
                 ),
               ],
             ),
           ),
-
-          const Icon(Icons.keyboard_arrow_down_rounded),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: HomeSureColors.surfaceSubtle,
+              borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+            ),
+            child: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: HomeSureColors.primaryNavy,
+              size: 20,
+            ),
+          ),
         ],
       ),
     );

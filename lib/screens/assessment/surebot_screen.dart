@@ -284,7 +284,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
 
   Widget _buildAssessmentOnboarding(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -292,30 +292,31 @@ class _SureBotScreenState extends State<SureBotScreen> {
             children: [
               const Spacer(),
               const SureBotAvatar(),
-              const SizedBox(height: 36),
-              _greeting(fontSize: 34, color: const Color(0xFF0F172A)),
+              const SizedBox(height: 32),
+              _greeting(fontSize: 30, color: const Color(0xFF17212F)),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: _languageSelector(),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Text(
                 _t('introTitle'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF172B4D),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               Text(
                 _t('introBody'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 17,
-                  color: Colors.grey,
-                  height: 1.6,
+                  fontSize: 15.5,
+                  color: Color(0xFF687386),
+                  height: 1.55,
                 ),
               ),
               const Spacer(),
@@ -335,7 +336,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
     final data = widget.sureBotContext!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
         title: const Text('SureBot'),
         actions: [
@@ -344,44 +345,44 @@ class _SureBotScreenState extends State<SureBotScreen> {
             child: Center(child: _languageSelector()),
           ),
         ],
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Center(child: SureBotAvatar()),
-              const SizedBox(height: 24),
-              _greeting(fontSize: 28, color: const Color(0xFF0F172A)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
+              _greeting(fontSize: 24, color: const Color(0xFF17212F)),
+              const SizedBox(height: 6),
               Text(
                 _t('contextIntro'),
                 style: const TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF64748B),
-                  height: 1.5,
+                  fontSize: 14.5,
+                  color: Color(0xFF687386),
+                  height: 1.45,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildPropertyCard(data.property),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _buildHealthCard(data.health),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _buildEvidenceCard(data.evidence),
               if (data.currentPriority != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 _buildPriorityCard(data.currentPriority!),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Text(
                 _t('help'),
                 style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF17212F),
                 ),
               ),
               const SizedBox(height: 12),
@@ -545,12 +546,12 @@ class _SureBotScreenState extends State<SureBotScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE7EAF0)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 21, color: const Color(0xFF2563EB)),
+          Icon(icon, size: 20, color: const Color(0xFF172B4D)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -558,11 +559,11 @@ class _SureBotScreenState extends State<SureBotScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF334155),
+                color: Color(0xFF17212F),
               ),
             ),
           ),
-          const Icon(Icons.chevron_right, color: Color(0xFF94A3B8)),
+          const Icon(Icons.chevron_right, color: Color(0xFF8C96A6)),
         ],
       ),
     );
@@ -584,30 +585,32 @@ class _ContextCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7EAF0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: const Color(0xFF2563EB)),
+              Icon(icon, color: const Color(0xFF172B4D), size: 20),
               const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF17212F),
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           ...children,
         ],
       ),

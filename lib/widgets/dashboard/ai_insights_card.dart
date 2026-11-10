@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../features/dashboard/models/dashboard_data.dart';
 import '../../features/dashboard/models/dashboard_priority.dart';
 import '../../models/property_health/recommendation.dart';
@@ -118,18 +119,18 @@ class AIInsightsCard extends StatelessWidget {
     final priority = _topPriority;
 
     if (priority == null) {
-      return Colors.blueGrey;
+      return HomeSureColors.textSecondary;
     }
 
     switch (priority.priority) {
       case RecommendationPriority.critical:
-        return Colors.red;
+        return HomeSureColors.statusCriticalText;
       case RecommendationPriority.high:
-        return Colors.orange;
+        return HomeSureColors.statusWarningText;
       case RecommendationPriority.medium:
-        return Colors.amber.shade800;
+        return HomeSureColors.primaryNavy;
       case RecommendationPriority.low:
-        return Colors.blue;
+        return HomeSureColors.accentTealDark;
     }
   }
 
@@ -173,136 +174,129 @@ class AIInsightsCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xff2563EB).withValues(alpha: .10),
-                  borderRadius: BorderRadius.circular(16),
+                  color: HomeSureColors.accentTealTint,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.md),
                 ),
-                child: const Icon(Icons.auto_awesome, color: Color(0xff2563EB)),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: HomeSureColors.accentTealDark,
+                  size: 22,
+                ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              const SizedBox(width: 12),
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'HomeSure AI',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: HomeSureTypography.sectionTitle,
                     ),
+                    SizedBox(height: 2),
                     Text(
                       'AI Property Intelligence',
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: HomeSureTypography.bodySecondary,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 28),
-
-          const Text(
-            'PROPERTY INTELLIGENCE',
-            style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700),
-          ),
-
-          const SizedBox(height: 12),
-
-          Center(
-            child: Text(
-              _scoreLabel,
-              style: const TextStyle(fontSize: 54, fontWeight: FontWeight.bold),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: HomeSureColors.surfaceSubtle,
+              borderRadius: BorderRadius.circular(HomeSureRadius.md),
+              border: Border.all(color: HomeSureColors.borderDivider),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'PROPERTY INTELLIGENCE',
+                  style: HomeSureTypography.eyebrow,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _scoreLabel,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: HomeSureColors.primaryNavy,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hasScore ? _starRating(data.healthScore!) : '☆☆☆☆☆',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: HomeSureColors.statusWarningText,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _profileLabel,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: hasScore
+                        ? _statusColor(data.healthScore!)
+                        : HomeSureColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-
-          const SizedBox(height: 10),
-
-          Center(
-            child: Text(
-              hasScore ? _starRating(data.healthScore!) : '☆☆☆☆☆',
-              style: const TextStyle(fontSize: 24, color: Colors.amber),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Center(
-            child: Text(
-              _profileLabel,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: hasScore ? _statusColor(data.healthScore!) : Colors.grey,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
-          const Divider(),
-
-          const SizedBox(height: 20),
-
-          if (hasPriority) ...[_priorityBadge(), const SizedBox(height: 16)],
-
+          const SizedBox(height: 18),
+          if (hasPriority) ...[_priorityBadge(), const SizedBox(height: 14)],
           _info(
             Icons.warning_amber_rounded,
             _priorityColor,
             'Biggest Risk',
             _riskTitle,
           ),
-
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.only(left: 58),
+            padding: const EdgeInsets.only(left: 48),
             child: Text(
               _riskDescription,
-              style: TextStyle(color: Colors.grey.shade700, height: 1.45),
+              style: HomeSureTypography.bodySecondary,
             ),
           ),
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 16),
           _info(
             Icons.lightbulb_outline,
-            Colors.blue,
+            HomeSureColors.primaryNavy,
             'Recommended Action',
             _recommendationTitle,
           ),
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 16),
           _info(
             Icons.trending_up,
-            Colors.green,
+            HomeSureColors.statusPositiveText,
             'Potential PHI Improvement',
             _estimatedGain,
           ),
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 16),
           _info(
             Icons.description_outlined,
-            Colors.indigo,
+            HomeSureColors.accentTealDark,
             'Evidence Required',
             _evidenceLabel,
           ),
-
-          const SizedBox(height: 28),
-
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: data.healthResult == null
                   ? null
                   : () => _openFullAnalysis(context),
-              icon: const Icon(Icons.auto_awesome),
+              icon: const Icon(Icons.auto_awesome, size: 18),
               label: const Text('View Full Property Analysis'),
             ),
           ),
@@ -313,24 +307,24 @@ class AIInsightsCard extends StatelessWidget {
 
   Widget _priorityBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: _priorityColor.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _priorityColor.withValues(alpha: .25)),
+        color: _priorityColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+        border: Border.all(color: _priorityColor.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.priority_high_rounded, size: 16, color: _priorityColor),
-          const SizedBox(width: 6),
+          Icon(Icons.priority_high_rounded, size: 14, color: _priorityColor),
+          const SizedBox(width: 5),
           Text(
             _priorityLabel,
             style: TextStyle(
               color: _priorityColor,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
-              letterSpacing: .8,
+              letterSpacing: 0.6,
             ),
           ),
         ],
@@ -340,49 +334,42 @@ class AIInsightsCard extends StatelessWidget {
 
   static String _starRating(double score) {
     final filledStars = (score / 20).round().clamp(0, 5);
-
     return List.generate(5, (index) => index < filledStars ? '★' : '☆').join();
   }
 
   static Color _statusColor(double score) {
-    if (score >= 90) {
-      return Colors.green;
-    }
-
     if (score >= 75) {
-      return Colors.green;
+      return HomeSureColors.statusPositiveText;
     }
-
     if (score >= 60) {
-      return Colors.orange;
+      return HomeSureColors.statusWarningText;
     }
-
-    return Colors.red;
+    return HomeSureColors.statusCriticalText;
   }
 
   static Widget _info(IconData icon, Color color, String title, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: color.withValues(alpha: .10),
-          child: Icon(icon, color: color),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+          ),
+          child: Icon(icon, color: color, size: 19),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(color: Colors.grey.shade600)),
-              const SizedBox(height: 4),
+              Text(title, style: HomeSureTypography.caption),
+              const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                  height: 1.3,
-                ),
+                style: HomeSureTypography.bodyMedium,
               ),
             ],
           ),

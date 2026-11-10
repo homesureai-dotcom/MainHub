@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../app_card.dart';
 
 class RecentAlertsCard extends StatelessWidget {
@@ -11,51 +12,54 @@ class RecentAlertsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             children: [
-
-              const Icon(
-                Icons.notifications_active_rounded,
-                color: Color(0xff2563EB),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: HomeSureColors.primaryNavyTint,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                ),
+                child: const Icon(
+                  Icons.notifications_active_outlined,
+                  color: HomeSureColors.primaryNavy,
+                  size: 19,
+                ),
               ),
-
               const SizedBox(width: 10),
-
-              Text(
-                "Recent Alerts",
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              const Text(
+                'Recent Alerts',
+                style: HomeSureTypography.sectionTitle,
               ),
             ],
           ),
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 16),
           _buildAlert(
-            color: Colors.orange,
+            color: HomeSureColors.statusWarningText,
             icon: Icons.warning_amber_rounded,
-            title: "e-Khata Pending",
-            subtitle: "Applications are under BBMP review.",
+            title: 'e-Khata Pending',
+            subtitle: 'Applications are under BBMP review.',
           ),
-
-          const Divider(height: 32),
-
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(),
+          ),
           _buildAlert(
-            color: Colors.red,
+            color: HomeSureColors.statusCriticalText,
             icon: Icons.error_outline_rounded,
-            title: "STP Issue",
-            subtitle: "Operational issue reported by residents.",
+            title: 'STP Issue',
+            subtitle: 'Operational issue reported by residents.',
           ),
-
-          const Divider(height: 32),
-
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(),
+          ),
           _buildAlert(
-            color: Colors.green,
+            color: HomeSureColors.statusPositiveText,
             icon: Icons.verified_rounded,
-            title: "Fire NOC Verified",
-            subtitle: "Fire Department approval received.",
+            title: 'Fire NOC Verified',
+            subtitle: 'Fire Department approval received.',
           ),
         ],
       ),
@@ -70,47 +74,36 @@ class RecentAlertsCard extends StatelessWidget {
   }) {
     return Row(
       children: [
-
         Container(
-          width: 48,
-          height: 48,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(14),
+            color: color.withValues(alpha: 0.11),
+            borderRadius: BorderRadius.circular(HomeSureRadius.sm),
           ),
-          child: Icon(icon, color: color),
+          child: Icon(icon, color: color, size: 20),
         ),
-
-        const SizedBox(width: 16),
-
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Text(
                 title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
+                style: HomeSureTypography.bodyMedium,
               ),
-
-              const SizedBox(height: 4),
-
+              const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                ),
+                style: HomeSureTypography.bodySecondary,
               ),
             ],
           ),
         ),
-
-        Icon(
+        const Icon(
           Icons.chevron_right_rounded,
-          color: Colors.grey.shade400,
+          color: HomeSureColors.textMuted,
+          size: 20,
         ),
       ],
     );

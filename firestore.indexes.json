@@ -1,30 +1,100 @@
 {
   "indexes": [
     {
-      "collectionGroup": "assessment_sessions",
+      "collectionGroup": "projects",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "city",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "lastUpdatedAt",
-          "order": "DESCENDING"
+          "fieldPath": "search_metadata.project_name_lower",
+          "order": "ASCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "property_submissions",
+      "collectionGroup": "projects",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "submittedBy",
+          "fieldPath": "taluk",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
+          "fieldPath": "search_metadata.project_name_lower",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "project_type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "search_metadata.project_name_lower",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "regulatory_status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "search_metadata.project_name_lower",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "search_metadata.search_tokens",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "search_metadata.project_name_lower",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "documents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "source_tab",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "display_order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "regulatory_tabs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "is_visible_tab",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "display_order",
+          "order": "ASCENDING"
         }
       ]
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/homesure_components.dart';
+import '../core/theme/homesure_tokens.dart';
 import '../data/phs_questions.dart';
 import '../features/dashboard/coordinators/dashboard_data_coordinator.dart';
 import '../features/dashboard/models/dashboard_data.dart';
@@ -13,7 +15,6 @@ import '../screens/assessment/property_health_result_screen.dart';
 import '../screens/assessment/surebot_screen.dart';
 import '../screens/dashboard/priority_detail_screen.dart';
 import '../state/assessment_state.dart';
-
 import '../widgets/dashboard/ai_insights_card.dart';
 import '../widgets/dashboard/assessment_progress_card.dart';
 import '../widgets/dashboard/evidence_snapshot_card.dart';
@@ -35,9 +36,7 @@ class HomeScreenV2 extends StatefulWidget {
 
 class _HomeScreenV2State extends State<HomeScreenV2> {
   final PropertyState propertyState = PropertyState.instance;
-
   final AssessmentState assessmentState = AssessmentState.instance;
-
   final SureBotContextBuilder _sureBotContextBuilder =
       const SureBotContextBuilder();
 
@@ -51,7 +50,6 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     if (_dashboardSessionRestoreAttempted) return;
     _dashboardSessionRestoreAttempted = true;
 
-    // Do not replace an assessment already active in this app session.
     if (assessmentState.hasActiveSession) return;
 
     try {
@@ -61,7 +59,6 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
       final submissionId = candidate.submissionId?.trim();
       if (submissionId != null && submissionId.isNotEmpty) {
-        // A saved session is not proof that the property remains approved.
         final approved = await PropertySubmissionService().isSubmissionApproved(
           submissionId,
         );
@@ -74,7 +71,6 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
         submissionId: candidate.submissionId,
       );
     } catch (error) {
-      // Keep the dashboard usable if saved progress cannot be checked.
       debugPrint('HOMESURE_DASHBOARD_RESTORE_ERROR: $error');
     }
   }
@@ -220,33 +216,23 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     }
 
     final totalQuestions = phsQuestions.length;
-
     final answeredQuestions = assessmentState.answeredQuestionCount;
-
     final remainingQuestions = totalQuestions > answeredQuestions
         ? totalQuestions - answeredQuestions
         : 0;
-
     final completionPercentage = totalQuestions > 0
         ? (answeredQuestions / totalQuestions).clamp(0.0, 1.0)
         : 0.0;
-
     final percentage = (completionPercentage * 100).round();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFDBEAFE)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.accentTealBorder),
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,88 +240,81 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(14),
+                  color: HomeSureColors.accentTealTint,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
                 ),
                 child: const Icon(
                   Icons.assignment_outlined,
-                  color: Color(0xFF2563EB),
+                  color: HomeSureColors.accentTealDark,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Assessment in progress',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
-                      ),
+                      style: HomeSureTypography.cardTitle,
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 2),
                     Text(
                       'Continue your Property Health Assessment',
-                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                      style: HomeSureTypography.bodySecondary,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '$answeredQuestions of $totalQuestions questions',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155),
-                ),
+                style: HomeSureTypography.bodyMedium,
               ),
               Text(
                 '$percentage%',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF2563EB),
+                  color: HomeSureColors.accentTealDark,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(HomeSureRadius.pill),
             child: LinearProgressIndicator(
               value: completionPercentage,
-              minHeight: 9,
-              backgroundColor: const Color(0xFFE2E8F0),
+              minHeight: 7,
+              backgroundColor: HomeSureColors.surfaceSubtle,
               valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF2563EB),
+                HomeSureColors.accentTeal,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             remainingQuestions > 0
                 ? '$remainingQuestions '
                       '${remainingQuestions == 1 ? 'question' : 'questions'} remaining'
                 : 'Assessment ready to complete',
-            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+            style: HomeSureTypography.caption,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: _continueAssessment,
-              icon: const Icon(Icons.arrow_forward),
+              icon: const Icon(Icons.arrow_forward, size: 18),
               label: const Text('Continue Assessment'),
             ),
           ),
@@ -354,76 +333,119 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
     if (data == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: HomeSureColors.backgroundWarm,
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.apartment_rounded,
-                      size: 64,
-                      color: Color(0xFF64748B),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      color: HomeSureColors.surfaceWhite,
+                      borderRadius: BorderRadius.circular(HomeSureRadius.xl),
+                      border: Border.all(color: HomeSureColors.borderDivider),
+                      boxShadow: HomeSureShadows.cardSubtle,
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Let’s get your property started',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Choose your apartment to explore its details '
-                      'and begin your HomeSureAI journey.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF64748B),
-                        height: 1.5,
-                      ),
-                    ),
-                    if (assessmentState.hasActiveSession) ...[
-                      const SizedBox(height: 24),
-                      _buildAssessmentResumeCard(),
-                      const SizedBox(height: 24),
-                      AssessmentProgressCard(
-                        completedQuestions: assessmentState
-                            .assessmentProgress
-                            .answeredQuestions,
-                        totalQuestions:
-                            assessmentState.assessmentProgress.totalQuestions,
-                        completionPercentage: assessmentState
-                            .assessmentProgress
-                            .completionPercentage
-                            .toDouble(),
-                        completedCategories: assessmentState
-                            .assessmentProgress
-                            .completedCategoryCount,
-                        totalCategories: assessmentState
-                            .assessmentProgress
-                            .totalCategoryCount,
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _findProperty,
-                        icon: const Icon(Icons.search),
-                        label: const Text('Find a Property'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      children: [
+                        const HomeSureStatusBadge(
+                          label: 'Bengaluru Property Due Diligence',
+                          tone: HomeSureBadgeTone.teal,
+                          icon: Icons.verified_user_outlined,
                         ),
-                      ),
+                        const SizedBox(height: 18),
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: HomeSureColors.primaryNavyTint,
+                            borderRadius: BorderRadius.circular(
+                              HomeSureRadius.lg,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.apartment_rounded,
+                            size: 30,
+                            color: HomeSureColors.primaryNavy,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Let’s get your property started',
+                          textAlign: TextAlign.center,
+                          style: HomeSureTypography.screenTitle,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Know the project you have chosen. Understand what is behind it using official K-RERA disclosures and structured buyer evaluation.',
+                          textAlign: TextAlign.center,
+                          style: HomeSureTypography.bodySecondary,
+                        ),
+                        const SizedBox(height: 18),
+                        const Row(
+                          children: [
+                            Expanded(
+                              child: HomeSureMetricTile(
+                                label: 'Canonical Builders',
+                                value: '680',
+                                sublabel: 'Bengaluru Registry',
+                                icon: Icons.domain_rounded,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: HomeSureMetricTile(
+                                label: 'K-RERA Projects',
+                                value: '875',
+                                sublabel: 'Official Records',
+                                icon: Icons.fact_check_outlined,
+                                accentColor: HomeSureColors.accentTealDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _findProperty,
+                            icon: const Icon(Icons.search_rounded, size: 19),
+                            label: const Text('Find a Property'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (assessmentState.hasActiveSession) ...[
+                    const SizedBox(height: 16),
+                    _buildAssessmentResumeCard(),
+                    const SizedBox(height: 16),
+                    AssessmentProgressCard(
+                      completedQuestions: assessmentState
+                          .assessmentProgress
+                          .answeredQuestions,
+                      totalQuestions:
+                          assessmentState.assessmentProgress.totalQuestions,
+                      completionPercentage: assessmentState
+                          .assessmentProgress
+                          .completionPercentage
+                          .toDouble(),
+                      completedCategories: assessmentState
+                          .assessmentProgress
+                          .completedCategoryCount,
+                      totalCategories: assessmentState
+                          .assessmentProgress
+                          .totalCategoryCount,
                     ),
                   ],
-                ),
+                ],
               ),
             ),
           ),
@@ -432,27 +454,25 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     }
 
     final property = data.property;
-
     final score = data.healthScore?.round();
-
     final status = data.healthGrade;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.backgroundWarm,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const GreetingHeader(userName: 'Vinod'),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               PropertySelectorCard(
                 propertyName: property.name,
                 location: property.address.city,
-                onTap: () {},
+                onTap: _findProperty,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
               HeroScoreCard(
                 score: score,
                 status: status ?? 'Not Assessed',
@@ -461,14 +481,14 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                 issueCount: property.compliance.issueCount,
                 onPressed: _openCompliance,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               TodaysPrioritiesCard(
                 data: data,
                 onPriorityTap: _openPriorityDetail,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               _buildAssessmentResumeCard(),
-              if (assessmentState.hasActiveSession) const SizedBox(height: 24),
+              if (assessmentState.hasActiveSession) const SizedBox(height: 18),
               AssessmentProgressCard(
                 completedQuestions: data.evaluatedQuestionCount,
                 totalQuestions: data.totalQuestionCount,
@@ -477,24 +497,24 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
                 totalCategories: data.totalCategoryCount,
               ),
               if (data.healthResult != null) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
                 PropertyHealthBreakdownCard(result: data.healthResult!),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               EvidenceSnapshotCard(
                 data: data,
                 onViewDetails: _openEvidenceDetails,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 22),
               QuickActionGrid(
                 onAiAdvisor: _openAiAdvisor,
                 onDocuments: _openDocuments,
                 onCompliance: _openCompliance,
                 onTimeline: _openTimeline,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 22),
               const RecentAlertsCard(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 22),
               AIInsightsCard(data: data),
             ],
           ),

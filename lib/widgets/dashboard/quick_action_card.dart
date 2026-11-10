@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../app_card.dart';
 
 class QuickActionCard extends StatelessWidget {
@@ -22,56 +23,49 @@ class QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           Row(
             children: [
-
               Container(
-                width: 54,
-                height: 54,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
+                  color: color.withValues(alpha: 0.11),
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
                 ),
                 child: Icon(
                   icon,
                   color: color,
-                  size: 28,
+                  size: 22,
                 ),
               ),
-
               const Spacer(),
-
-              Icon(
+              const Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: Colors.grey.shade400,
+                size: 13,
+                color: HomeSureColors.textMuted,
               ),
             ],
           ),
-
-          const SizedBox(height: 22),
-
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              height: 1.4,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: HomeSureTypography.cardTitle,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: HomeSureTypography.caption,
+              ),
+            ],
           ),
         ],
       ),
