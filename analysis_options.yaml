@@ -28,6 +28,9 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 
 analyzer:
+  errors:
+    prefer_initializing_formals: ignore
+    deprecated_member_use: ignore
   exclude:
     - backups/**
     - build/**

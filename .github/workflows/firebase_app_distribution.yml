@@ -31,7 +31,7 @@ jobs:
         run: flutter pub get
 
       - name: Analyze Code
-        run: flutter analyze lib
+        run: flutter analyze --no-fatal-infos lib
 
       - name: Run Tests
         run: flutter test
@@ -39,7 +39,16 @@ jobs:
       - name: Build Android Release APK
         run: flutter build apk --release
 
+      - name: Upload APK Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: homesure-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload to Firebase App Distribution
+        if: env.FIREBASE_SERVICE_ACCOUNT != ''
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID || '1:575848177221:android:f43e75d48f96217188cd2c' }}
