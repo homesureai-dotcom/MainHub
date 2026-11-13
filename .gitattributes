@@ -1,0 +1,4 @@
+# Preserve LF line endings for Cloud Functions JS/TS files across OSes (ESLint linebreak-style)
+functions/**/*.js text eol=lf
+functions/**/*.ts text eol=lf
+functions/.eslintrc.js text eol=lf
