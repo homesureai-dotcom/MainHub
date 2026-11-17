@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/city.dart';
 
 class CityCard extends StatelessWidget {
@@ -17,33 +18,35 @@ class CityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(HomeSureRadius.lg),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF2563EB).withValues(alpha: 0.08)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(18),
+              ? HomeSureColors.midnightSelected
+              : HomeSureColors.midnightCard,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
           border: Border.all(
             color: selected
-                ? const Color(0xFF2563EB)
-                : const Color(0xFFE2E8F0),
-            width: selected ? 2 : 1,
+                ? HomeSureColors.champagneGold
+                : HomeSureColors.borderSlate,
+            width: selected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
 
-            const CircleAvatar(
+            CircleAvatar(
               radius: 24,
-              backgroundColor: Color(0xFFEEF4FF),
-              child: Icon(
+              backgroundColor: selected
+                  ? HomeSureColors.midnightSand
+                  : HomeSureColors.midnightInteractive,
+              child: const Icon(
                 Icons.location_city,
-                color: Color(0xFF2563EB),
+                color: HomeSureColors.champagneHighlight,
               ),
             ),
 
@@ -58,7 +61,8 @@ class CityCard extends StatelessWidget {
                     city.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 17,
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
 
@@ -67,7 +71,7 @@ class CityCard extends StatelessWidget {
                   Text(
                     city.state,
                     style: const TextStyle(
-                      color: Colors.grey,
+                      color: HomeSureColors.slateMuted,
                     ),
                   ),
                 ],
@@ -77,7 +81,7 @@ class CityCard extends StatelessWidget {
             if (selected)
               const Icon(
                 Icons.check_circle,
-                color: Color(0xFF2563EB),
+                color: HomeSureColors.champagneGold,
               ),
           ],
         ),

@@ -66,21 +66,13 @@ void main() {
   }
 
   Future<void> answerCurrentQuestion(WidgetTester tester) async {
-    final yesOption = find.text('Yes').last;
-
-    expect(yesOption, findsOneWidget);
+    final yesOption = find.text('Yes').at(
+      AssessmentState.instance.answeredQuestionCount,
+    );
 
     await tester.ensureVisible(yesOption);
     await tester.pumpAndSettle();
     await tester.tap(yesOption);
-    await tester.pumpAndSettle();
-
-    final nextButton = find.text('Next Question');
-    expect(nextButton, findsOneWidget);
-
-    await tester.ensureVisible(nextButton);
-    await tester.pumpAndSettle();
-    await tester.tap(nextButton);
     await tester.pumpAndSettle();
   }
 

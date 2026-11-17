@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class JourneyStepCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -15,35 +17,29 @@ class JourneyStepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
+          color: HomeSureColors.borderSlate,
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 16,
-            offset: Offset(0, 8),
-          ),
-        ],
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 28,
-            backgroundColor: const Color(0xFFEEF4FF),
+            radius: 26,
+            backgroundColor: HomeSureColors.midnightInteractive,
             child: Icon(
               icon,
-              color: const Color(0xFF2563EB),
-              size: 28,
+              color: HomeSureColors.champagneHighlight,
+              size: 26,
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,16 +47,17 @@ class JourneyStepCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 19,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: HomeSureColors.champagneInk,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey,
+                    fontSize: 14.5,
+                    color: HomeSureColors.slateMuted,
                     height: 1.5,
                   ),
                 ),

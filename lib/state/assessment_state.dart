@@ -20,6 +20,7 @@ class AssessmentState extends ChangeNotifier {
   AssessmentSessionStore? _sessionStore;
   Future<void> _pendingPersistence = Future<void>.value();
   Object? _persistenceError;
+  int _lastSessionTimestamp = 0;
 
   Object? get persistenceError => _persistenceError;
 
@@ -188,8 +189,14 @@ class AssessmentState extends ChangeNotifier {
 
     _evidenceRepository.clear();
 
+    var sessionMicro = now.microsecondsSinceEpoch;
+    if (sessionMicro <= _lastSessionTimestamp) {
+      sessionMicro = _lastSessionTimestamp + 1;
+    }
+    _lastSessionTimestamp = sessionMicro;
+
     _session = AssessmentSession(
-      assessmentId: 'ASSESSMENT_${now.microsecondsSinceEpoch}',
+      assessmentId: 'ASSESSMENT_$sessionMicro',
       propertyId: propertyId,
       submissionId: submissionId,
       startedAt: now,
@@ -216,6 +223,19 @@ class AssessmentState extends ChangeNotifier {
     _queueSessionSave();
   }
 
+  void clearAnswer(String questionId, {String? currentQuestionId}) {
+    final beforeLength = _answers.length;
+    _answers.removeWhere((existing) => existing.questionId == questionId);
+    if (_answers.length == beforeLength) {
+      return;
+    }
+
+    _updateSession(currentQuestionId: currentQuestionId ?? questionId);
+
+    notifyListeners();
+    _queueSessionSave();
+  }
+
   void updateCurrentQuestion(String? questionId) {
     if (_session == null) {
       return;
@@ -224,7 +244,6 @@ class AssessmentState extends ChangeNotifier {
     _updateSession(currentQuestionId: questionId);
 
     notifyListeners();
-    _queueSessionSave();
     _queueSessionSave();
   }
 

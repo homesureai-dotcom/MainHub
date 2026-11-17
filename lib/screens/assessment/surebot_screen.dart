@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/localization/app_locale_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../features/auth/services/user_profile_service.dart';
+import '../../features/auth/state/user_profile_state.dart';
 
 import '../../features/property_submission/services/property_submission_service.dart';
 import '../../features/surebot/models/surebot_context.dart';
@@ -9,16 +11,50 @@ import '../../widgets/assessment/surebot_avatar.dart';
 import '../../widgets/common/app_button.dart';
 import 'assessment_screen.dart';
 
+class SureBotChatMessage {
+  final bool isUser;
+  final String text;
+  final DateTime timestamp;
+
+  SureBotChatMessage({
+    required this.isUser,
+    required this.text,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
+}
+
+/// Preserves in-session SureBot Q&A history when the assistant modal is
+/// dismissed and reopened from the floating AI button.
+class SureBotConversationHistory {
+  SureBotConversationHistory._();
+
+  static final List<SureBotChatMessage> _messages = [];
+
+  static List<SureBotChatMessage> get messages => List.unmodifiable(_messages);
+
+  static void add(SureBotChatMessage message) {
+    _messages.add(message);
+  }
+
+  static void clear() {
+    _messages.clear();
+  }
+}
+
 class SureBotScreen extends StatefulWidget {
   final SureBotContext? sureBotContext;
   final String? submissionId;
   final PropertySubmissionApprovalGateway? approvalGateway;
+  final bool openAsAssistant;
+  final VoidCallback? onBrowseProperties;
 
   const SureBotScreen({
     super.key,
     this.sureBotContext,
     this.submissionId,
     this.approvalGateway,
+    this.openAsAssistant = false,
+    this.onBrowseProperties,
   });
 
   @override
@@ -30,6 +66,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
   String _languageCode = 'en';
   String _greetingName = 'there';
   bool _savingLanguage = false;
+  final TextEditingController _questionController = TextEditingController();
 
   static const Map<String, Map<String, String>> _copy = {
     'en': {
@@ -119,8 +156,25 @@ class _SureBotScreenState extends State<SureBotScreen> {
   void initState() {
     super.initState();
     _languageCode = AppLocaleController.instance.languageCode;
+    _syncCachedProfileName();
     AppLocaleController.instance.locale.addListener(_onAppLocaleChanged);
+    UserProfileState.instance.addListener(_onUserProfileChanged);
     _loadPreferences();
+  }
+
+  void _syncCachedProfileName() {
+    final cached = UserProfileState.instance.firstNameOrDisplay.trim();
+    if (cached.isNotEmpty) {
+      _greetingName = cached;
+    }
+  }
+
+  void _onUserProfileChanged() {
+    if (!mounted) return;
+    final updated = UserProfileState.instance.firstNameOrDisplay.trim();
+    setState(() {
+      _greetingName = updated.isNotEmpty ? updated : 'there';
+    });
   }
 
   void _onAppLocaleChanged() {
@@ -134,6 +188,8 @@ class _SureBotScreenState extends State<SureBotScreen> {
   @override
   void dispose() {
     AppLocaleController.instance.locale.removeListener(_onAppLocaleChanged);
+    UserProfileState.instance.removeListener(_onUserProfileChanged);
+    _questionController.dispose();
     super.dispose();
   }
 
@@ -143,19 +199,23 @@ class _SureBotScreenState extends State<SureBotScreen> {
     if (Firebase.apps.isEmpty) return;
 
     final profileService = _profileService ??= UserProfileService();
-    var name = 'there';
+    var name = UserProfileState.instance.firstNameOrDisplay.trim();
 
     // The app normally loads this preference before showing screens.
     // Reload here as well for standalone routes and test contexts.
     await AppLocaleController.instance.loadSavedLanguage();
     try {
-      name = await profileService.getPreferredName();
+      if (name.isEmpty) {
+        name = await profileService.getPreferredName();
+      }
     } catch (_) {}
 
     if (!mounted) return;
     setState(() {
       _languageCode = AppLocaleController.instance.languageCode;
-      _greetingName = name;
+      if (name.isNotEmpty) {
+        _greetingName = name;
+      }
     });
   }
 
@@ -193,6 +253,13 @@ class _SureBotScreenState extends State<SureBotScreen> {
     };
     return DropdownButton<String>(
       value: _languageCode,
+      dropdownColor: HomeSureColors.midnightCard,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: HomeSureColors.champagneInk,
+        fontSize: 13.5,
+        fontWeight: FontWeight.w600,
+      ),
+      iconEnabledColor: HomeSureColors.champagneHighlight,
       underline: const SizedBox.shrink(),
       onChanged: _savingLanguage ? null : _changeLanguage,
       items: names.entries
@@ -206,9 +273,53 @@ class _SureBotScreenState extends State<SureBotScreen> {
     );
   }
 
+  void _askSureBot(String prompt) {
+    final trimmed = prompt.trim();
+    if (trimmed.isEmpty) return;
+
+    final reply = _buildContextualReply(trimmed);
+    setState(() {
+      SureBotConversationHistory.add(
+        SureBotChatMessage(isUser: true, text: trimmed),
+      );
+      SureBotConversationHistory.add(
+        SureBotChatMessage(isUser: false, text: reply),
+      );
+    });
+    _questionController.clear();
+  }
+
+  String _buildContextualReply(String prompt) {
+    final ctx = widget.sureBotContext;
+    if (ctx == null) {
+      return 'Select a K-RERA registered property first from the Properties tab or complete your 33-question PHI assessment so I can analyze your exact score, legal evidence gaps, and priority actions.';
+    }
+
+    final lower = prompt.toLowerCase();
+    final scoreText = ctx.health.score == null
+        ? 'not yet calculated (${ctx.health.evaluatedQuestionCount}/${ctx.health.totalQuestionCount} questions evaluated)'
+        : '${ctx.health.score!.round()} out of 100 (${ctx.health.grade ?? 'Rated'})';
+
+    if (lower.contains('score') || lower.contains('phi') || lower.contains('why')) {
+      return 'For ${ctx.property.name}, your current Property Health Index is $scoreText with ${ctx.health.riskCount} flagged risk items and ${ctx.evidence.coveragePercentage.round()}% evidence coverage.';
+    }
+    if (lower.contains('first') || lower.contains('priority') || lower.contains('address')) {
+      if (ctx.currentPriority != null) {
+        final p = ctx.currentPriority!;
+        final gain = p.estimatedPHIGain > 0 ? ' (estimated +${p.estimatedPHIGain} PHI gain)' : '';
+        return 'Your top priority is "${p.title}"$gain: ${p.description}';
+      }
+      return 'Continue answering unanswered PHS questions in your Health tab to reveal priority legal and technical actions.';
+    }
+    if (lower.contains('doc') || lower.contains('evidence')) {
+      return 'Evidence status for ${ctx.property.name}: ${ctx.evidence.satisfiedRequirements} satisfied, ${ctx.evidence.missingRequirements} missing, and ${ctx.evidence.needsReviewRequirements} needing review.';
+    }
+    return 'SureBot analyzed ${ctx.property.name} (${ctx.property.builderName}): PHI is $scoreText and evidence coverage is ${ctx.evidence.coveragePercentage.round()}%. Ask about your score, top priority, or missing documents anytime.';
+  }
+
   Widget _greeting({required double fontSize, required Color color}) {
     final prefix = _t('greeting');
-    final suffix = _languageCode == 'en' && _greetingName != 'there'
+    final suffix = _greetingName.isNotEmpty && _greetingName != 'there'
         ? ' $_greetingName'
         : '';
     return Text(
@@ -226,7 +337,9 @@ class _SureBotScreenState extends State<SureBotScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (hasContext) return _buildContextualSureBot(context);
+    if (hasContext || widget.openAsAssistant) {
+      return _buildContextualSureBot(context);
+    }
     return _buildAssessmentOnboarding(context);
   }
 
@@ -284,7 +397,11 @@ class _SureBotScreenState extends State<SureBotScreen> {
 
   Widget _buildAssessmentOnboarding(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: HomeSureColors.midnightBg,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -292,8 +409,8 @@ class _SureBotScreenState extends State<SureBotScreen> {
             children: [
               const Spacer(),
               const SureBotAvatar(),
-              const SizedBox(height: 32),
-              _greeting(fontSize: 30, color: const Color(0xFF17212F)),
+              const SizedBox(height: 28),
+              _greeting(fontSize: 28, color: HomeSureColors.champagneInk),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
@@ -306,16 +423,16 @@ class _SureBotScreenState extends State<SureBotScreen> {
                 style: const TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF172B4D),
+                  color: HomeSureColors.champagneHighlight,
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Text(
                 _t('introBody'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 15.5,
-                  color: Color(0xFF687386),
+                  color: HomeSureColors.slateMuted,
                   height: 1.55,
                 ),
               ),
@@ -333,11 +450,19 @@ class _SureBotScreenState extends State<SureBotScreen> {
   }
 
   Widget _buildContextualSureBot(BuildContext context) {
-    final data = widget.sureBotContext!;
+    final data = widget.sureBotContext;
+    final history = SureBotConversationHistory.messages;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
+        backgroundColor: HomeSureColors.midnightHeader,
+        elevation: 0,
+        leading: IconButton(
+          tooltip: 'Dismiss SureBot',
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
         title: const Text('SureBot'),
         actions: [
           Padding(
@@ -345,61 +470,166 @@ class _SureBotScreenState extends State<SureBotScreen> {
             child: Center(child: _languageSelector()),
           ),
         ],
-        backgroundColor: Colors.white,
-        elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(child: SureBotAvatar()),
-              const SizedBox(height: 20),
-              _greeting(fontSize: 24, color: const Color(0xFF17212F)),
-              const SizedBox(height: 6),
-              Text(
-                _t('contextIntro'),
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  color: Color(0xFF687386),
-                  height: 1.45,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Center(child: SureBotAvatar(size: 92)),
+                    const SizedBox(height: 18),
+                    _greeting(fontSize: 24, color: HomeSureColors.champagneInk),
+                    const SizedBox(height: 6),
+                    Text(
+                      data != null
+                          ? _t('contextIntro')
+                          : 'Ask about your K-RERA project checks, PHI scoring methodology, or select a property to unlock project-specific due diligence.',
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        color: HomeSureColors.slateMuted,
+                        height: 1.45,
+                      ),
+                    ),
+                    if (data != null) ...[
+                      const SizedBox(height: 18),
+                      _buildPropertyCard(data.property),
+                      const SizedBox(height: 12),
+                      _buildHealthCard(data.health),
+                      const SizedBox(height: 12),
+                      _buildEvidenceCard(data.evidence),
+                      if (data.currentPriority != null) ...[
+                        const SizedBox(height: 12),
+                        _buildPriorityCard(data.currentPriority!),
+                      ],
+                    ] else if (widget.onBrowseProperties != null) ...[
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: widget.onBrowseProperties,
+                          icon: const Icon(Icons.apartment_rounded, size: 18),
+                          label: const Text('Select Property for Project Context'),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    Text(
+                      _t('help'),
+                      style: const TextStyle(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w700,
+                        color: HomeSureColors.champagneInk,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestionChip(
+                      icon: Icons.health_and_safety_outlined,
+                      label: _t('score'),
+                      onTap: () => _askSureBot(_t('score')),
+                    ),
+                    _buildQuestionChip(
+                      icon: Icons.warning_amber_outlined,
+                      label: _t('first'),
+                      onTap: () => _askSureBot(_t('first')),
+                    ),
+                    _buildQuestionChip(
+                      icon: Icons.description_outlined,
+                      label: _t('docs'),
+                      onTap: () => _askSureBot(_t('docs')),
+                    ),
+                    if (history.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Conversation',
+                            style: HomeSureTypography.sectionTitle,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                SureBotConversationHistory.clear();
+                              });
+                            },
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      ...history.map(
+                        (msg) => Align(
+                          alignment: msg.isUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(12),
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            decoration: BoxDecoration(
+                              color: msg.isUser
+                                  ? HomeSureColors.midnightSelected
+                                  : HomeSureColors.midnightCard,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: msg.isUser
+                                    ? HomeSureColors.champagneBronze
+                                    : HomeSureColors.borderSlate,
+                              ),
+                            ),
+                            child: Text(
+                              msg.text,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                height: 1.45,
+                                color: msg.isUser
+                                    ? HomeSureColors.champagneHighlight
+                                    : HomeSureColors.champagneInk,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              _buildPropertyCard(data.property),
-              const SizedBox(height: 14),
-              _buildHealthCard(data.health),
-              const SizedBox(height: 14),
-              _buildEvidenceCard(data.evidence),
-              if (data.currentPriority != null) ...[
-                const SizedBox(height: 14),
-                _buildPriorityCard(data.currentPriority!),
-              ],
-              const SizedBox(height: 20),
-              Text(
-                _t('help'),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF17212F),
+            ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+              decoration: const BoxDecoration(
+                color: HomeSureColors.midnightHeader,
+                border: Border(
+                  top: BorderSide(color: HomeSureColors.borderSlate),
                 ),
               ),
-              const SizedBox(height: 12),
-              _buildQuestionChip(
-                icon: Icons.health_and_safety_outlined,
-                label: _t('score'),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _questionController,
+                      style: const TextStyle(color: HomeSureColors.champagneInk),
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: _askSureBot,
+                      decoration: const InputDecoration(
+                        hintText: 'Ask SureBot about your property...',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => _askSureBot(_questionController.text),
+                    child: const Icon(Icons.send_rounded, size: 18),
+                  ),
+                ],
               ),
-              _buildQuestionChip(
-                icon: Icons.warning_amber_outlined,
-                label: _t('first'),
-              ),
-              _buildQuestionChip(
-                icon: Icons.description_outlined,
-                label: _t('docs'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -491,7 +721,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: HomeSureColors.champagneInk,
           ),
         ),
         const SizedBox(height: 8),
@@ -499,7 +729,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
           priority.description,
           style: const TextStyle(
             fontSize: 14,
-            color: Color(0xFF64748B),
+            color: HomeSureColors.slateMuted,
             height: 1.5,
           ),
         ),
@@ -510,7 +740,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF2563EB),
+              color: HomeSureColors.champagneHighlight,
             ),
           ),
         ],
@@ -521,7 +751,7 @@ class _SureBotScreenState extends State<SureBotScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: HomeSureColors.champagneInk,
             ),
           ),
           const SizedBox(height: 6),
@@ -530,7 +760,10 @@ class _SureBotScreenState extends State<SureBotScreen> {
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(
                 '• $document',
-                style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: HomeSureColors.slateMuted,
+                ),
               ),
             ),
           ),
@@ -539,32 +772,48 @@ class _SureBotScreenState extends State<SureBotScreen> {
     );
   }
 
-  Widget _buildQuestionChip({required IconData icon, required String label}) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE7EAF0)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: const Color(0xFF172B4D)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF17212F),
-              ),
+  Widget _buildQuestionChip({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: HomeSureColors.borderSlate),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: HomeSureColors.champagneHighlight),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: HomeSureColors.champagneInk,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  color: HomeSureColors.slateMuted,
+                ),
+              ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Color(0xFF8C96A6)),
-        ],
+        ),
       ),
     );
   }
@@ -587,16 +836,16 @@ class _ContextCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: HomeSureColors.midnightCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7EAF0)),
+        border: Border.all(color: HomeSureColors.borderSlate),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: const Color(0xFF172B4D), size: 20),
+              Icon(icon, color: HomeSureColors.champagneHighlight, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -604,7 +853,7 @@ class _ContextCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF17212F),
+                    color: HomeSureColors.champagneInk,
                   ),
                 ),
               ),
@@ -635,7 +884,10 @@ class _FactRow extends StatelessWidget {
             width: 125,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              style: const TextStyle(
+                fontSize: 13,
+                color: HomeSureColors.slateMuted,
+              ),
             ),
           ),
           Expanded(
@@ -644,7 +896,7 @@ class _FactRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF334155),
+                color: HomeSureColors.champagneInk,
               ),
             ),
           ),

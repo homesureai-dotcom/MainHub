@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class AddEvidenceButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
@@ -16,7 +18,7 @@ class AddEvidenceButton extends StatelessWidget {
         onPressed: onPressed,
         icon: const Icon(
           Icons.add_a_photo_outlined,
-          size: 21,
+          size: 20,
         ),
         label: const Text(
           'Add Evidence',
@@ -26,13 +28,14 @@ class AddEvidenceButton extends StatelessWidget {
           ),
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF2563EB),
+          backgroundColor: HomeSureColors.midnightInteractive,
+          foregroundColor: HomeSureColors.champagneHighlight,
           side: const BorderSide(
-            color: Color(0xFFBFDBFE),
+            color: HomeSureColors.champagneBronze,
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: 18,
-            vertical: 15,
+            vertical: 14,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),

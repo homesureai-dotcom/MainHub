@@ -1,88 +1,51 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/generated/app_localizations.dart';
-
-import '../../widgets/assessment/classic_category_accordion.dart';
-
 import '../../core/evidence/assessment_evidence_management_service.dart';
-
 import '../../core/evidence/composite_evidence_capture_service.dart';
-
 import '../../core/evidence/evidence.dart';
-
 import '../../core/evidence/evidence_capture_coordinator.dart';
-
 import '../../core/evidence/evidence_capture_service.dart';
-
 import '../../core/evidence/evidence_requirement_catalog.dart';
-
 import '../../core/evidence/evidence_requirement_resolver.dart';
-
 import '../../core/evidence/evidence_type_mapper.dart';
-
 import '../../core/evidence/evidence_validator.dart';
-
 import '../../core/evidence/file_picker_evidence_capture_service.dart';
-
 import '../../core/evidence/file_picker_gateway.dart';
-
 import '../../core/evidence/image_picker_evidence_capture_service.dart';
-
 import '../../core/evidence/image_picker_gateway.dart';
-
 import '../../core/evidence/question_evidence_coordinator.dart';
-
 import '../../core/evidence/video_capture_service.dart';
-
+import '../../core/localization/app_locale_controller.dart';
 import '../../core/phs/phs_answer.dart';
-
 import '../../core/phs/phs_categories.dart';
-
-import '../../core/phs/phs_category_question_resolver.dart';
-
-import '../../core/phs/phs_question_progress_resolver.dart';
-
-import '../../data/phs_questions.dart';
-
 import '../../core/phs/phs_question.dart';
-
+import '../../core/theme/homesure_tokens.dart';
+import '../../data/phs_questions.dart';
+import '../../features/assessment/localization/assessment_translations.dart';
 import '../../features/property/state/property_state.dart';
-
 import '../../features/property_submission/services/property_submission_service.dart';
-
 import '../../models/property_health/category_score.dart';
-
 import '../../models/property_health/score_calculator.dart';
-
 import '../../state/assessment_state.dart';
-
-import '../../widgets/assessment/assessment_progress.dart';
-
-import '../../widgets/assessment/current_question_progress.dart';
-
-import '../../widgets/assessment/premium_assessment_view.dart';
-
+import '../../theme/app_gradients.dart';
 import '../../widgets/assessment/question_card.dart';
-
-import '../../widgets/property_health/score_heatmap_legend.dart';
-
+import '../onboarding/property_search_screen.dart';
 import 'analyzing_screen.dart';
 
 class AssessmentScreen extends StatefulWidget {
   final EvidenceCaptureService? evidenceCaptureService;
-
   final String? submissionId;
-
   final PropertySubmissionApprovalGateway? approvalGateway;
+  final bool embeddedInTab;
+  final VoidCallback? onSelectProperty;
 
   const AssessmentScreen({
     super.key,
-
     this.evidenceCaptureService,
-
     this.submissionId,
-
     this.approvalGateway,
+    this.embeddedInTab = false,
+    this.onSelectProperty,
   });
 
   @override
@@ -90,44 +53,23 @@ class AssessmentScreen extends StatefulWidget {
 }
 
 class _AssessmentScreenState extends State<AssessmentScreen> {
-  int currentQuestion = 0;
-  late final PageController _questionPageController = PageController();
-
   final AssessmentState assessmentState = AssessmentState.instance;
-
   final PropertyState propertyState = PropertyState.instance;
-
-  final PHSCategoryQuestionResolver _categoryQuestionResolver =
-      const PHSCategoryQuestionResolver();
-
-  final PHSQuestionProgressResolver _questionProgressResolver =
-      const PHSQuestionProgressResolver();
-
   final ScoreCalculator _scoreCalculator = ScoreCalculator();
+  final ScrollController _scrollController = ScrollController();
 
   late final QuestionEvidenceCoordinator _evidenceCoordinator;
-
   late final AssessmentEvidenceManagementService _evidenceManagementService;
-
   late final EvidenceCaptureCoordinator _evidenceCaptureCoordinator;
 
-  List<Evidence> _currentQuestionEvidence = const [];
-
-  PHSResponse? _selectedResponse;
+  PHSCategory _activeCategory = PHSCategory.legalOwnership;
+  Map<String, List<Evidence>> _evidenceByQuestionId = {};
+  final Set<String> _expandedEvidenceQuestionIds = {};
 
   bool _isAnswering = false;
-
-  bool _premiumView = false;
-
-  // Catalogue properties retain the existing flow. Submitted properties// must pass a fresh approval check before an assessment can start.*
-
   bool _approvalCheckComplete = true;
-
   bool _approvalDenied = false;
-
   bool _approvalCheckFailed = false;
-
-  PHSCategory? _selectedPremiumCategory;
 
   List<CategoryScore> get _categoryScores =>
       _scoreCalculator.calculate(assessmentState.answers);
@@ -138,32 +80,60 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   double get _assessmentCoverage =>
       _scoreCalculator.calculateAssessmentCoverage(assessmentState.answers);
 
+  List<PHSQuestion> _questionsForCategory(PHSCategory category) {
+    return phsQuestions
+        .where((question) => question.category == category)
+        .toList(growable: false);
+  }
+
   @override
   void initState() {
     super.initState();
 
+    _seedInitialExpandedQuestion(_activeCategory);
+    assessmentState.addListener(_onAssessmentStateChanged);
+    propertyState.addListener(_onPropertyStateChanged);
     _initializeEvidenceCoordinator();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       final id = widget.submissionId?.trim();
-
       if (id == null || id.isEmpty) {
-        // Existing catalogue/dashboard assessment flow.*
-
         _initializeAssessment();
       } else {
-        // Do not initialize the assessment until approval is confirmed.*
-
         _verifySubmissionApproval(id);
       }
     });
   }
 
+  void _seedInitialExpandedQuestion(PHSCategory category) {
+    final questions = _questionsForCategory(category);
+    if (questions.isNotEmpty) {
+      _expandedEvidenceQuestionIds
+        ..clear()
+        ..add(questions.first.id);
+    }
+  }
+
+  void _onAssessmentStateChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void _onPropertyStateChanged() {
+    if (!mounted) return;
+    setState(() {});
+    if (propertyState.selectedProperty != null) {
+      _loadPillarEvidence();
+    }
+  }
+
   @override
   void dispose() {
-    _questionPageController.dispose();
+    assessmentState.removeListener(_onAssessmentStateChanged);
+    propertyState.removeListener(_onPropertyStateChanged);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -171,53 +141,57 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     if (mounted) {
       setState(() {
         _approvalCheckComplete = false;
-
         _approvalDenied = false;
-
         _approvalCheckFailed = false;
       });
     }
 
     try {
       final checker = widget.approvalGateway ?? PropertySubmissionService();
-
       final approved = await checker.isSubmissionApproved(submissionId);
 
       if (!mounted) return;
 
       setState(() {
         _approvalCheckComplete = true;
-
         _approvalDenied = !approved;
-
         _approvalCheckFailed = false;
       });
 
       if (approved) {
-        _initializeAssessment();
+        await _initializeAssessment();
       }
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
         _approvalCheckComplete = true;
-
         _approvalDenied = true;
-
         _approvalCheckFailed = true;
       });
     }
   }
 
+  void _ensureActiveSession() {
+    if (assessmentState.hasActiveSession) {
+      return;
+    }
+
+    final submissionId = widget.submissionId?.trim();
+    assessmentState.startAssessment(
+      propertyId: propertyState.selectedProperty?.id,
+      submissionId:
+          submissionId == null || submissionId.isEmpty ? null : submissionId,
+    );
+  }
+
   Future<void> _initializeAssessment() async {
     final propertyId = propertyState.selectedProperty?.id;
-
     final submissionId = widget.submissionId?.trim();
 
     try {
       final restored = await assessmentState.restoreInProgress(
         propertyId: propertyId,
-
         submissionId: submissionId == null || submissionId.isEmpty
             ? null
             : submissionId,
@@ -225,25 +199,16 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
       if (!mounted) return;
 
-      if (!restored) {
-        assessmentState.startAssessment(
-          propertyId: propertyId,
-
-          submissionId: submissionId == null || submissionId.isEmpty
-              ? null
-              : submissionId,
-        );
+      if (!restored && !widget.embeddedInTab) {
+        _ensureActiveSession();
       }
 
-      _restoreCurrentQuestion();
-
-      _loadCurrentQuestionEvidence();
+      _restoreCurrentPillar();
+      await _loadPillarEvidence();
     } catch (error, stackTrace) {
       debugPrint('HOMESURE_ASSESSMENT_RESTORE_ERROR: $error');
-
       debugPrintStack(
         label: 'HOMESURE_ASSESSMENT_RESTORE_STACK',
-
         stackTrace: stackTrace,
       );
 
@@ -259,75 +224,61 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
   }
 
-  void _restoreCurrentQuestion() {
+  void _restoreCurrentPillar() {
     if (phsQuestions.isEmpty) {
       return;
     }
 
     final savedQuestionId = assessmentState.currentQuestionId;
-
     var restoredIndex = savedQuestionId == null
         ? -1
-        : phsQuestions.indexWhere((question) => question.id == savedQuestionId);
+        : phsQuestions.indexWhere((q) => q.id == savedQuestionId);
 
     if (restoredIndex < 0) {
       final answers = assessmentState.answers;
-
       if (answers.isEmpty) {
         restoredIndex = 0;
       } else {
-        final answeredQuestionIds = answers
-            .map((answer) => answer.questionId)
-            .toSet();
-
+        final answeredIds = answers.map((a) => a.questionId).toSet();
         restoredIndex = phsQuestions.indexWhere(
-          (question) => !answeredQuestionIds.contains(question.id),
+          (q) => !answeredIds.contains(q.id),
         );
-
         if (restoredIndex < 0) {
           restoredIndex = phsQuestions.length - 1;
         }
       }
     }
 
+    final restoredQuestion = phsQuestions[restoredIndex];
+
     setState(() {
-      currentQuestion = restoredIndex;
-      _selectedResponse = null;
+      _activeCategory = restoredQuestion.category;
+      _seedInitialExpandedQuestion(_activeCategory);
       _isAnswering = false;
     });
 
-    final restoredQuestionId = phsQuestions[restoredIndex].id;
-
-    // Keep the persisted session aligned with the question shown on screen.
-    if (assessmentState.currentQuestionId != restoredQuestionId) {
-      assessmentState.updateCurrentQuestion(restoredQuestionId);
+    if (assessmentState.currentQuestionId != restoredQuestion.id) {
+      assessmentState.updateCurrentQuestion(restoredQuestion.id);
     }
   }
 
   PHSResponse? _savedResponseForQuestion(String questionId) {
-    PHSResponse? response;
-
     for (final answer in assessmentState.answers) {
       if (answer.questionId == questionId) {
-        response = answer.response;
+        return answer.response;
       }
     }
-
-    return response;
+    return null;
   }
 
   void _initializeEvidenceCoordinator() {
-    final typeMapper = const EvidenceTypeMapper();
-
-    final resolver = EvidenceRequirementResolver(typeMapper: typeMapper);
-
-    final catalog = EvidenceRequirementCatalog(resolver: resolver);
-
+    const typeMapper = EvidenceTypeMapper();
+    const resolver = EvidenceRequirementResolver(typeMapper: typeMapper);
+    const catalog = EvidenceRequirementCatalog(resolver: resolver);
     final validator = EvidenceValidator();
 
     _evidenceCoordinator = QuestionEvidenceCoordinator(
       repository: assessmentState.evidenceRepository,
-
       validator: validator,
     );
 
@@ -341,11 +292,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
           documentCaptureService: FilePickerEvidenceCaptureService(
             filePicker: const PlatformFilePickerGateway(),
           ),
-
           photographCaptureService: ImagePickerEvidenceCaptureService(
             imagePicker: PlatformImagePickerGateway(),
           ),
-
           videoCaptureService: VideoCaptureService(
             imagePicker: PlatformImagePickerGateway(),
           ),
@@ -353,76 +302,74 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
     _evidenceCaptureCoordinator = EvidenceCaptureCoordinator(
       captureService: captureService,
-
       repository: assessmentState.evidenceRepository,
     );
 
-    catalog.getForQuestion(phsQuestions[currentQuestion]);
+    if (phsQuestions.isNotEmpty) {
+      catalog.getForQuestion(phsQuestions.first);
+    }
   }
 
-  Future<void> _loadCurrentQuestionEvidence() async {
-    final question = phsQuestions[currentQuestion];
+  Future<void> _loadPillarEvidence() async {
+    final questions = _questionsForCategory(_activeCategory);
+    final nextMap = <String, List<Evidence>>{};
 
-    final evidence = await _evidenceCoordinator.loadEvidence(question.id);
+    for (final q in questions) {
+      nextMap[q.id] = await _evidenceCoordinator.loadEvidence(q.id);
+    }
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _currentQuestionEvidence = evidence;
+      _evidenceByQuestionId = nextMap;
     });
   }
 
-  Future<void> handleEvidenceTypeSelected(EvidenceType type) async {
+  Future<void> handleEvidenceTypeSelectedForQuestion(
+    PHSQuestion question,
+    EvidenceType type,
+  ) async {
+    _ensureActiveSession();
+    _expandedEvidenceQuestionIds.add(question.id);
+
     if (type == EvidenceType.document ||
         type == EvidenceType.photograph ||
         type == EvidenceType.video) {
-      await _captureEvidence(type);
-
+      await _captureEvidenceForQuestion(question, type);
       return;
     }
 
-    await _createPendingEvidence(type);
+    await _createPendingEvidenceForQuestion(question, type);
   }
 
-  Future<void> _captureEvidence(EvidenceType type) async {
-    final question = phsQuestions[currentQuestion];
-
+  Future<void> _captureEvidenceForQuestion(
+    PHSQuestion question,
+    EvidenceType type,
+  ) async {
     final label = switch (type) {
       EvidenceType.document => 'Document',
-
       EvidenceType.photograph => 'Photograph',
-
       EvidenceType.video => 'Video',
-
       EvidenceType.manual => 'Manual Entry',
     };
 
     final request = switch (type) {
       EvidenceType.document => const EvidenceCaptureRequest.document(),
-
       EvidenceType.photograph => const EvidenceCaptureRequest.photograph(),
-
       EvidenceType.video => const EvidenceCaptureRequest.video(),
-
       EvidenceType.manual => const EvidenceCaptureRequest.manual(),
     };
 
     try {
       final evidence = await _evidenceCaptureCoordinator.captureEvidence(
         id: 'EVIDENCE_${DateTime.now().microsecondsSinceEpoch}',
-
         questionId: question.id,
-
         type: type,
-
         name: '$label evidence',
-
         request: request,
-
         source: EvidenceSource.userUpload,
-
         addedAt: DateTime.now(),
       );
 
@@ -430,8 +377,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         return;
       }
 
-      await _loadCurrentQuestionEvidence();
-
+      await _loadPillarEvidence();
       if (!mounted) {
         return;
       }
@@ -439,84 +385,61 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$label evidence added successfully.'),
-
           duration: const Duration(seconds: 2),
         ),
       );
     } on UnsupportedError catch (error) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message ?? '$label capture is unavailable.'),
-
           duration: const Duration(seconds: 2),
         ),
       );
     } on StateError catch (error) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-
           duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
-  Future<void> _createPendingEvidence(EvidenceType type) async {
-    final question = phsQuestions[currentQuestion];
-
+  Future<void> _createPendingEvidenceForQuestion(
+    PHSQuestion question,
+    EvidenceType type,
+  ) async {
     final label = switch (type) {
       EvidenceType.document => 'Document',
-
       EvidenceType.photograph => 'Photograph',
-
       EvidenceType.video => 'Video',
-
       EvidenceType.manual => 'Manual Entry',
     };
 
     final evidence = Evidence(
       id: 'EVIDENCE_${DateTime.now().microsecondsSinceEpoch}',
-
       questionId: question.id,
-
       type: type,
-
       name: '$label evidence pending capture',
-
       description:
           'Evidence entry created from the assessment evidence action.',
-
       status: EvidenceStatus.notProvided,
-
       source: EvidenceSource.userEntry,
-
       addedAt: DateTime.now(),
     );
 
     await _evidenceCoordinator.addEvidence(evidence);
+    await _loadPillarEvidence();
 
-    await _loadCurrentQuestionEvidence();
-
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '$label evidence entry added. '
-          'Capture can be completed here.',
+          '$label evidence entry added. Capture can be completed here.',
         ),
-
         duration: const Duration(seconds: 2),
       ),
     );
@@ -525,29 +448,21 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   Future<void> _handleEvidenceStatusChange(Evidence updatedEvidence) async {
     try {
       await _evidenceManagementService.updateEvidence(updatedEvidence);
+      await _loadPillarEvidence();
 
-      await _loadCurrentQuestionEvidence();
-
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Evidence status updated.'),
-
           duration: Duration(seconds: 2),
         ),
       );
     } on StateError catch (error) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-
           duration: const Duration(seconds: 2),
         ),
       );
@@ -561,214 +476,108 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       );
 
       if (!deleted) {
-        if (!mounted) {
-          return;
-        }
-
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Evidence could not be found.'),
-
             duration: Duration(seconds: 2),
           ),
         );
-
         return;
       }
 
-      await _loadCurrentQuestionEvidence();
-
-      if (!mounted) {
-        return;
-      }
+      await _loadPillarEvidence();
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Evidence deleted.'),
-
           duration: Duration(seconds: 2),
         ),
       );
     } on StateError catch (error) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-
           duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
-  void _moveCarouselTo(int index) {
-    if (!_questionPageController.hasClients) return;
-    _questionPageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
-  void _openQuestion(PHSQuestion question) {
-    if (_isAnswering) return;
-
-    final questionIndex = phsQuestions.indexWhere(
-      (candidate) => candidate.id == question.id,
-    );
-
-    if (questionIndex < 0) return;
-
+  void _selectPillar(PHSCategory category, {bool scrollToTop = false}) {
+    final questions = _questionsForCategory(category);
     setState(() {
-      currentQuestion = questionIndex;
-
-      _selectedResponse = null;
-
+      _activeCategory = category;
+      _seedInitialExpandedQuestion(category);
       _isAnswering = false;
-
-      _currentQuestionEvidence = const [];
-
-      _selectedPremiumCategory = question.category;
     });
 
-    assessmentState.updateCurrentQuestion(question.id);
-    _moveCarouselTo(questionIndex);
-    _loadCurrentQuestionEvidence();
-  }
+    if (questions.isNotEmpty) {
+      assessmentState.updateCurrentQuestion(questions.first.id);
+    }
+    _loadPillarEvidence();
 
-  void _openCategory(PHSCategory category) {
-    final question = _categoryQuestionResolver.resolve(
-      category: category,
-
-      questions: phsQuestions,
-
-      answers: assessmentState.answers,
-    );
-
-    if (question == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'There are no questions available for '
-            '${category.displayName}.',
-          ),
-
-          duration: const Duration(seconds: 2),
-        ),
+    if (scrollToTop && _scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
       );
-
-      return;
-    }
-
-    final questionIndex = phsQuestions.indexWhere(
-      (candidate) => candidate.id == question.id,
-    );
-
-    if (questionIndex < 0) {
-      return;
-    }
-
-    setState(() {
-      currentQuestion = questionIndex;
-
-      _selectedResponse = null;
-
-      _isAnswering = false;
-
-      _currentQuestionEvidence = const [];
-
-      _selectedPremiumCategory = category;
-    });
-
-    assessmentState.updateCurrentQuestion(question.id);
-    _moveCarouselTo(questionIndex);
-    _loadCurrentQuestionEvidence();
-
-    if (!_premiumView) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-
-        final message =
-            assessmentState.answers.any(
-              (answer) => answer.questionId == question.id,
-            )
-            ? 'Opening ${category.displayName}.'
-            : 'Continuing ${category.displayName}.';
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      });
     }
   }
 
-  void _toggleView(bool premium) {
-    setState(() {
-      _premiumView = premium;
+  void _goToNextPillar() {
+    const categories = PHSCategory.values;
+    final currentIndex = categories.indexOf(_activeCategory);
+    final nextCategory = categories[(currentIndex + 1) % categories.length];
+    _selectPillar(nextCategory, scrollToTop: true);
+  }
 
-      if (premium) {
-        _selectedPremiumCategory ??= phsQuestions[currentQuestion].category;
+  void _toggleEvidenceExpanded(String questionId) {
+    setState(() {
+      if (!_expandedEvidenceQuestionIds.add(questionId)) {
+        _expandedEvidenceQuestionIds.remove(questionId);
       }
     });
   }
 
-  void saveAnswer(PHSResponse response) {
-    final question = phsQuestions[currentQuestion];
+  void _saveAnswerForQuestion(PHSQuestion question, PHSResponse response) {
+    _ensureActiveSession();
 
-    // Save or update the answer without moving to another question.
     assessmentState.saveAnswer(
       PHSAnswer(questionId: question.id, response: response),
       currentQuestionId: question.id,
     );
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     setState(() {
-      _selectedResponse = response;
+      if (response == PHSResponse.yes) {
+        _expandedEvidenceQuestionIds.add(question.id);
+      }
       _isAnswering = false;
     });
   }
 
-  void _goToNextQuestion() {
-    if (currentQuestion >= phsQuestions.length - 1) {
-      return;
-    }
-
-    final nextIndex = currentQuestion + 1;
-    final nextQuestion = phsQuestions[nextIndex];
-
+  void _clearAnswer(PHSQuestion question) {
+    assessmentState.clearAnswer(
+      question.id,
+      currentQuestionId: question.id,
+    );
+    if (!mounted) return;
     setState(() {
-      currentQuestion = nextIndex;
-      _selectedResponse = null;
       _isAnswering = false;
-      _currentQuestionEvidence = const [];
-      if (_premiumView) {
-        _selectedPremiumCategory = nextQuestion.category;
-      }
     });
-
-    assessmentState.updateCurrentQuestion(nextQuestion.id);
-    _moveCarouselTo(nextIndex);
-    _loadCurrentQuestionEvidence();
   }
 
   void _completeAssessment() {
-    if (currentQuestion != phsQuestions.length - 1) {
-      return;
+    _ensureActiveSession();
+    final pillarQuestions = _questionsForCategory(_activeCategory);
+    if (pillarQuestions.isNotEmpty) {
+      assessmentState.updateCurrentQuestion(pillarQuestions.last.id);
     }
-
-    assessmentState.updateCurrentQuestion(phsQuestions[currentQuestion].id);
     assessmentState.completeAssessment();
 
     Navigator.pushReplacement(
@@ -777,42 +586,13 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     );
   }
 
-  Widget _buildQuestionNavigation() {
-    final isFirstQuestion = currentQuestion == 0;
-    final isLastQuestion = currentQuestion == phsQuestions.length - 1;
-
-    return Row(
-      children: [
-        if (!isFirstQuestion)
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _goToPreviousQuestion,
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Previous Question'),
-            ),
-          )
-        else
-          const Spacer(),
-        const SizedBox(width: 12),
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: isLastQuestion ? _completeAssessment : _goToNextQuestion,
-            icon: Icon(
-              isLastQuestion ? Icons.check_circle_outline : Icons.arrow_forward,
-            ),
-            label: Text(
-              isLastQuestion ? 'Complete assessment' : 'Next Question',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Future<void> _saveAndExit() async {
     if (_isAnswering) return;
 
-    assessmentState.updateCurrentQuestion(phsQuestions[currentQuestion].id);
+    final pillarQuestions = _questionsForCategory(_activeCategory);
+    if (assessmentState.currentQuestionId == null && pillarQuestions.isNotEmpty) {
+      assessmentState.updateCurrentQuestion(pillarQuestions.first.id);
+    }
 
     assessmentState.saveAndExit();
 
@@ -829,14 +609,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             ),
           ),
         );
-
         return;
       }
 
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (_) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not save your progress. Please try again.'),
@@ -845,380 +623,297 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     }
   }
 
-  Widget _buildAnswerOptions(PHSResponse? selectedResponse) {
-    final labels = Localizations.of<AppLocalizations>(
-      context,
-      AppLocalizations,
-    );
-
-    Widget option({
-      required String text,
-      required PHSResponse response,
-      required Color color,
-    }) {
-      final selected = selectedResponse == response;
-
-      return Expanded(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: _isAnswering ? null : () => saveAnswer(response),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+  Widget _buildGradientProgressBar(double ratio) {
+    final clamped = ratio.clamp(0.0, 1.0);
+    return Container(
+      height: 7,
+      decoration: BoxDecoration(
+        color: HomeSureColors.midnightSelected,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FractionallySizedBox(
+          widthFactor: clamped,
+          child: Container(
             decoration: BoxDecoration(
-              color: selected ? color.withValues(alpha: 0.10) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: selected ? color : Colors.grey.shade300,
-                width: selected ? 2 : 1,
+              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                colors: [
+                  HomeSureColors.champagneGold,
+                  HomeSureColors.champagneHighlight,
+                ],
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  color: color,
-                  size: 22,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHealthPhiBanner(int liveScore, bool hasScore) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: AppGradients.hero,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: HomeSureColors.champagneGold.withAlpha(87),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PROPERTY HEALTH INDEX',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: HomeSureColors.slateMuted,
                 ),
-                const SizedBox(height: 5),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: selected ? color : Colors.black87,
+              ),
+              const SizedBox(height: 2),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '$liveScore',
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w800,
+                      color: HomeSureColors.champagneInk,
+                      height: 1.2,
                     ),
+                  ),
+                  const SizedBox(width: 3),
+                  const Text(
+                    '/100',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: HomeSureColors.champagneHighlight,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  hasScore
+                      ? 'Based on your assessment responses'
+                      : 'Select a response to calculate PHI',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: HomeSureColors.champagneHighlight,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        option(
-          text: labels?.assessmentYes ?? 'Yes',
-          response: PHSResponse.yes,
-          color: Colors.green,
-        ),
-        const SizedBox(width: 8),
-        option(
-          text: labels?.assessmentNo ?? 'No',
-          response: PHSResponse.no,
-          color: Colors.red,
-        ),
-        const SizedBox(width: 8),
-        option(
-          text: labels?.assessmentNotSure ?? "I'm Not Sure",
-          response: PHSResponse.unsure,
-          color: Colors.orange,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuestionContent({
-    required PHSQuestion question,
-
-    bool includeProgress = true,
-  }) {
-    final selectedResponse =
-        _selectedResponse ?? _savedResponseForQuestion(question.id);
-
-    final questionProgress = includeProgress
-        ? _questionProgressResolver.resolve(
-            questionId: question.id,
-
-            questions: phsQuestions,
-
-            answeredQuestionIds: assessmentState.answers
-                .map((answer) => answer.questionId)
-                .toSet(),
-          )
-        : null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-
-      children: [
-        if (includeProgress && questionProgress != null) ...[
-          CurrentQuestionProgress(progress: questionProgress),
-
-          const SizedBox(height: 24),
-        ],
-
-        QuestionCard(
-          question: question,
-
-          suppliedEvidence: question.id == phsQuestions[currentQuestion].id
-              ? _currentQuestionEvidence
-              : const [],
-
-          onEvidenceTypeSelected:
-              question.id == phsQuestions[currentQuestion].id
-              ? handleEvidenceTypeSelected
-              : null,
-
-          onEvidenceStatusChange:
-              question.id == phsQuestions[currentQuestion].id
-              ? _handleEvidenceStatusChange
-              : null,
-
-          onEvidenceDelete: question.id == phsQuestions[currentQuestion].id
-              ? _handleEvidenceDelete
-              : null,
-        ),
-
-        const SizedBox(height: 24),
-
-        _buildAnswerOptions(selectedResponse),
-      ],
-    );
-  }
-
-  Widget _buildPremiumQuestion(PHSCategory category) {
-    final question = phsQuestions[currentQuestion];
-
-    if (question.category != category) {
-      return const SizedBox.shrink();
-    }
-
-    return _buildQuestionContent(question: question, includeProgress: false);
-  }
-
-  Widget _buildViewToggle() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-
-      decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F0),
-
-        borderRadius: BorderRadius.circular(12),
-      ),
-
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-
-        children: [
-          _buildViewToggleOption(
-            label: 'Classic',
-
-            icon: Icons.view_agenda_outlined,
-
-            selected: !_premiumView,
-
-            onTap: () => _toggleView(false),
-          ),
-
-          _buildViewToggleOption(
-            label: 'Premium',
-
-            icon: Icons.auto_awesome_outlined,
-
-            selected: _premiumView,
-
-            onTap: () => _toggleView(true),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildViewToggleOption({
-    required String label,
-
-    required IconData icon,
-
-    required bool selected,
-
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: selected ? Colors.white : Colors.transparent,
-
-      borderRadius: BorderRadius.circular(9),
-
-      child: InkWell(
-        borderRadius: BorderRadius.circular(9),
-
-        onTap: _isAnswering ? null : onTap,
-
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-
-            children: [
-              Icon(
-                icon,
-
-                size: 16,
-
-                color: selected
-                    ? const Color(0xFF2563EB)
-                    : const Color(0xFF64748B),
-              ),
-
-              const SizedBox(width: 5),
-
-              Text(
-                label,
-
-                style: TextStyle(
-                  fontSize: 12,
-
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-
-                  color: selected
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget _buildPillarStrip() {
+    final translations = AssessmentTranslations(
+      AppLocaleController.instance.languageCode,
     );
-  }
-
-  Widget _buildClassicView() {
     final progress = assessmentState.assessmentProgress;
-    final answeredIds = assessmentState.answers
-        .map((answer) => answer.questionId)
-        .toSet();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AssessmentProgress(
-                current: currentQuestion + 1,
-                total: phsQuestions.length,
-              ),
-              const SizedBox(height: 5),
-              Text(
-                '${progress.answeredQuestions} of '
-                '${progress.totalQuestions} questions answered',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 10),
-              ClassicCategoryAccordion(
-                questions: phsQuestions,
-                progressFor: progress.progressFor,
-                isAnswered: answeredIds.contains,
-                currentQuestionId: phsQuestions[currentQuestion].id,
-                onQuestionSelected: _openQuestion,
+    return SizedBox(
+      height: 106,
+      child: SingleChildScrollView(
+        key: const ValueKey<String>('assessment-pillars-strip'),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (var index = 0; index < PHSCategory.values.length; index++) ...[
+              if (index > 0) const SizedBox(width: 8),
+              Builder(
+                builder: (context) {
+                  final category = PHSCategory.values[index];
+                  final isSelected = category == _activeCategory;
+                  final catProgress = progress.progressFor(category);
+                  final answered = catProgress?.answeredQuestions ?? 0;
+                  final total = catProgress?.totalQuestions ?? 0;
+                  final fraction = total == 0 ? 0.0 : answered / total;
+
+                  return InkWell(
+                    key: ValueKey<String>('assessment-pillar-${category.name}'),
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _isAnswering ? null : () => _selectPillar(category),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 158,
+                      padding: const EdgeInsets.all(11),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? HomeSureColors.midnightSelected
+                            : HomeSureColors.midnightCard,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected
+                              ? HomeSureColors.champagneGold
+                              : HomeSureColors.borderSlate,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            translations.categoryName(category),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: HomeSureColors.champagneInk,
+                              height: 1.2,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '$answered/$total answered',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: HomeSureColors.slateMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          _buildGradientProgressBar(fraction),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
-          ),
+          ],
         ),
-        Expanded(
-          child: PageView.builder(
-            key: const PageStorageKey<String>('assessment-question-carousel'),
-            controller: _questionPageController,
-            itemCount: phsQuestions.length,
-            onPageChanged: (index) {
-              if (index == currentQuestion || !mounted) return;
-              final question = phsQuestions[index];
-              setState(() {
-                currentQuestion = index;
-                _selectedResponse = null;
-                _isAnswering = false;
-                _currentQuestionEvidence = const [];
-                _selectedPremiumCategory = question.category;
-              });
-              assessmentState.updateCurrentQuestion(question.id);
-              _loadCurrentQuestionEvidence();
-            },
-            itemBuilder: (context, index) {
-              final question = phsQuestions[index];
-              return SingleChildScrollView(
-                key: PageStorageKey<String>(
-                  'assessment-question-${question.id}',
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ScoreHeatmapLegend(
-                      compact: true,
-                      score: _assessmentCoverage > 0 ? _overallScore : null,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildQuestionContent(
-                      question: question,
-                      includeProgress: true,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-            child: _buildQuestionNavigation(),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildPremiumHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildActivePillarCard(List<PHSQuestion> pillarQuestions) {
+    final translations = AssessmentTranslations(
+      AppLocaleController.instance.languageCode,
+    );
+    final progress = assessmentState.assessmentProgress;
+    final catProgress = progress.progressFor(_activeCategory);
+    final answered = catProgress?.answeredQuestions ?? 0;
+    final total = pillarQuestions.length;
+    final ratio = total == 0 ? 0.0 : answered / total;
 
-      children: [
-        Text(
-          'Choose how you want to explore your assessment.',
+    CategoryScore? pillarScore;
+    for (final s in _categoryScores) {
+      if (s.category == _activeCategory) {
+        pillarScore = s;
+        break;
+      }
+    }
+    final scoreValue =
+        pillarScore != null && pillarScore.maxScore > 0
+            ? pillarScore.score.round()
+            : 0;
 
-          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-        ),
-
-        const SizedBox(height: 16),
-
-        _buildViewToggle(),
-
-        const SizedBox(height: 20),
-      ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: HomeSureColors.borderSlate),
+        boxShadow: HomeSureShadows.cardSubtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'ACTIVE ASSESSMENT PILLAR',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+              color: HomeSureColors.slateMuted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            translations.categoryName(_activeCategory),
+            key: const ValueKey<String>('active-pillar-title'),
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: HomeSureColors.champagneInk,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _activeCategory.description,
+            style: const TextStyle(
+              fontSize: 12,
+              color: HomeSureColors.slateMuted,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '$answered of $total answered',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: HomeSureColors.champagneInk,
+                ),
+              ),
+              Text(
+                '$scoreValue / 100',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: HomeSureColors.champagneHighlight,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          _buildGradientProgressBar(ratio),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final submissionId = widget.submissionId?.trim();
-
     final isSubmittedProperty = submissionId != null && submissionId.isNotEmpty;
 
     if (isSubmittedProperty && !_approvalCheckComplete) {
       return Scaffold(
         appBar: AppBar(title: const Text('Property Assessment')),
-
         body: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-
             children: [
               CircularProgressIndicator(),
-
               SizedBox(height: 16),
-
               Text('Verifying property approval...'),
             ],
           ),
@@ -1229,25 +924,20 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     if (isSubmittedProperty && _approvalDenied) {
       final message = _approvalCheckFailed
           ? 'We could not verify this property’s approval. '
-                'Please check your connection and try again later.'
+              'Please check your connection and try again later.'
           : 'This property has not been approved for assessment yet. '
-                'Please check My Property Requests for its status.';
+              'Please check My Property Requests for its status.';
 
       return Scaffold(
         appBar: AppBar(title: const Text('Property Assessment')),
-
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-
             child: Column(
               mainAxisSize: MainAxisSize.min,
-
               children: [
                 const Icon(Icons.lock_outline, size: 48),
-
                 const SizedBox(height: 16),
-
                 Text(message, textAlign: TextAlign.center),
               ],
             ),
@@ -1256,80 +946,255 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       );
     }
 
-    final progress = assessmentState.assessmentProgress;
+    final hasPropertyContext =
+        propertyState.selectedProperty != null || isSubmittedProperty;
+    if (widget.embeddedInTab && !hasPropertyContext) {
+      return Scaffold(
+        backgroundColor: HomeSureColors.midnightBg,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('Property Assessment'),
+        ),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 104),
+              child: Container(
+                key: const ValueKey<String>('assessment-no-property-selected'),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: HomeSureColors.midnightCard,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+                  border: Border.all(color: HomeSureColors.borderSlate),
+                  boxShadow: HomeSureShadows.cardSubtle,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: HomeSureColors.midnightInteractive,
+                        borderRadius: BorderRadius.circular(HomeSureRadius.md),
+                        border: Border.all(
+                          color: HomeSureColors.champagneBronze,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.apartment_rounded,
+                        size: 28,
+                        color: HomeSureColors.champagneHighlight,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Select a Property First',
+                      style: HomeSureTypography.sectionTitle,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Please select a property from the catalogue so you can start your Property Health Assessment and view the assessment questions.',
+                      textAlign: TextAlign.center,
+                      style: HomeSureTypography.bodySecondary,
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        key: const ValueKey<String>(
+                          'assessment-select-property-btn',
+                        ),
+                        onPressed: widget.onSelectProperty ??
+                            () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const PropertySearchScreen(),
+                                ),
+                              );
+                            },
+                        icon: const Icon(Icons.search_rounded, size: 18),
+                        label: const Text('Select a Property'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final hasScore = _assessmentCoverage > 0;
+    final liveScore = hasScore ? _overallScore.round() : 0;
+    final pillarQuestions = _questionsForCategory(_activeCategory);
+    final isLastPillar = _activeCategory == PHSCategory.values.last;
+    final showCompleteButton =
+        isLastPillar || assessmentState.answeredQuestionCount > 0;
 
     return Scaffold(
-      backgroundColor: _premiumView
-          ? const Color(0xFFF1F5F9)
-          : const Color(0xFFF8FAFC),
-
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
-        title: const Text('Property Assessment'),
-
+        automaticallyImplyLeading: !widget.embeddedInTab,
+        title: const Text(
+          'Property Assessment',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
+          if (!widget.embeddedInTab)
+            TextButton(
+              onPressed: _isAnswering ? null : _saveAndExit,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              child: const Text('Save & Exit'),
+            ),
           Padding(
-            padding: const EdgeInsets.only(right: 8),
-
-            child: _buildViewToggle(),
-          ),
-
-          TextButton(
-            onPressed: _isAnswering ? null : _saveAndExit,
-
-            child: const Text('Save & Exit'),
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: Container(
+                key: const ValueKey<String>('assessment-phi-top-right'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: HomeSureColors.midnightCard,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: HomeSureColors.champagneGold,
+                    width: 1.4,
+                  ),
+                ),
+                child: Text(
+                  '$liveScore out of 100',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: HomeSureColors.champagneHighlight,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
-
       body: SafeArea(
-        child: _premiumView
-            ? SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPremiumHeader(),
-                    PremiumAssessmentView(
-                      progress: progress,
-                      categoryScores: _categoryScores,
-                      overallScore: _overallScore,
-                      assessmentCoverage: _assessmentCoverage,
-                      selectedCategory: _selectedPremiumCategory,
-                      onCategoryTap: _openCategory,
-                      questionBuilder: _buildPremiumQuestion,
-                    ),
-                    const SizedBox(height: 24),
-                    _buildQuestionNavigation(),
-                    const SizedBox(height: 20),
-                  ],
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            widget.embeddedInTab ? 104 : 28,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHealthPhiBanner(liveScore, hasScore),
+              const SizedBox(height: 12),
+              const Text(
+                'Select a pillar and answer each question.',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  color: HomeSureColors.slateMuted,
                 ),
-              )
-            : _buildClassicView(),
+              ),
+              const SizedBox(height: 10),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Assessment pillars',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: HomeSureColors.champagneHighlight,
+                    ),
+                  ),
+                  Text(
+                    'Swipe right to explore →',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: HomeSureColors.champagneHighlight,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _buildPillarStrip(),
+              const SizedBox(height: 12),
+              _buildActivePillarCard(pillarQuestions),
+              const SizedBox(height: 12),
+              for (var i = 0; i < pillarQuestions.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: QuestionCard(
+                    key: ValueKey<String>(
+                      'assessment-qcard-${pillarQuestions[i].id}',
+                    ),
+                    question: pillarQuestions[i],
+                    questionNumber: i + 1,
+                    totalPillarQuestions: pillarQuestions.length,
+                    selectedResponse: _savedResponseForQuestion(
+                      pillarQuestions[i].id,
+                    ),
+                    onResponseSelected: _isAnswering
+                        ? null
+                        : (response) => _saveAnswerForQuestion(
+                              pillarQuestions[i],
+                              response,
+                            ),
+                    onClearResponse: () => _clearAnswer(pillarQuestions[i]),
+                    collapsibleEvidence: true,
+                    evidenceExpanded: _expandedEvidenceQuestionIds.contains(
+                      pillarQuestions[i].id,
+                    ),
+                    onToggleEvidenceExpanded: () =>
+                        _toggleEvidenceExpanded(pillarQuestions[i].id),
+                    suppliedEvidence:
+                        _evidenceByQuestionId[pillarQuestions[i].id] ??
+                            const [],
+                    onEvidenceTypeSelected: (type) =>
+                        handleEvidenceTypeSelectedForQuestion(
+                          pillarQuestions[i],
+                          type,
+                        ),
+                    onEvidenceStatusChange: _handleEvidenceStatusChange,
+                    onEvidenceDelete: _handleEvidenceDelete,
+                  ),
+                ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  key: const ValueKey<String>('assessment-next-pillar-btn'),
+                  onPressed: _isAnswering ? null : _goToNextPillar,
+                  child: const Text('Next pillar →'),
+                ),
+              ),
+              if (showCompleteButton) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    key: const ValueKey<String>('assessment-complete-btn'),
+                    onPressed: _isAnswering ? null : _completeAssessment,
+                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                    label: const Text('Complete assessment'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
-  }
-
-  void _goToPreviousQuestion() {
-    if (currentQuestion <= 0) {
-      return;
-    }
-
-    setState(() {
-      currentQuestion--;
-
-      _selectedResponse = null;
-
-      _isAnswering = false;
-
-      _currentQuestionEvidence = const [];
-
-      if (_premiumView) {
-        _selectedPremiumCategory = phsQuestions[currentQuestion].category;
-      }
-    });
-
-    assessmentState.updateCurrentQuestion(phsQuestions[currentQuestion].id);
-    _moveCarouselTo(currentQuestion);
-    _loadCurrentQuestionEvidence();
   }
 }

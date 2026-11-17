@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/homesure_tokens.dart';
+
 class HeroModule extends StatelessWidget {
   final String propertyName;
   final int phi;
@@ -20,17 +22,12 @@ class HeroModule extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: HomeSureColors.borderSlate),
+        boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Column(
         children: [
@@ -38,31 +35,32 @@ class HeroModule extends StatelessWidget {
             propertyName,
             style: const TextStyle(
               fontSize: 18,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
+              color: HomeSureColors.slateMuted,
+              fontWeight: FontWeight.w600,
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           const Text(
-            "PROPERTY HEALTH INDEX™",
+            'PROPERTY HEALTH INDEX™',
             style: TextStyle(
               letterSpacing: 2,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
-              fontSize: 13,
+              color: HomeSureColors.champagneHighlight,
+              fontSize: 12.5,
             ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           Text(
-            "$phi",
+            '$phi',
             style: const TextStyle(
-              fontSize: 72,
-              fontWeight: FontWeight.w700,
+              fontSize: 68,
+              fontWeight: FontWeight.w800,
               height: 1,
+              color: HomeSureColors.champagneInk,
             ),
           ),
 
@@ -74,39 +72,40 @@ class HeroModule extends StatelessWidget {
               vertical: 10,
             ),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: HomeSureColors.statusPositiveBg,
               borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: HomeSureColors.statusPositiveBorder),
             ),
             child: Text(
               status.toUpperCase(),
-              style: TextStyle(
-                color: Colors.green.shade700,
+              style: const TextStyle(
+                color: HomeSureColors.statusPositiveText,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
           const Divider(),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           Row(
             children: [
               Expanded(
                 child: _InfoColumn(
-                  title: "Potential PHI",
-                  value: "$potentialPhi",
-                  subtitle: "+${potentialPhi - phi} Available",
+                  title: 'Potential PHI',
+                  value: '$potentialPhi',
+                  subtitle: '+${potentialPhi - phi} Available',
                 ),
               ),
 
               Expanded(
                 child: _InfoColumn(
-                  title: "Last Assessment",
+                  title: 'Last Assessment',
                   value: assessmentDate,
-                  subtitle: "",
+                  subtitle: '',
                 ),
               ),
             ],
@@ -135,7 +134,7 @@ class _InfoColumn extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Colors.grey,
+            color: HomeSureColors.slateMuted,
           ),
         ),
 
@@ -146,6 +145,7 @@ class _InfoColumn extends StatelessWidget {
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
+            color: HomeSureColors.champagneInk,
           ),
         ),
 
@@ -154,8 +154,8 @@ class _InfoColumn extends StatelessWidget {
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.green.shade700,
+              style: const TextStyle(
+                color: HomeSureColors.statusPositiveText,
                 fontWeight: FontWeight.w600,
               ),
             ),

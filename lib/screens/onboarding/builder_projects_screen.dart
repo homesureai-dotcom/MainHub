@@ -9,17 +9,22 @@ import '../../features/property/services/property_repository.dart';
 import '../../features/property/state/property_state.dart';
 import '../../models/property.dart' as legacy;
 import '../../widgets/common/app_search_field.dart';
+import '../../widgets/property/bengaluru_taluk_filter_bar.dart';
 import '../../widgets/property/property_card.dart';
 import '../property/property_details_screen.dart';
 
 class BuilderProjectsScreen extends StatefulWidget {
   final BuilderCatalogueEntry builder;
   final PropertyCatalogueGateway? catalogueGateway;
+  final BengaluruTalukFilter initialTalukFilter;
+  final Set<BengaluruTalukFilter> initialTalukFilters;
 
   const BuilderProjectsScreen({
     super.key,
     required this.builder,
     this.catalogueGateway,
+    this.initialTalukFilter = BengaluruTalukFilter.all,
+    this.initialTalukFilters = const {},
   });
 
   @override
@@ -32,6 +37,7 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
   List<legacy.Property> _allBuilderProjects = [];
   List<legacy.Property> _filteredProjects = [];
   String _searchQuery = '';
+  late Set<BengaluruTalukFilter> _selectedTaluks;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -41,12 +47,27 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
   @override
   void initState() {
     super.initState();
+    final passed = widget.initialTalukFilters
+        .where((f) => f != BengaluruTalukFilter.all)
+        .toSet();
+    if (passed.isNotEmpty) {
+      _selectedTaluks = passed;
+    } else if (widget.initialTalukFilter != BengaluruTalukFilter.all) {
+      _selectedTaluks = {widget.initialTalukFilter};
+    } else {
+      _selectedTaluks = const {};
+    }
+
     if (widget.builder.projects.isNotEmpty) {
       final initial = widget.builder.projects
           .map(PropertyRepository.propertyFromBuilderSummary)
           .toList();
       _allBuilderProjects = initial;
-      _filteredProjects = initial;
+      _filteredProjects = PropertyRepository.filterBuilderProjects(
+        initial,
+        searchQuery: _searchQuery,
+        talukFilters: _selectedTaluks,
+      );
       _isLoading = false;
     }
     _loadFullBuilderProjects();
@@ -64,6 +85,7 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
           _filteredProjects = PropertyRepository.filterBuilderProjects(
             fullProjects,
             searchQuery: _searchQuery,
+            talukFilters: _selectedTaluks,
           );
           _isLoading = false;
           _errorMessage = null;
@@ -92,6 +114,18 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
       _filteredProjects = PropertyRepository.filterBuilderProjects(
         _allBuilderProjects,
         searchQuery: trimmed,
+        talukFilters: _selectedTaluks,
+      );
+    });
+  }
+
+  void _onTaluksChanged(Set<BengaluruTalukFilter> filters) {
+    setState(() {
+      _selectedTaluks = filters;
+      _filteredProjects = PropertyRepository.filterBuilderProjects(
+        _allBuilderProjects,
+        searchQuery: _searchQuery,
+        talukFilters: filters,
       );
     });
   }
@@ -137,10 +171,10 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
     return Scaffold(
       backgroundColor: HomeSureColors.backgroundWarm,
       appBar: AppBar(
-        backgroundColor: HomeSureColors.surfaceWhite,
+        backgroundColor: HomeSureColors.midnightHeader,
         elevation: 0,
         scrolledUnderElevation: 0.5,
-        foregroundColor: HomeSureColors.textPrimary,
+        foregroundColor: HomeSureColors.champagneInk,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -168,14 +202,15 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: HomeSureColors.primaryNavy,
+                  color: HomeSureColors.midnightCard,
                   borderRadius: BorderRadius.circular(HomeSureRadius.md),
+                  border: Border.all(color: HomeSureColors.champagneBronze),
                 ),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.domain_verification_rounded,
-                      color: Color(0xFF8CE0D8),
+                      color: HomeSureColors.champagneHighlight,
                       size: 20,
                     ),
                     const SizedBox(width: 10),
@@ -187,7 +222,7 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
                         style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: HomeSureColors.champagneInk,
                         ),
                       ),
                     ),
@@ -199,7 +234,13 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
                 hintText: 'Search projects by name, locality, or RERA...',
                 onChanged: _onSearchChanged,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
+              BengaluruTalukFilterBar(
+                selectedTaluks: _selectedTaluks,
+                onChanged: _onTaluksChanged,
+                keyPrefix: 'builder-locality-filter',
+              ),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

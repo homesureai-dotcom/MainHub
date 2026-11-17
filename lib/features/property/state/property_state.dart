@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../auth/services/user_profile_service.dart';
 import '../models/property.dart';
 
 class PropertyState extends ChangeNotifier {
@@ -11,13 +16,13 @@ class PropertyState extends ChangeNotifier {
 
   List<Property> _properties = [];
 
+  bool _restoreAttempted = false;
+
   Property? get selectedProperty => _selectedProperty;
 
-  List<Property> get properties =>
-      List.unmodifiable(_properties);
+  List<Property> get properties => List.unmodifiable(_properties);
 
-  bool get hasSelectedProperty =>
-      _selectedProperty != null;
+  bool get hasSelectedProperty => _selectedProperty != null;
 
   void initialize({
     required List<Property> properties,
@@ -26,8 +31,9 @@ class PropertyState extends ChangeNotifier {
     _properties = List<Property>.from(properties);
 
     if (_properties.isNotEmpty) {
-      _selectedProperty =
-          selectedProperty ?? _properties.first;
+      _selectedProperty = selectedProperty ?? _properties.first;
+    } else {
+      _selectedProperty = selectedProperty;
     }
 
     notifyListeners();
@@ -38,7 +44,46 @@ class PropertyState extends ChangeNotifier {
   ) {
     _selectedProperty = property;
 
+    final index = _properties.indexWhere((p) => p.id == property.id);
+    if (index == -1) {
+      _properties.add(property);
+    } else {
+      _properties[index] = property;
+    }
+
     notifyListeners();
+
+    if (Firebase.apps.isNotEmpty && FirebaseAuth.instance.currentUser != null) {
+      unawaited(
+        UserProfileService().saveSelectedProperty(property).catchError((_) {}),
+      );
+    }
+  }
+
+  /// Restores the signed-in user's previously selected property from Firestore
+  /// if no property is currently held in memory.
+  Future<void> restorePersistedProperty() async {
+    if (_selectedProperty != null || _restoreAttempted) {
+      return;
+    }
+    if (Firebase.apps.isEmpty || FirebaseAuth.instance.currentUser == null) {
+      return;
+    }
+    _restoreAttempted = true;
+
+    try {
+      final restored = await UserProfileService().loadSelectedProperty();
+      if (restored != null && _selectedProperty == null) {
+        _selectedProperty = restored;
+        final index = _properties.indexWhere((p) => p.id == restored.id);
+        if (index == -1) {
+          _properties.add(restored);
+        } else {
+          _properties[index] = restored;
+        }
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   void addProperty(
@@ -77,8 +122,7 @@ class PropertyState extends ChangeNotifier {
     );
 
     if (_selectedProperty?.id == propertyId) {
-      _selectedProperty =
-          _properties.isEmpty ? null : _properties.first;
+      _selectedProperty = _properties.isEmpty ? null : _properties.first;
     }
 
     notifyListeners();
@@ -86,9 +130,8 @@ class PropertyState extends ChangeNotifier {
 
   void clear() {
     _properties.clear();
-
     _selectedProperty = null;
-
+    _restoreAttempted = false;
     notifyListeners();
   }
 }

@@ -764,6 +764,49 @@ class ProjectRegulatoryDetailBundle {
   }
 }
 
+/// Supported Bengaluru Urban K-RERA taluk locality filters.
+enum BengaluruTalukFilter {
+  all('All'),
+  anekal('Anekal'),
+  east('East'),
+  north('North'),
+  south('South'),
+  yelahanka('Yelahanka');
+
+  final String label;
+  const BengaluruTalukFilter(this.label);
+
+  /// Normalizes a raw taluk/locality string into its canonical filter bucket,
+  /// or `null` if it does not correspond to any supported taluk.
+  static BengaluruTalukFilter? normalize(String? rawValue) {
+    final v = (rawValue ?? '').trim().toLowerCase();
+    if (v.isEmpty) return null;
+    if (v.contains('anekal')) return BengaluruTalukFilter.anekal;
+    if (v.contains('yelahanka')) return BengaluruTalukFilter.yelahanka;
+    if (RegExp(r'\beast\b').hasMatch(v) ||
+        v.contains('bengaluru east') ||
+        v.contains('bangalore east')) {
+      return BengaluruTalukFilter.east;
+    }
+    if (RegExp(r'\bnorth\b').hasMatch(v) ||
+        v.contains('bengaluru north') ||
+        v.contains('bangalore north')) {
+      return BengaluruTalukFilter.north;
+    }
+    if (RegExp(r'\bsouth\b').hasMatch(v) ||
+        v.contains('bengaluru south') ||
+        v.contains('bangalore south')) {
+      return BengaluruTalukFilter.south;
+    }
+    return null;
+  }
+
+  bool matchesTaluk(String? rawValue) {
+    if (this == BengaluruTalukFilter.all) return true;
+    return normalize(rawValue) == this;
+  }
+}
+
 /// Lightweight project entry embedded inside a [BuilderCatalogueEntry].
 class BuilderProjectSummary {
   final String projectId;
@@ -841,6 +884,18 @@ class BuilderProjectSummary {
     'total_units': totalUnits,
     'total_towers': totalTowers,
   };
+
+  bool matchesTalukFilter(BengaluruTalukFilter filter) {
+    if (filter == BengaluruTalukFilter.all) return true;
+    return filter.matchesTaluk(taluk);
+  }
+
+  bool matchesTalukFilters(Set<BengaluruTalukFilter> filters) {
+    if (filters.isEmpty || filters.contains(BengaluruTalukFilter.all)) {
+      return true;
+    }
+    return filters.any(matchesTalukFilter);
+  }
 }
 
 /// Canonical Builder / Developer group entry in the K-RERA catalogue.
@@ -928,6 +983,56 @@ class BuilderCatalogueEntry {
     }
 
     return false;
+  }
+
+  bool matchesTalukFilter(BengaluruTalukFilter filter) =>
+      matchesTalukFilters({filter});
+
+  bool matchesTalukFilters(Set<BengaluruTalukFilter> filters) {
+    if (filters.isEmpty || filters.contains(BengaluruTalukFilter.all)) {
+      return true;
+    }
+    if (projects.isNotEmpty) {
+      return projects.any((p) => p.matchesTalukFilters(filters));
+    }
+    return localities.any((loc) => filters.any((f) => f.matchesTaluk(loc)));
+  }
+
+  /// Projects a copy of this builder containing only projects matching [filter].
+  BuilderCatalogueEntry filteredByTaluk(BengaluruTalukFilter filter) =>
+      filteredByTaluks({filter});
+
+  /// Projects a copy of this builder containing only projects in [filters]
+  /// (when non-empty and not containing [BengaluruTalukFilter.all]).
+  BuilderCatalogueEntry filteredByTaluks(Set<BengaluruTalukFilter> filters) {
+    if (filters.isEmpty || filters.contains(BengaluruTalukFilter.all)) {
+      return this;
+    }
+    final matchedProjects =
+        projects.where((p) => p.matchesTalukFilters(filters)).toList();
+    final matchedLocalities = matchedProjects.isNotEmpty
+        ? matchedProjects
+            .map((p) => p.taluk.trim())
+            .where((t) => t.isNotEmpty)
+            .toSet()
+            .toList()
+        : localities
+            .where((loc) => filters.any((f) => f.matchesTaluk(loc)))
+            .toList();
+    return BuilderCatalogueEntry(
+      builderId: builderId,
+      builderName: builderName,
+      isFeaturedBrand: isFeaturedBrand,
+      projectCount:
+          matchedProjects.isNotEmpty ? matchedProjects.length : projectCount,
+      legalPromoterNames: legalPromoterNames,
+      localities: matchedLocalities,
+      projectIds: matchedProjects.isNotEmpty
+          ? matchedProjects.map((p) => p.projectId).toList()
+          : projectIds,
+      projects: matchedProjects,
+      searchTokens: searchTokens,
+    );
   }
 
   /// Resolves the canonical brand `(builderId, builderName, isFeaturedBrand)`

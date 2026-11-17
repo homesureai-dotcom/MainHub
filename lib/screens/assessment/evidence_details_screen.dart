@@ -4,6 +4,7 @@ import '../../core/evidence/assessment_evidence_summary.dart';
 import '../../core/evidence/evidence.dart';
 import '../../core/evidence/evidence_risk_signal.dart';
 import '../../core/evidence/evidence_validation_result.dart';
+import '../../core/theme/homesure_tokens.dart';
 
 class EvidenceDetailsScreen extends StatefulWidget {
   final AssessmentEvidenceSummary summary;
@@ -82,7 +83,7 @@ class _EvidenceDetailsScreenState
     final summary = widget.summary;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
         title: const Text(
           'Evidence Details',
@@ -90,8 +91,8 @@ class _EvidenceDetailsScreenState
             fontWeight: FontWeight.w700,
           ),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        backgroundColor: HomeSureColors.midnightHeader,
+        foregroundColor: HomeSureColors.champagneInk,
         elevation: 0,
       ),
       body: SafeArea(
@@ -162,10 +163,10 @@ class _SummaryHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
+          color: HomeSureColors.borderSlate,
         ),
       ),
       child: Column(
@@ -176,7 +177,7 @@ class _SummaryHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
+              color: HomeSureColors.champagneInk,
             ),
           ),
           const SizedBox(height: 6),
@@ -184,8 +185,8 @@ class _SummaryHeader extends StatelessWidget {
             '$percentage%',
             style: const TextStyle(
               fontSize: 34,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF2563EB),
+              fontWeight: FontWeight.w900,
+              color: HomeSureColors.champagneHighlight,
             ),
           ),
           const SizedBox(height: 10),
@@ -196,7 +197,8 @@ class _SummaryHeader extends StatelessWidget {
                   ? 0
                   : summary.coveragePercentage / 100,
               minHeight: 8,
-              backgroundColor: const Color(0xFFE2E8F0),
+              backgroundColor: HomeSureColors.midnightInteractive,
+              color: HomeSureColors.champagneGold,
             ),
           ),
           const SizedBox(height: 12),
@@ -205,7 +207,7 @@ class _SummaryHeader extends StatelessWidget {
             '${summary.totalRequirements} requirements satisfied',
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF475569),
+              color: HomeSureColors.slateMuted,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -236,7 +238,7 @@ class _FilterSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: HomeSureColors.champagneInk,
           ),
         ),
         const SizedBox(height: 10),
@@ -369,10 +371,10 @@ class _EvidenceRequirementCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          color: HomeSureColors.midnightCard,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
           border: Border.all(
-            color: const Color(0xFFE2E8F0),
+            color: HomeSureColors.borderSlate,
           ),
         ),
         child: Column(
@@ -388,7 +390,7 @@ class _EvidenceRequirementCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
                 ),
@@ -403,7 +405,7 @@ class _EvidenceRequirementCard extends StatelessWidget {
               'Question: ${requirement.questionId}',
               style: const TextStyle(
                 fontSize: 12,
-                color: Color(0xFF64748B),
+                color: HomeSureColors.slateMuted,
               ),
             ),
             const SizedBox(height: 10),
@@ -412,14 +414,14 @@ class _EvidenceRequirementCard extends StatelessWidget {
                 Icon(
                   _typeIcon(requirement.type),
                   size: 17,
-                  color: const Color(0xFF475569),
+                  color: HomeSureColors.champagneHighlight,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   _typeLabel(requirement.type),
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF475569),
+                    color: HomeSureColors.slateDetailBody,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -450,7 +452,7 @@ class _EvidenceRequirementCard extends StatelessWidget {
               result.message,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF475569),
+                color: HomeSureColors.slateMuted,
                 height: 1.35,
               ),
             ),
@@ -463,7 +465,7 @@ class _EvidenceRequirementCard extends StatelessWidget {
                   'View details',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF2563EB),
+                    color: HomeSureColors.champagneHighlight,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -471,7 +473,7 @@ class _EvidenceRequirementCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 13,
-                  color: Color(0xFF2563EB),
+                  color: HomeSureColors.champagneHighlight,
                 ),
               ],
             ),
@@ -523,13 +525,13 @@ class _EvidenceRequirementCard extends StatelessWidget {
   Color _riskColor(EvidenceRiskLevel level) {
     switch (level) {
       case EvidenceRiskLevel.none:
-        return const Color(0xFF16A34A);
+        return HomeSureColors.statusPositiveText;
       case EvidenceRiskLevel.low:
-        return const Color(0xFF2563EB);
+        return HomeSureColors.champagneHighlight;
       case EvidenceRiskLevel.medium:
-        return const Color(0xFFD97706);
+        return HomeSureColors.statusWarningText;
       case EvidenceRiskLevel.high:
-        return const Color(0xFFDC2626);
+        return HomeSureColors.statusCriticalText;
     }
   }
 
@@ -596,15 +598,15 @@ class _StatusBadge extends StatelessWidget {
   ) {
     switch (status) {
       case EvidenceValidationStatus.missing:
-        return const Color(0xFFFEE2E2);
+        return HomeSureColors.statusCriticalBg;
       case EvidenceValidationStatus.provided:
-        return const Color(0xFFDBEAFE);
+        return HomeSureColors.midnightSand;
       case EvidenceValidationStatus.satisfied:
-        return const Color(0xFFDCFCE7);
+        return HomeSureColors.statusPositiveBg;
       case EvidenceValidationStatus.needsReview:
-        return const Color(0xFFFEF3C7);
+        return HomeSureColors.statusWarningBg;
       case EvidenceValidationStatus.rejected:
-        return const Color(0xFFFEE2E2);
+        return HomeSureColors.statusCriticalBg;
     }
   }
 
@@ -613,15 +615,15 @@ class _StatusBadge extends StatelessWidget {
   ) {
     switch (status) {
       case EvidenceValidationStatus.missing:
-        return const Color(0xFFB91C1C);
+        return HomeSureColors.statusCriticalText;
       case EvidenceValidationStatus.provided:
-        return const Color(0xFF1D4ED8);
+        return HomeSureColors.champagneHighlight;
       case EvidenceValidationStatus.satisfied:
-        return const Color(0xFF15803D);
+        return HomeSureColors.statusPositiveText;
       case EvidenceValidationStatus.needsReview:
-        return const Color(0xFFB45309);
+        return HomeSureColors.statusWarningText;
       case EvidenceValidationStatus.rejected:
-        return const Color(0xFFB91C1C);
+        return HomeSureColors.statusCriticalText;
     }
   }
 }
@@ -642,7 +644,7 @@ class EvidenceRequirementDetailScreen
         EvidenceRiskSignal.fromValidationResult(result);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
         title: const Text(
           'Requirement Details',
@@ -650,8 +652,8 @@ class EvidenceRequirementDetailScreen
             fontWeight: FontWeight.w700,
           ),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        backgroundColor: HomeSureColors.midnightHeader,
+        foregroundColor: HomeSureColors.champagneInk,
         elevation: 0,
       ),
       body: SafeArea(
@@ -662,10 +664,10 @@ class EvidenceRequirementDetailScreen
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: HomeSureColors.midnightCard,
+                borderRadius: BorderRadius.circular(HomeSureRadius.lg),
                 border: Border.all(
-                  color: const Color(0xFFE2E8F0),
+                  color: HomeSureColors.borderSlate,
                 ),
               ),
               child: Column(
@@ -677,7 +679,7 @@ class EvidenceRequirementDetailScreen
                     style: const TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -698,7 +700,7 @@ class EvidenceRequirementDetailScreen
                     result.message,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF475569),
+                      color: HomeSureColors.slateDetailBody,
                       height: 1.4,
                     ),
                   ),
@@ -710,10 +712,10 @@ class EvidenceRequirementDetailScreen
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: HomeSureColors.midnightCard,
+                borderRadius: BorderRadius.circular(HomeSureRadius.lg),
                 border: Border.all(
-                  color: const Color(0xFFE2E8F0),
+                  color: HomeSureColors.borderSlate,
                 ),
               ),
               child: Column(
@@ -725,7 +727,7 @@ class EvidenceRequirementDetailScreen
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -751,7 +753,7 @@ class EvidenceRequirementDetailScreen
                     risk.message,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF475569),
+                      color: HomeSureColors.slateMuted,
                       height: 1.4,
                     ),
                   ),
@@ -810,13 +812,13 @@ class EvidenceRequirementDetailScreen
   Color _riskColor(EvidenceRiskLevel level) {
     switch (level) {
       case EvidenceRiskLevel.none:
-        return const Color(0xFF16A34A);
+        return HomeSureColors.statusPositiveText;
       case EvidenceRiskLevel.low:
-        return const Color(0xFF2563EB);
+        return HomeSureColors.champagneHighlight;
       case EvidenceRiskLevel.medium:
-        return const Color(0xFFD97706);
+        return HomeSureColors.statusWarningText;
       case EvidenceRiskLevel.high:
-        return const Color(0xFFDC2626);
+        return HomeSureColors.statusCriticalText;
     }
   }
 
@@ -857,7 +859,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF64748B),
+                color: HomeSureColors.slateMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -867,7 +869,7 @@ class _DetailRow extends StatelessWidget {
               value,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF0F172A),
+                color: HomeSureColors.champagneInk,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -886,10 +888,10 @@ class _EmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
+          color: HomeSureColors.borderSlate,
         ),
       ),
       child: const Column(
@@ -897,7 +899,7 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.fact_check_outlined,
             size: 42,
-            color: Color(0xFF64748B),
+            color: HomeSureColors.champagneHighlight,
           ),
           SizedBox(height: 12),
           Text(
@@ -905,7 +907,7 @@ class _EmptyState extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
+              color: HomeSureColors.champagneInk,
             ),
           ),
           SizedBox(height: 6),
@@ -914,7 +916,7 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF64748B),
+              color: HomeSureColors.slateMuted,
               height: 1.4,
             ),
           ),

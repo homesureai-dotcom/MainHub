@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/property_health/property_risk.dart';
 
 class PropertyRiskCard extends StatelessWidget {
@@ -13,13 +14,13 @@ class PropertyRiskCard extends StatelessWidget {
   Color _severityColor() {
     switch (risk.severity) {
       case RiskSeverity.critical:
-        return Colors.red.shade700;
+        return HomeSureColors.statusCriticalText;
       case RiskSeverity.high:
-        return Colors.orange.shade700;
+        return HomeSureColors.champagneHighlight;
       case RiskSeverity.medium:
-        return Colors.amber.shade700;
+        return HomeSureColors.champagneGold;
       case RiskSeverity.low:
-        return Colors.blue.shade700;
+        return HomeSureColors.slateMuted;
     }
   }
 

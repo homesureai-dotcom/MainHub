@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/onboarding_page_model.dart';
 
 class OnboardingPageWidget extends StatelessWidget {
@@ -22,33 +23,48 @@ class OnboardingPageWidget extends StatelessWidget {
 
         children: [
 
-          Text(
-            page.icon,
-            style: const TextStyle(
-              fontSize: 110,
+          Container(
+            width: 140,
+            height: 140,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: HomeSureColors.midnightCard,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: HomeSureColors.champagneBronze,
+                width: 1.5,
+              ),
+              boxShadow: HomeSureShadows.cardElevated,
+            ),
+            child: Text(
+              page.icon,
+              style: const TextStyle(
+                fontSize: 64,
+              ),
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 36),
 
           Text(
             page.title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
               height: 1.2,
+              color: HomeSureColors.champagneInk,
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           Text(
             page.description,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 18,
-              color: Colors.grey,
+              fontSize: 16.5,
+              color: HomeSureColors.slateMuted,
               height: 1.5,
             ),
           ),

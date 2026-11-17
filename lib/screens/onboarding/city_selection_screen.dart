@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../data/cities.dart';
 import '../../features/auth/services/user_profile_service.dart';
 import '../../features/auth/screens/auth_gate.dart';
@@ -69,7 +70,10 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
           if (_errorMessage != null) ...[
             Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red, fontSize: 14),
+              style: const TextStyle(
+                color: HomeSureColors.statusCriticalText,
+                fontSize: 14,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -95,7 +99,11 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Popular Locations',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: HomeSureColors.champagneInk,
+              ),
             ),
           ),
           const SizedBox(height: 20),

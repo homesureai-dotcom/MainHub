@@ -1,11 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../core/theme/homesure_components.dart';
 import '../core/theme/homesure_tokens.dart';
+import '../theme/app_gradients.dart';
+import '../widgets/common/app_logo.dart';
 import '../data/phs_questions.dart';
+import '../features/auth/state/user_profile_state.dart';
 import '../features/dashboard/coordinators/dashboard_data_coordinator.dart';
 import '../features/dashboard/models/dashboard_data.dart';
 import '../features/dashboard/models/dashboard_priority.dart';
+import '../features/property/models/property.dart';
+import '../features/property/models/property_adapter.dart';
+import '../features/property/services/property_repository.dart';
 import '../features/property/state/property_state.dart';
 import '../features/property_submission/services/property_submission_service.dart';
 import '../features/surebot/builders/surebot_context_builder.dart';
@@ -45,6 +52,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
   DashboardData? _dashboardData;
   bool _isLoading = true;
   bool _dashboardSessionRestoreAttempted = false;
+  bool _restoringSelectedProperty = false;
 
   Future<void> _restoreDashboardSessionIfNeeded() async {
     if (_dashboardSessionRestoreAttempted) return;
@@ -75,6 +83,33 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     }
   }
 
+  Future<void> _restoreSelectedPropertyIfNeeded() async {
+    if (_restoringSelectedProperty || propertyState.selectedProperty != null) {
+      return;
+    }
+    _restoringSelectedProperty = true;
+    try {
+      await propertyState.restorePersistedProperty();
+      if (propertyState.selectedProperty == null) {
+        final candidateId = assessmentState.propertyId?.trim();
+        if (candidateId != null &&
+            candidateId.isNotEmpty &&
+            Firebase.apps.isNotEmpty) {
+          final fetched = await PropertyRepository.instance.fetchProjectById(
+            candidateId,
+          );
+          if (fetched != null && mounted && propertyState.selectedProperty == null) {
+            propertyState.selectProperty(PropertyAdapter.fromLegacy(fetched));
+          }
+        }
+      }
+    } catch (error) {
+      debugPrint('HOMESURE_PROPERTY_RESTORE_ERROR: $error');
+    } finally {
+      _restoringSelectedProperty = false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -86,19 +121,26 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
     propertyState.addListener(_refresh);
     assessmentState.addListener(_refresh);
+    UserProfileState.instance.addListener(_onProfileChanged);
 
     _loadDashboardData();
+  }
+
+  void _onProfileChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
   void dispose() {
     propertyState.removeListener(_refresh);
     assessmentState.removeListener(_refresh);
+    UserProfileState.instance.removeListener(_onProfileChanged);
     super.dispose();
   }
 
   void _refresh() {
-    if (!mounted) {
+    if (!mounted || _restoringSelectedProperty) {
       return;
     }
 
@@ -107,6 +149,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
 
   Future<void> _loadDashboardData() async {
     await _restoreDashboardSessionIfNeeded();
+    await _restoreSelectedPropertyIfNeeded();
 
     if (!mounted) return;
 
@@ -120,6 +163,18 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
       _dashboardData = data;
       _isLoading = false;
     });
+  }
+
+  String _resolveGreetingName(Property property) {
+    final profileName = UserProfileState.instance.displayName.trim();
+    if (profileName.isNotEmpty) {
+      return profileName;
+    }
+    final owner = property.ownerName.trim();
+    if (owner.isNotEmpty) {
+      return owner;
+    }
+    return 'Homebuyer';
   }
 
   void _openEvidenceDetails() {
@@ -323,6 +378,58 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     );
   }
 
+  Widget _buildBrandTopBar({int? phiScore}) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 14),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: HomeSureColors.borderSlate, width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: AppLogo(
+              variant: AppLogoVariant.brandHeader,
+              height: 32,
+              showSubtitle: true,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+            decoration: BoxDecoration(
+              color: HomeSureColors.midnightCard,
+              borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+              border: Border.all(color: HomeSureColors.borderSlate),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'PHI',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: HomeSureColors.slateMuted,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  phiScore != null ? '$phiScore' : '--',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                    color: HomeSureColors.champagneHighlight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -335,118 +442,146 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
       return Scaffold(
         backgroundColor: HomeSureColors.backgroundWarm,
         body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: BoxDecoration(
-                      color: HomeSureColors.surfaceWhite,
-                      borderRadius: BorderRadius.circular(HomeSureRadius.xl),
-                      border: Border.all(color: HomeSureColors.borderDivider),
-                      boxShadow: HomeSureShadows.cardSubtle,
-                    ),
-                    child: Column(
-                      children: [
-                        const HomeSureStatusBadge(
-                          label: 'Bengaluru Property Due Diligence',
-                          tone: HomeSureBadgeTone.teal,
-                          icon: Icons.verified_user_outlined,
-                        ),
-                        const SizedBox(height: 18),
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: HomeSureColors.primaryNavyTint,
-                            borderRadius: BorderRadius.circular(
-                              HomeSureRadius.lg,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.apartment_rounded,
-                            size: 30,
-                            color: HomeSureColors.primaryNavy,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Let’s get your property started',
-                          textAlign: TextAlign.center,
-                          style: HomeSureTypography.screenTitle,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Know the project you have chosen. Understand what is behind it using official K-RERA disclosures and structured buyer evaluation.',
-                          textAlign: TextAlign.center,
-                          style: HomeSureTypography.bodySecondary,
-                        ),
-                        const SizedBox(height: 18),
-                        const Row(
-                          children: [
-                            Expanded(
-                              child: HomeSureMetricTile(
-                                label: 'Canonical Builders',
-                                value: '680',
-                                sublabel: 'Bengaluru Registry',
-                                icon: Icons.domain_rounded,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: HomeSureMetricTile(
-                                label: 'K-RERA Projects',
-                                value: '875',
-                                sublabel: 'Official Records',
-                                icon: Icons.fact_check_outlined,
-                                accentColor: HomeSureColors.accentTealDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 18),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _findProperty,
-                            icon: const Icon(Icons.search_rounded, size: 19),
-                            label: const Text('Find a Property'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 92),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildBrandTopBar(),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.hero,
+                    borderRadius: BorderRadius.circular(HomeSureRadius.xl),
+                    border: Border.all(color: HomeSureColors.borderSlate),
+                    boxShadow: HomeSureShadows.cardElevated,
                   ),
-                  if (assessmentState.hasActiveSession) ...[
-                    const SizedBox(height: 16),
-                    _buildAssessmentResumeCard(),
-                    const SizedBox(height: 16),
-                    AssessmentProgressCard(
-                      completedQuestions: assessmentState
-                          .assessmentProgress
-                          .answeredQuestions,
-                      totalQuestions:
-                          assessmentState.assessmentProgress.totalQuestions,
-                      completionPercentage: assessmentState
-                          .assessmentProgress
-                          .completionPercentage
-                          .toDouble(),
-                      completedCategories: assessmentState
-                          .assessmentProgress
-                          .completedCategoryCount,
-                      totalCategories: assessmentState
-                          .assessmentProgress
-                          .totalCategoryCount,
-                    ),
-                  ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'HOMESURE AI',
+                        style: HomeSureTypography.eyebrow,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Welcome to HomeSureAI',
+                        style: HomeSureTypography.screenTitle,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Verify K-RERA filings, promoter financials, and your 6-pillar Property Health Index in one workspace.',
+                        style: HomeSureTypography.bodySecondary,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: HomeSureColors.surfaceWhite,
+                    borderRadius: BorderRadius.circular(HomeSureRadius.xl),
+                    border: Border.all(color: HomeSureColors.borderDivider),
+                    boxShadow: HomeSureShadows.cardSubtle,
+                  ),
+                  child: Column(
+                    children: [
+                      const HomeSureStatusBadge(
+                        label: 'Bengaluru Property Due Diligence',
+                        tone: HomeSureBadgeTone.teal,
+                        icon: Icons.verified_user_outlined,
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: HomeSureColors.primaryNavyTint,
+                          borderRadius: BorderRadius.circular(
+                            HomeSureRadius.lg,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.apartment_rounded,
+                          size: 30,
+                          color: HomeSureColors.primaryNavy,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Let’s get your property started',
+                        textAlign: TextAlign.center,
+                        style: HomeSureTypography.screenTitle,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Know the project you have chosen. Understand what is behind it using official K-RERA disclosures and structured buyer evaluation.',
+                        textAlign: TextAlign.center,
+                        style: HomeSureTypography.bodySecondary,
+                      ),
+                      const SizedBox(height: 18),
+                      const Row(
+                        children: [
+                          Expanded(
+                            child: HomeSureMetricTile(
+                              label: 'Canonical Builders',
+                              value: '680',
+                              sublabel: 'Bengaluru Registry',
+                              icon: Icons.domain_rounded,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: HomeSureMetricTile(
+                              label: 'K-RERA Projects',
+                              value: '875',
+                              sublabel: 'Official Records',
+                              icon: Icons.fact_check_outlined,
+                              accentColor: HomeSureColors.accentTealDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _findProperty,
+                          icon: const Icon(Icons.search_rounded, size: 19),
+                          label: const Text('Find a Property'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (assessmentState.hasActiveSession &&
+                    (assessmentState.submissionId?.trim().isNotEmpty ??
+                        false)) ...[
+                  const SizedBox(height: 16),
+                  _buildAssessmentResumeCard(),
+                  const SizedBox(height: 16),
+                  AssessmentProgressCard(
+                    completedQuestions:
+                        assessmentState.assessmentProgress.answeredQuestions,
+                    totalQuestions:
+                        assessmentState.assessmentProgress.totalQuestions,
+                    completionPercentage: assessmentState
+                        .assessmentProgress
+                        .completionPercentage
+                        .toDouble(),
+                    completedCategories: assessmentState
+                        .assessmentProgress
+                        .completedCategoryCount,
+                    totalCategories:
+                        assessmentState.assessmentProgress.totalCategoryCount,
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
@@ -461,11 +596,13 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
       backgroundColor: HomeSureColors.backgroundWarm,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 92),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const GreetingHeader(userName: 'Vinod'),
+              _buildBrandTopBar(phiScore: score),
+              const SizedBox(height: 16),
+              GreetingHeader(userName: _resolveGreetingName(property)),
               const SizedBox(height: 18),
               PropertySelectorCard(
                 propertyName: property.name,

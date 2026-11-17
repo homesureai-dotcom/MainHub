@@ -1,33 +1,46 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class SureBotAvatar extends StatelessWidget {
-  const SureBotAvatar({super.key});
+  final double size;
+
+  const SureBotAvatar({
+    super.key,
+    this.size = 104,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
-      height: 120,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF2563EB),
-            Color(0xFF1D4ED8),
+            HomeSureColors.midnightSelected,
+            HomeSureColors.midnightCard,
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: HomeSureColors.champagneGold,
+          width: 2,
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x22000000),
+            color: Color(0x55000000),
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
         ],
       ),
-      child: const Icon(
-        Icons.smart_toy_rounded,
-        color: Colors.white,
-        size: 60,
+      child: Icon(
+        Icons.auto_awesome_rounded,
+        color: HomeSureColors.champagneHighlight,
+        size: size * 0.48,
       ),
     );
   }

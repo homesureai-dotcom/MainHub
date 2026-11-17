@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/property_health/recommendation.dart';
 
 class PropertyHealthRecommendationCard extends StatelessWidget {
@@ -13,13 +14,13 @@ class PropertyHealthRecommendationCard extends StatelessWidget {
   Color _priorityColor() {
     switch (recommendation.priority) {
       case RecommendationPriority.critical:
-        return Colors.red.shade700;
+        return HomeSureColors.statusCriticalText;
       case RecommendationPriority.high:
-        return Colors.orange.shade700;
+        return HomeSureColors.champagneHighlight;
       case RecommendationPriority.medium:
-        return Colors.blue.shade700;
+        return HomeSureColors.champagneGold;
       case RecommendationPriority.low:
-        return Colors.green.shade700;
+        return HomeSureColors.statusPositiveText;
     }
   }
 

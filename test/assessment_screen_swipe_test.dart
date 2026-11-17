@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:homesure_ai/core/phs/phs_answer.dart';
+import 'package:homesure_ai/core/phs/phs_categories.dart';
 import 'package:homesure_ai/data/phs_questions.dart';
 import 'package:homesure_ai/screens/assessment/assessment_screen.dart';
 import 'package:homesure_ai/state/assessment_state.dart';
@@ -18,108 +20,105 @@ void main() {
 
   Future<void> pumpAssessmentScreen(WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: AssessmentScreen()));
-
-    // Allow assessment restoration and initial question selection to finish.
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
   }
 
-  Finder questionCarousel() {
-    return find.byKey(
-      const PageStorageKey<String>('assessment-question-carousel'),
+  Finder activePillarTitle(PHSCategory category) {
+    return find.byWidgetPredicate(
+      (w) =>
+          w is Text &&
+          w.key == const ValueKey<String>('active-pillar-title') &&
+          w.data == category.displayName,
     );
   }
 
-  Future<void> swipeCarousel(
-    WidgetTester tester, {
-    required double horizontalDistance,
-  }) async {
-    final carousel = questionCarousel();
-
-    expect(carousel, findsOneWidget);
-
-    final rect = tester.getRect(carousel);
-
-    expect(
-      rect.width,
-      greaterThan(100),
-      reason: 'The question carousel must have a usable horizontal swipe area.',
-    );
-
-    expect(
-      rect.height,
-      greaterThan(100),
-      reason: 'The question carousel must have a usable vertical area.',
-    );
-
-    await tester.fling(carousel, Offset(horizontalDistance, 0), 1200);
-
-    await tester.pumpAndSettle();
-  }
-
-  testWidgets('swiping left advances to the next question', (tester) async {
-    expect(phsQuestions.length, greaterThanOrEqualTo(2));
-
+  testWidgets('scrolling brings later questions of the active pillar into view', (
+    tester,
+  ) async {
     await pumpAssessmentScreen(tester);
 
-    final secondQuestion = phsQuestions[1];
+    final legalQuestions = phsQuestions
+        .where((q) => q.category == PHSCategory.legalOwnership)
+        .toList();
+    expect(legalQuestions.length, greaterThanOrEqualTo(2));
 
-    expect(assessmentState.currentQuestionId, phsQuestions[0].id);
+    final lastLegalQCard = find.byKey(
+      ValueKey<String>('assessment-qcard-${legalQuestions.last.id}'),
+    );
+    await tester.ensureVisible(lastLegalQCard);
+    await tester.pumpAndSettle();
 
-    await swipeCarousel(tester, horizontalDistance: -400);
-
-    expect(assessmentState.currentQuestionId, secondQuestion.id);
+    expect(lastLegalQCard, findsOneWidget);
+    expect(
+      find.descendant(
+        of: lastLegalQCard,
+        matching: find.text("I'm Not Sure"),
+      ),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('swiping right returns to the previous question', (tester) async {
-    expect(phsQuestions.length, greaterThanOrEqualTo(2));
-
+  testWidgets('scrolling horizontally on pillars strip exposes remaining pillars', (
+    tester,
+  ) async {
     await pumpAssessmentScreen(tester);
 
-    final firstQuestion = phsQuestions[0];
-    final secondQuestion = phsQuestions[1];
+    final scrollablePillarStrip = find.byKey(
+      const ValueKey<String>('assessment-pillars-strip'),
+    );
+    expect(scrollablePillarStrip, findsOneWidget);
 
-    final nextButton = find.text('Next Question');
-
-    expect(nextButton, findsOneWidget);
-
-    await tester.ensureVisible(nextButton);
-    await tester.tap(nextButton);
+    await tester.drag(scrollablePillarStrip, const Offset(-450, 0));
     await tester.pumpAndSettle();
 
-    expect(assessmentState.currentQuestionId, secondQuestion.id);
+    final safetyPillar = find.byKey(
+      const ValueKey<String>('assessment-pillar-safetyCompliance'),
+    );
+    expect(safetyPillar, findsOneWidget);
+    await tester.tap(safetyPillar);
+    await tester.pumpAndSettle();
 
-    await swipeCarousel(tester, horizontalDistance: 400);
-
-    expect(assessmentState.currentQuestionId, firstQuestion.id);
+    expect(activePillarTitle(PHSCategory.safetyCompliance), findsOneWidget);
   });
 
-  testWidgets('swiping preserves previously saved answers', (tester) async {
-    expect(phsQuestions.length, greaterThanOrEqualTo(2));
-
+  testWidgets('answering stacked questions preserves responses while switching pillars', (
+    tester,
+  ) async {
     await pumpAssessmentScreen(tester);
 
-    final firstQuestion = phsQuestions[0];
-    final secondQuestion = phsQuestions[1];
+    final legalQuestions = phsQuestions
+        .where((q) => q.category == PHSCategory.legalOwnership)
+        .toList();
+    final firstCard = find.byKey(
+      ValueKey<String>('assessment-qcard-${legalQuestions[0].id}'),
+    );
+    final secondCard = find.byKey(
+      ValueKey<String>('assessment-qcard-${legalQuestions[1].id}'),
+    );
 
-    final yesOption = find.text('Yes');
-
-    expect(yesOption, findsOneWidget);
-
-    await tester.ensureVisible(yesOption);
-    await tester.tap(yesOption);
+    final firstYes = find.descendant(of: firstCard, matching: find.text('Yes'));
+    await tester.ensureVisible(firstYes);
+    await tester.tap(firstYes);
     await tester.pumpAndSettle();
 
-    expect(assessmentState.answers, hasLength(1));
+    final secondNo = find.descendant(of: secondCard, matching: find.text('No'));
+    await tester.ensureVisible(secondNo);
+    await tester.tap(secondNo);
+    await tester.pumpAndSettle();
 
-    expect(assessmentState.answers.first.questionId, firstQuestion.id);
+    expect(assessmentState.answers, hasLength(2));
+    expect(assessmentState.answers[0].response, PHSResponse.yes);
+    expect(assessmentState.answers[1].response, PHSResponse.no);
 
-    await swipeCarousel(tester, horizontalDistance: -400);
+    final nextPillarBtn = find.byKey(
+      const ValueKey<String>('assessment-next-pillar-btn'),
+    );
+    await tester.ensureVisible(nextPillarBtn);
+    await tester.tap(nextPillarBtn);
+    await tester.pumpAndSettle();
 
-    expect(assessmentState.currentQuestionId, secondQuestion.id);
-
-    expect(assessmentState.answers, hasLength(1));
-
-    expect(assessmentState.answers.first.questionId, firstQuestion.id);
+    expect(assessmentState.answers, hasLength(2));
+    expect(activePillarTitle(PHSCategory.constructionQuality), findsOneWidget);
   });
 }

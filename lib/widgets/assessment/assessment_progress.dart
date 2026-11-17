@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class AssessmentProgress extends StatelessWidget {
   final int current;
   final int total;
@@ -12,27 +14,30 @@ class AssessmentProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = current / total;
+    final progress = total == 0 ? 0.0 : (current / total).clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
         Text(
-          "Question $current of $total",
+          'Question $current of $total',
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w700,
+            color: HomeSureColors.champagneInk,
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         ClipRRect(
           borderRadius: BorderRadius.circular(100),
           child: LinearProgressIndicator(
             value: progress,
-            minHeight: 10,
+            minHeight: 8,
+            backgroundColor: HomeSureColors.midnightInteractive,
+            color: HomeSureColors.champagneGold,
           ),
         ),
       ],

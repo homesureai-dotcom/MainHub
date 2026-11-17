@@ -16,7 +16,7 @@ class AppInitializer {
           id: "P001",
           name: "Casagrand Aquene",
           builderName: "Casagrand",
-          ownerName: "Vinod",
+          ownerName: "",
           address: const Address(
             line1: "Kengeri",
             city: "Bangalore",

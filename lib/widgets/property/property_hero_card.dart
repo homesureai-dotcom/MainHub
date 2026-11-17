@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/property.dart';
 import '../../theme/app_gradients.dart';
 
@@ -13,36 +14,38 @@ class PropertyHeroCard extends StatelessWidget {
 
   Color get scoreColor {
     if (property.overallScore >= 85) {
-      return Colors.greenAccent;
+      return HomeSureColors.statusPositiveText;
     }
 
     if (property.overallScore >= 70) {
-      return Colors.orangeAccent;
+      return HomeSureColors.champagneHighlight;
     }
 
-    return Colors.redAccent;
+    return HomeSureColors.statusCriticalText;
   }
 
   String get scoreLabel {
     if (property.overallScore >= 85) {
-      return "Excellent";
+      return 'Excellent';
     }
 
     if (property.overallScore >= 70) {
-      return "Good";
+      return 'Good';
     }
 
-    return "Needs Attention";
+    return 'Needs Attention';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: AppGradients.hero,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: HomeSureColors.champagneBronze),
+        boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,18 +62,18 @@ class PropertyHeroCard extends StatelessWidget {
                     Text(
                       property.name,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                        color: HomeSureColors.champagneInk,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      "${property.builder} • ${property.city}",
+                      '${property.builder} • ${property.city}',
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: HomeSureColors.slateMuted,
                         fontSize: 15,
                       ),
                     ),
@@ -81,12 +84,13 @@ class PropertyHeroCard extends StatelessWidget {
               if (property.verified)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
+                    horizontal: 12,
+                    vertical: 7,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: HomeSureColors.midnightInteractive,
                     borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: HomeSureColors.champagneBronze),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
@@ -94,8 +98,8 @@ class PropertyHeroCard extends StatelessWidget {
 
                       Icon(
                         Icons.verified,
-                        size: 18,
-                        color: Colors.white,
+                        size: 16,
+                        color: HomeSureColors.champagneHighlight,
                       ),
 
                       SizedBox(width: 6),
@@ -130,11 +134,11 @@ class PropertyHeroCard extends StatelessWidget {
             children: [
 
               Text(
-                "${property.overallScore}",
+                '${property.overallScore}',
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 72,
-                  fontWeight: FontWeight.bold,
+                  color: HomeSureColors.champagneHighlight,
+                  fontSize: 68,
+                  fontWeight: FontWeight.w900,
                   height: 1,
                 ),
               ),
@@ -147,7 +151,7 @@ class PropertyHeroCard extends StatelessWidget {
                   scoreLabel,
                   style: TextStyle(
                     color: scoreColor,
-                    fontSize: 22,
+                    fontSize: 21,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -155,31 +159,31 @@ class PropertyHeroCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
           const Divider(
-            color: Colors.white24,
+            color: HomeSureColors.borderSlate,
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
 
               _HeroStat(
-                title: "Status",
-                value: "Active",
+                title: 'Status',
+                value: 'Active',
               ),
 
               _HeroStat(
-                title: "Updated",
-                value: "Today",
+                title: 'Updated',
+                value: 'Today',
               ),
 
               _HeroStat(
-                title: "Health",
-                value: "Good",
+                title: 'Health',
+                value: 'Good',
               ),
             ],
           ),
@@ -206,7 +210,7 @@ class _HeroStat extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Colors.white60,
+            color: HomeSureColors.slateMuted,
             fontSize: 13,
           ),
         ),
@@ -216,7 +220,7 @@ class _HeroStat extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: HomeSureColors.champagneInk,
             fontWeight: FontWeight.bold,
           ),
         ),

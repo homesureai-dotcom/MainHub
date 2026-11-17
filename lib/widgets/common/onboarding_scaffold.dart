@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class OnboardingScaffold extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -17,7 +19,7 @@ class OnboardingScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
 
       body: SafeArea(
         child: Padding(
@@ -31,9 +33,10 @@ class OnboardingScaffold extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
                   height: 1.2,
+                  color: HomeSureColors.champagneInk,
                 ),
               ),
 
@@ -42,13 +45,13 @@ class OnboardingScaffold extends StatelessWidget {
               Text(
                 subtitle,
                 style: const TextStyle(
-                  fontSize: 17,
-                  color: Colors.grey,
+                  fontSize: 16,
+                  color: HomeSureColors.slateMuted,
                   height: 1.5,
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
               Expanded(child: child),
 

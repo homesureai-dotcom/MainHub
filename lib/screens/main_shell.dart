@@ -1,14 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../core/localization/app_locale_controller.dart';
-import '../core/phs/phs_categories.dart';
-import '../core/theme/homesure_components.dart';
 import '../core/theme/homesure_tokens.dart';
+import '../features/auth/services/user_profile_service.dart';
+import '../features/auth/state/user_profile_state.dart';
+import '../features/dashboard/coordinators/dashboard_data_coordinator.dart';
 import '../features/network/screens/network_home_screen.dart';
 import '../features/property/models/property.dart';
 import '../features/property/state/property_state.dart';
+import '../features/surebot/builders/surebot_context_builder.dart';
 import '../state/assessment_state.dart';
+import '../widgets/common/floating_surebot_button.dart';
 import 'assessment/assessment_screen.dart';
 import 'assessment/surebot_screen.dart';
 import 'home_screen_v2.dart';
@@ -67,21 +71,65 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  Future<void> _openSureBotAssistant() async {
+    final property = _selectedProperty;
+    if (property != null) {
+      final data = await DashboardDataCoordinator(
+        propertyState: _propertyState,
+        assessmentState: AssessmentState.instance,
+      ).build();
+
+      if (!mounted) return;
+      final sureBotContext = data == null
+          ? null
+          : const SureBotContextBuilder().build(
+              data,
+              currentPriority:
+                  data.priorities.isEmpty ? null : data.priorities.first,
+            );
+
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => SureBotScreen(
+            sureBotContext: sureBotContext,
+            openAsAssistant: true,
+            onBrowseProperties: () {
+              Navigator.of(context).pop();
+              _switchTab(1);
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => SureBotScreen(
+          openAsAssistant: true,
+          onBrowseProperties: () {
+            Navigator.of(context).pop();
+            _switchTab(1);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = <Widget>[
       const HomeScreenV2(),
       const PropertySearchScreen(),
-      _HealthWorkspaceScreen(
-        selectedProperty: _selectedProperty,
-        onBrowseProperties: () => _switchTab(1),
-      ),
-      _AiWorkspaceScreen(
-        selectedProperty: _selectedProperty,
-        onBrowseProperties: () => _switchTab(1),
+      AssessmentScreen(
+        embeddedInTab: true,
+        onSelectProperty: () => _switchTab(1),
       ),
       _buildNetworkTab(),
-      const _ProfileScreen(),
+      _ProfileScreen(
+        onBrowseProperties: () => _switchTab(1),
+      ),
     ];
 
     return PopScope(
@@ -95,10 +143,26 @@ class _MainShellState extends State<MainShell> {
       },
       child: Scaffold(
         backgroundColor: HomeSureColors.backgroundWarm,
-        body: IndexedStack(index: currentIndex, children: screens),
+        body: Stack(
+          children: [
+            IndexedStack(index: currentIndex, children: screens),
+            Positioned(
+              right: 16,
+              bottom: 12,
+              child: SafeArea(
+                top: false,
+                left: false,
+                bottom: false,
+                child: FloatingSureBotButton(
+                  onPressed: _openSureBotAssistant,
+                ),
+              ),
+            ),
+          ],
+        ),
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
-            color: HomeSureColors.surfaceWhite,
+            color: HomeSureColors.midnightBottomNav,
             border: Border(
               top: BorderSide(color: HomeSureColors.borderDivider, width: 1),
             ),
@@ -121,11 +185,6 @@ class _MainShellState extends State<MainShell> {
                 icon: Icon(Icons.health_and_safety_outlined),
                 selectedIcon: Icon(Icons.health_and_safety_rounded),
                 label: 'Health',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.smart_toy_outlined),
-                selectedIcon: Icon(Icons.smart_toy_rounded),
-                label: 'AI',
               ),
               NavigationDestination(
                 icon: Icon(Icons.groups_outlined),
@@ -214,314 +273,10 @@ class _NoPropertySelectedScreen extends StatelessWidget {
   }
 }
 
-class _HealthWorkspaceScreen extends StatelessWidget {
-  final Property? selectedProperty;
-  final VoidCallback onBrowseProperties;
-
-  const _HealthWorkspaceScreen({
-    required this.selectedProperty,
-    required this.onBrowseProperties,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final assessmentState = AssessmentState.instance;
-    final answeredCount = assessmentState.answers.length;
-
-    return Scaffold(
-      backgroundColor: HomeSureColors.backgroundWarm,
-      appBar: AppBar(
-        title: const Text('Property Health'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Center(
-              child: HomeSureStatusBadge(
-                label: '6-Pillar PHS Engine',
-                tone: HomeSureBadgeTone.teal,
-                icon: Icons.verified_user_outlined,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: HomeSureColors.primaryNavy,
-                  borderRadius: BorderRadius.circular(HomeSureRadius.lg),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'PROPERTY HEALTH INTELLIGENCE',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                        color: Color(0xFFB5C4D8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      selectedProperty != null
-                          ? selectedProperty!.name
-                          : 'Evaluate Your Shortlisted Project',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      selectedProperty != null
-                          ? '${selectedProperty!.builderName} • ${selectedProperty!.address.line1}'
-                          : 'Complete your property health assessment to view detailed category scores, risks, and recommendations.',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFFD5DFEC),
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: HomeSureColors.accentTeal,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          if (selectedProperty == null && answeredCount == 0) {
-                            onBrowseProperties();
-                            return;
-                          }
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => answeredCount > 0
-                                  ? const AssessmentScreen()
-                                  : const SureBotScreen(),
-                            ),
-                          );
-                        },
-                        icon: Icon(
-                          selectedProperty == null && answeredCount == 0
-                              ? Icons.search_rounded
-                              : Icons.play_arrow_rounded,
-                        ),
-                        label: Text(
-                          selectedProperty == null && answeredCount == 0
-                              ? 'Select a Property to Assess'
-                              : answeredCount > 0
-                                  ? 'Continue Assessment ($answeredCount Answered)'
-                                  : 'Start Property Health Assessment',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              const HomeSureSectionHeader(
-                title: 'Six Evaluation Pillars',
-                subtitle:
-                    'Weighted diagnostic framework across statutory, financial, and engineering dimensions.',
-              ),
-              const SizedBox(height: 12),
-              ...PHSCategory.values.map(
-                (category) => Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: HomeSureColors.surfaceWhite,
-                    borderRadius: BorderRadius.circular(HomeSureRadius.md),
-                    border: Border.all(color: HomeSureColors.borderDivider),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: HomeSureColors.surfaceSubtle,
-                          borderRadius: BorderRadius.circular(HomeSureRadius.sm),
-                        ),
-                        child: Text(
-                          category.icon,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              category.displayName,
-                              style: HomeSureTypography.bodyMedium,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Weight in Overall PHS: ${category.weight.round()}%',
-                              style: HomeSureTypography.caption,
-                            ),
-                          ],
-                        ),
-                      ),
-                      HomeSureStatusBadge(
-                        label: '${category.weight.round()}%',
-                        tone: HomeSureBadgeTone.navy,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AiWorkspaceScreen extends StatelessWidget {
-  final Property? selectedProperty;
-  final VoidCallback onBrowseProperties;
-
-  const _AiWorkspaceScreen({
-    required this.selectedProperty,
-    required this.onBrowseProperties,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: HomeSureColors.backgroundWarm,
-      appBar: AppBar(
-        title: const Text('HomeSureAI Assistant'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Center(
-              child: HomeSureStatusBadge(
-                label: 'SureBot Due Diligence',
-                tone: HomeSureBadgeTone.teal,
-                icon: Icons.auto_awesome_outlined,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: HomeSureColors.surfaceWhite,
-                  borderRadius: BorderRadius.circular(HomeSureRadius.lg),
-                  border: Border.all(color: HomeSureColors.borderDivider),
-                  boxShadow: HomeSureShadows.cardSubtle,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: HomeSureColors.accentTealTint,
-                            borderRadius: BorderRadius.circular(
-                              HomeSureRadius.md,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.smart_toy_outlined,
-                            color: HomeSureColors.accentTealDark,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'SureBot Intelligence Guide',
-                                style: HomeSureTypography.sectionTitle,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                selectedProperty != null
-                                    ? 'Active Project: ${selectedProperty!.name}'
-                                    : 'Multilingual K-RERA & Buyer Due-Diligence Assistant',
-                                style: HomeSureTypography.bodySecondary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Start a property assessment from the Home or Properties tab to unlock guided AI assistance, document verification prompts, and risk explanations in 6 Indian languages.',
-                      style: HomeSureTypography.bodySecondary,
-                    ),
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const SureBotScreen(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 18,
-                            ),
-                            label: const Text('Launch SureBot'),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        OutlinedButton(
-                          onPressed: onBrowseProperties,
-                          child: const Text('Browse Catalogue'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ProfileScreen extends StatefulWidget {
-  const _ProfileScreen();
+  final VoidCallback onBrowseProperties;
+
+  const _ProfileScreen({required this.onBrowseProperties});
 
   @override
   State<_ProfileScreen> createState() => _ProfileScreenState();
@@ -538,6 +293,25 @@ class _ProfileScreenState extends State<_ProfileScreen> {
   };
 
   bool _savingLanguage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    UserProfileState.instance.addListener(_onProfileChanged);
+    PropertyState.instance.addListener(_onProfileChanged);
+  }
+
+  @override
+  void dispose() {
+    UserProfileState.instance.removeListener(_onProfileChanged);
+    PropertyState.instance.removeListener(_onProfileChanged);
+    super.dispose();
+  }
+
+  void _onProfileChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
 
   Future<void> _selectLanguage(String? code) async {
     if (code == null ||
@@ -563,16 +337,32 @@ class _ProfileScreenState extends State<_ProfileScreen> {
     }
   }
 
+  Future<void> _openEditProfileSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditUserProfileSheet(
+        initialProfile: UserProfileState.instance.profile,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        Firebase.apps.isNotEmpty ? FirebaseAuth.instance.currentUser : null;
+    final profile = UserProfileState.instance.profile;
+    final displayName = UserProfileState.instance.displayName;
+    final dob = profile?.dateOfBirth.trim() ?? '';
+    final selectedProperty = PropertyState.instance.selectedProperty;
 
     return Scaffold(
       backgroundColor: HomeSureColors.backgroundWarm,
       appBar: AppBar(title: const Text('Profile & Preferences')),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -583,40 +373,121 @@ class _ProfileScreenState extends State<_ProfileScreen> {
                   borderRadius: BorderRadius.circular(HomeSureRadius.lg),
                   border: Border.all(color: HomeSureColors.borderDivider),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: HomeSureColors.primaryNavyTint,
-                        borderRadius: BorderRadius.circular(HomeSureRadius.md),
-                      ),
-                      child: const Icon(
-                        Icons.person_outline_rounded,
-                        color: HomeSureColors.primaryNavy,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: HomeSureColors.primaryNavyTint,
+                            borderRadius: BorderRadius.circular(
+                              HomeSureRadius.md,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person_outline_rounded,
+                            color: HomeSureColors.primaryNavy,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Account Profile',
+                                style: HomeSureTypography.caption,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                displayName.isNotEmpty
+                                    ? displayName
+                                    : (user?.email ?? 'Signed in user'),
+                                style: HomeSureTypography.cardTitle,
+                              ),
+                              if (user?.email != null &&
+                                  user!.email!.isNotEmpty &&
+                                  displayName.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  user.email!,
+                                  style: HomeSureTypography.bodySecondary,
+                                ),
+                              ],
+                              if (dob.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  'DOB: $dob',
+                                  style: HomeSureTypography.caption.copyWith(
+                                    color: HomeSureColors.champagneHighlight,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Signed In Account',
-                            style: HomeSureTypography.caption,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            user?.email ?? 'Signed in user',
-                            style: HomeSureTypography.cardTitle,
-                          ),
-                        ],
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        key: const ValueKey<String>('profile-edit-button'),
+                        onPressed: _openEditProfileSheet,
+                        icon: const Icon(Icons.edit_outlined, size: 17),
+                        label: const Text('Edit Name & Date of Birth'),
                       ),
                     ),
                   ],
                 ),
               ),
+              if (selectedProperty != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: HomeSureColors.surfaceWhite,
+                    borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+                    border: Border.all(color: HomeSureColors.champagneBronze),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.apartment_rounded,
+                        color: HomeSureColors.champagneHighlight,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Selected Property',
+                              style: HomeSureTypography.caption,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              selectedProperty.name,
+                              style: HomeSureTypography.cardTitle,
+                            ),
+                            Text(
+                              '${selectedProperty.builderName} • ${selectedProperty.address.city}',
+                              style: HomeSureTypography.bodySecondary,
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: widget.onBrowseProperties,
+                        child: const Text('Change'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(18),
@@ -666,12 +537,223 @@ class _ProfileScreenState extends State<_ProfileScreen> {
               const SizedBox(height: 20),
               OutlinedButton.icon(
                 onPressed: () async {
+                  UserProfileState.instance.clear();
+                  PropertyState.instance.clear();
+                  AssessmentState.instance.clearAssessment();
                   await FirebaseAuth.instance.signOut();
                 },
                 icon: const Icon(Icons.logout_rounded, size: 18),
                 label: const Text('Sign Out'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EditUserProfileSheet extends StatefulWidget {
+  final UserProfileData? initialProfile;
+
+  const _EditUserProfileSheet({this.initialProfile});
+
+  @override
+  State<_EditUserProfileSheet> createState() => _EditUserProfileSheetState();
+}
+
+class _EditUserProfileSheetState extends State<_EditUserProfileSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _firstNameCtrl;
+  late final TextEditingController _lastNameCtrl;
+  late final TextEditingController _dobCtrl;
+
+  bool _saving = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameCtrl = TextEditingController(
+      text: widget.initialProfile?.firstName ?? '',
+    );
+    _lastNameCtrl = TextEditingController(
+      text: widget.initialProfile?.lastName ?? '',
+    );
+    _dobCtrl = TextEditingController(
+      text: widget.initialProfile?.dateOfBirth ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
+    _dobCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDob() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year - 28, now.month, now.day),
+      firstDate: DateTime(1920),
+      lastDate: DateTime(now.year - 13, now.month, now.day),
+    );
+    if (picked == null || !mounted) return;
+    final dd = picked.day.toString().padLeft(2, '0');
+    final mm = picked.month.toString().padLeft(2, '0');
+    setState(() {
+      _dobCtrl.text = '$dd/$mm/${picked.year}';
+    });
+  }
+
+  Future<void> _save() async {
+    if (_saving || !(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      final first = _firstNameCtrl.text.trim();
+      final last = _lastNameCtrl.text.trim();
+      final dob = _dobCtrl.text.trim();
+
+      if (Firebase.apps.isNotEmpty &&
+          FirebaseAuth.instance.currentUser != null) {
+        await UserProfileService().saveUserProfile(
+          firstName: first,
+          lastName: last,
+          dateOfBirth: dob,
+        );
+      } else {
+        UserProfileState.instance.setProfile(
+          UserProfileData(
+            firstName: first,
+            lastName: last,
+            dateOfBirth: dob,
+            email: widget.initialProfile?.email ?? '',
+          ),
+        );
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not update profile. Please try again.';
+      });
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: HomeSureColors.midnightCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border(
+            top: BorderSide(color: HomeSureColors.borderSlate),
+            left: BorderSide(color: HomeSureColors.borderSlate),
+            right: BorderSide(color: HomeSureColors.borderSlate),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Edit Profile',
+                          style: HomeSureTypography.sectionTitle,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: HomeSureColors.slateMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    key: const ValueKey<String>('profile-edit-first-name'),
+                    controller: _firstNameCtrl,
+                    style: const TextStyle(color: HomeSureColors.champagneInk),
+                    decoration: const InputDecoration(
+                      labelText: 'First Name *',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter first name'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    key: const ValueKey<String>('profile-edit-last-name'),
+                    controller: _lastNameCtrl,
+                    style: const TextStyle(color: HomeSureColors.champagneInk),
+                    decoration: const InputDecoration(
+                      labelText: 'Last Name *',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter last name'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    key: const ValueKey<String>('profile-edit-dob'),
+                    controller: _dobCtrl,
+                    style: const TextStyle(color: HomeSureColors.champagneInk),
+                    decoration: InputDecoration(
+                      labelText: 'Date of Birth *',
+                      hintText: 'DD/MM/YYYY',
+                      suffixIcon: IconButton(
+                        onPressed: _pickDob,
+                        icon: const Icon(
+                          Icons.calendar_today_outlined,
+                          color: HomeSureColors.champagneHighlight,
+                        ),
+                      ),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter date of birth'
+                        : null,
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: HomeSureColors.statusCriticalText,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    key: const ValueKey<String>('profile-edit-save'),
+                    onPressed: _saving ? null : _save,
+                    child: Text(_saving ? 'Saving...' : 'Save Changes'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -30,14 +30,14 @@ class HomeSureStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (Color fg, Color bg, Color border) = switch (tone) {
       HomeSureBadgeTone.navy => (
-        HomeSureColors.primaryNavy,
-        HomeSureColors.primaryNavyTint,
-        HomeSureColors.borderStrong,
+        HomeSureColors.champagneHighlight,
+        HomeSureColors.midnightSelected,
+        HomeSureColors.borderInput,
       ),
       HomeSureBadgeTone.teal => (
-        HomeSureColors.accentTealDark,
-        HomeSureColors.accentTealTint,
-        HomeSureColors.accentTealBorder,
+        HomeSureColors.champagneHighlight,
+        HomeSureColors.midnightInteractive,
+        HomeSureColors.champagneBronze,
       ),
       HomeSureBadgeTone.positive => (
         HomeSureColors.statusPositiveText,
@@ -190,13 +190,13 @@ class HomeSureMetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint = accentColor ?? HomeSureColors.primaryNavy;
+    final tint = accentColor ?? HomeSureColors.champagneHighlight;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: HomeSureColors.surfaceSubtle,
-        borderRadius: BorderRadius.circular(HomeSureRadius.md),
-        border: Border.all(color: HomeSureColors.borderDivider),
+        color: HomeSureColors.midnightDetail,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: HomeSureColors.borderSlate),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +213,7 @@ class HomeSureMetricTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: HomeSureTypography.caption.copyWith(
-                    color: HomeSureColors.textSecondary,
+                    color: HomeSureColors.slateMuted,
                   ),
                 ),
               ),
@@ -223,7 +223,7 @@ class HomeSureMetricTile extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               color: tint,
               height: 1.15,
@@ -237,7 +237,7 @@ class HomeSureMetricTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: HomeSureTypography.caption.copyWith(
                 fontSize: 10.5,
-                color: HomeSureColors.textMuted,
+                color: HomeSureColors.slatePlaceholder,
               ),
             ),
           ],

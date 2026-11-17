@@ -102,6 +102,96 @@ class Property {
       documents: documents ?? this.documents,
     );
   }
+
+  Map<String, dynamic> toPersistenceMap() {
+    return {
+      'id': id,
+      'name': name,
+      'builderName': builderName,
+      'ownerName': ownerName,
+      'address': {
+        'line1': address.line1,
+        'city': address.city,
+        'state': address.state,
+        'pincode': address.pincode,
+      },
+      'type': type.name,
+      'yearOfConstruction': yearOfConstruction,
+      'carpetArea': carpetArea,
+      'totalUnits': totalUnits,
+      'reraNumber': reraNumber,
+      'acknowledgementNumber': acknowledgementNumber,
+      'regulatoryStatus': regulatoryStatus,
+      'proposedCompletionDate': proposedCompletionDate,
+      'compliance': {
+        'verifiedCount': compliance.verifiedCount,
+        'pendingCount': compliance.pendingCount,
+        'issueCount': compliance.issueCount,
+        'compliancePercentage': compliance.compliancePercentage,
+      },
+      'documents': {
+        'verifiedDocuments': documents.verifiedDocuments,
+        'pendingDocuments': documents.pendingDocuments,
+        'missingDocuments': documents.missingDocuments,
+      },
+    };
+  }
+
+  factory Property.fromPersistenceMap(Map<String, dynamic> map) {
+    final addrMap = (map['address'] as Map?) ?? const {};
+    final compMap = (map['compliance'] as Map?) ?? const {};
+    final docsMap = (map['documents'] as Map?) ?? const {};
+    final typeName = (map['type'] ?? '').toString();
+    final parsedType = PropertyType.values.firstWhere(
+      (t) => t.name == typeName,
+      orElse: () => PropertyType.apartment,
+    );
+
+    int toInt(dynamic val) {
+      if (val is int) return val;
+      if (val is num) return val.toInt();
+      return int.tryParse((val ?? '').toString()) ?? 0;
+    }
+
+    double toDouble(dynamic val) {
+      if (val is double) return val;
+      if (val is num) return val.toDouble();
+      return double.tryParse((val ?? '').toString()) ?? 0;
+    }
+
+    return Property(
+      id: (map['id'] ?? '').toString(),
+      name: (map['name'] ?? '').toString(),
+      builderName: (map['builderName'] ?? '').toString(),
+      ownerName: (map['ownerName'] ?? '').toString(),
+      address: Address(
+        line1: (addrMap['line1'] ?? '').toString(),
+        city: (addrMap['city'] ?? 'Bengaluru').toString(),
+        state: (addrMap['state'] ?? 'Karnataka').toString(),
+        pincode: (addrMap['pincode'] ?? '').toString(),
+      ),
+      type: parsedType,
+      yearOfConstruction: toInt(map['yearOfConstruction']),
+      carpetArea: toDouble(map['carpetArea']),
+      totalUnits: toInt(map['totalUnits']),
+      reraNumber: (map['reraNumber'] ?? '').toString(),
+      acknowledgementNumber: (map['acknowledgementNumber'] ?? '').toString(),
+      regulatoryStatus: (map['regulatoryStatus'] ?? '').toString(),
+      proposedCompletionDate: (map['proposedCompletionDate'] ?? '').toString(),
+      compliance: ComplianceSummary(
+        verifiedCount: toInt(compMap['verifiedCount']),
+        pendingCount: toInt(compMap['pendingCount']),
+        issueCount: toInt(compMap['issueCount']),
+        compliancePercentage: toDouble(compMap['compliancePercentage']),
+      ),
+      assessment: const AssessmentSummary(),
+      documents: DocumentSummary(
+        verifiedDocuments: toInt(docsMap['verifiedDocuments']),
+        pendingDocuments: toInt(docsMap['pendingDocuments']),
+        missingDocuments: toInt(docsMap['missingDocuments']),
+      ),
+    );
+  }
 }
 
 class Address {

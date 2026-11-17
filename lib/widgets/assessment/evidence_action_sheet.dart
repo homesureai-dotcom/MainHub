@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/evidence/evidence.dart';
+import '../../core/theme/homesure_tokens.dart';
 
 class EvidenceActionSheet {
   const EvidenceActionSheet._();
@@ -10,12 +11,13 @@ class EvidenceActionSheet {
   ) {
     return showModalBottomSheet<EvidenceType>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: HomeSureColors.midnightCard,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
         ),
+        side: BorderSide(color: HomeSureColors.borderSlate),
       ),
       builder: (_) {
         return const _EvidenceActionSheetContent();
@@ -46,30 +48,31 @@ class _EvidenceActionSheetContent extends StatelessWidget {
                 width: 42,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
+                  color: HomeSureColors.borderInput,
                   borderRadius: BorderRadius.circular(100),
                 ),
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             const Text(
               'Add Evidence',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: HomeSureColors.champagneInk,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             const Text(
               'Choose how you want to provide supporting evidence.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.blueGrey,
-                height: 1.5,
+                color: HomeSureColors.slateMuted,
+                height: 1.45,
               ),
             ),
 
@@ -174,10 +177,10 @@ class _EvidenceAction extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: HomeSureColors.midnightDetail,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFFE2E8F0),
+            color: HomeSureColors.borderSlate,
           ),
         ),
         child: Row(
@@ -186,12 +189,13 @@ class _EvidenceAction extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: HomeSureColors.midnightSand,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: HomeSureColors.champagneBronze),
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF2563EB),
+                color: HomeSureColors.champagneHighlight,
                 size: 21,
               ),
             ),
@@ -207,6 +211,7 @@ class _EvidenceAction extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
 
@@ -216,7 +221,7 @@ class _EvidenceAction extends StatelessWidget {
                     subtitle,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Colors.blueGrey,
+                      color: HomeSureColors.slateMuted,
                     ),
                   ),
                 ],
@@ -225,7 +230,7 @@ class _EvidenceAction extends StatelessWidget {
 
             const Icon(
               Icons.chevron_right,
-              color: Colors.blueGrey,
+              color: HomeSureColors.champagneHighlight,
             ),
           ],
         ),

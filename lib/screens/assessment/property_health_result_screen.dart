@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/engine/models/property_health_result.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../features/report/screens/property_health_report_screen.dart';
 import '../../state/assessment_state.dart';
 import '../../core/evidence/assessment_evidence_summary.dart';
@@ -30,7 +31,7 @@ class PropertyHealthResultScreen extends StatelessWidget {
     final categoryEntries = result.categoryScores.entries.toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Property Health'),
@@ -53,10 +54,10 @@ class PropertyHealthResultScreen extends StatelessWidget {
                       : 'PROPERTY HEALTH ASSESSMENT',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     letterSpacing: 2,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
+                    fontWeight: FontWeight.w800,
+                    color: HomeSureColors.champagneHighlight,
                   ),
                 ),
               ),
@@ -86,9 +87,9 @@ class PropertyHealthResultScreen extends StatelessWidget {
                             'will be available after all PHS categories are evaluated.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15.5,
                     height: 1.5,
-                    color: Colors.black87,
+                    color: HomeSureColors.slateMuted,
                   ),
                 ),
               ),
@@ -295,19 +296,19 @@ class _EvidenceCoverageCard extends StatelessWidget {
     final IconData icon;
 
     if (isComplete) {
-      accentColor = const Color(0xFF15803D);
-      backgroundColor = const Color(0xFFF0FDF4);
-      borderColor = const Color(0xFFBBF7D0);
+      accentColor = HomeSureColors.statusPositiveText;
+      backgroundColor = HomeSureColors.statusPositiveBg;
+      borderColor = HomeSureColors.statusPositiveBorder;
       icon = Icons.verified_outlined;
     } else if (hasRisk) {
-      accentColor = const Color(0xFFB45309);
-      backgroundColor = const Color(0xFFFFFBEB);
-      borderColor = const Color(0xFFFDE68A);
+      accentColor = HomeSureColors.statusWarningText;
+      backgroundColor = HomeSureColors.statusWarningBg;
+      borderColor = HomeSureColors.statusWarningBorder;
       icon = Icons.warning_amber_rounded;
     } else {
-      accentColor = const Color(0xFF2563EB);
-      backgroundColor = const Color(0xFFEFF6FF);
-      borderColor = const Color(0xFFBFDBFE);
+      accentColor = HomeSureColors.champagneHighlight;
+      backgroundColor = HomeSureColors.midnightCard;
+      borderColor = HomeSureColors.borderSlate;
       icon = Icons.fact_check_outlined;
     }
 
@@ -316,7 +317,7 @@ class _EvidenceCoverageCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -329,7 +330,11 @@ class _EvidenceCoverageCard extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'Evidence Coverage',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: HomeSureColors.champagneInk,
+                  ),
                 ),
               ),
               Text(
@@ -350,7 +355,8 @@ class _EvidenceCoverageCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage / 100,
               minHeight: 8,
-              backgroundColor: Colors.white,
+              backgroundColor: HomeSureColors.midnightInteractive,
+              color: accentColor,
             ),
           ),
 
@@ -362,9 +368,7 @@ class _EvidenceCoverageCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isComplete
-                  ? const Color(0xFF166534)
-                  : const Color(0xFF92400E),
+              color: accentColor,
             ),
           ),
 
@@ -372,7 +376,10 @@ class _EvidenceCoverageCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               '${summary.providedRequirements} provided but not yet verified',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              style: const TextStyle(
+                fontSize: 13,
+                color: HomeSureColors.slateMuted,
+              ),
             ),
           ],
 
@@ -380,7 +387,10 @@ class _EvidenceCoverageCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               '${summary.needsReviewRequirements} evidence items need review',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              style: const TextStyle(
+                fontSize: 13,
+                color: HomeSureColors.slateMuted,
+              ),
             ),
           ],
 
@@ -388,7 +398,10 @@ class _EvidenceCoverageCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               '${summary.missingRequirements} evidence requirements missing',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              style: const TextStyle(
+                fontSize: 13,
+                color: HomeSureColors.slateMuted,
+              ),
             ),
           ],
 
@@ -396,7 +409,10 @@ class _EvidenceCoverageCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               '${summary.rejectedRequirements} evidence requirements rejected',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              style: const TextStyle(
+                fontSize: 13,
+                color: HomeSureColors.statusCriticalText,
+              ),
             ),
           ],
 
@@ -475,12 +491,13 @@ class _PartialScoreCard extends StatelessWidget {
               width: 76,
               height: 76,
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.10),
+                color: HomeSureColors.midnightSand,
                 shape: BoxShape.circle,
+                border: Border.all(color: HomeSureColors.champagneBronze),
               ),
               child: const Icon(
                 Icons.hourglass_top_rounded,
-                color: Colors.blue,
+                color: HomeSureColors.champagneHighlight,
                 size: 36,
               ),
             ),
@@ -488,20 +505,24 @@ class _PartialScoreCard extends StatelessWidget {
             const Text(
               'Final Property Health Score',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+                color: HomeSureColors.champagneInk,
+              ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Pending complete PHS assessment',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Colors.blueGrey.shade700,
+                color: HomeSureColors.champagneHighlight,
               ),
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               'We have evaluated the available categories, '
               'but the final HomeSure Property Health Index '
               'requires all six PHS pillars.',
@@ -509,7 +530,7 @@ class _PartialScoreCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
-                color: Colors.grey.shade700,
+                color: HomeSureColors.slateMuted,
               ),
             ),
           ],
@@ -544,29 +565,47 @@ class _AssessmentProgressCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.checklist_rounded, color: Colors.blue),
+                const Icon(
+                  Icons.checklist_rounded,
+                  color: HomeSureColors.champagneHighlight,
+                ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
                     'Assessment Progress',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: HomeSureColors.champagneInk,
+                    ),
                   ),
                 ),
                 Text(
                   '$evaluated / $total',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: HomeSureColors.champagneHighlight,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(value: progress, minHeight: 8),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: HomeSureColors.midnightInteractive,
+                color: HomeSureColors.champagneGold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '${percentage.round()}% of questions evaluated',
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              style: const TextStyle(
+                color: HomeSureColors.slateMuted,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -600,29 +639,47 @@ class _CategoryCoverageCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.grid_view_rounded, color: Colors.indigo),
+                const Icon(
+                  Icons.grid_view_rounded,
+                  color: HomeSureColors.champagneHighlight,
+                ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
                     'PHS Pillar Coverage',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: HomeSureColors.champagneInk,
+                    ),
                   ),
                 ),
                 Text(
                   '$evaluated / $total',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: HomeSureColors.champagneHighlight,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(value: progress, minHeight: 8),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: HomeSureColors.midnightInteractive,
+                color: HomeSureColors.champagneGold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '${percentage.round()}% of PHS pillars evaluated',
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              style: const TextStyle(
+                color: HomeSureColors.slateMuted,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -652,7 +709,7 @@ class _EmptyState extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Colors.green, size: 26),
+            Icon(icon, color: HomeSureColors.statusPositiveText, size: 26),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -663,12 +720,16 @@ class _EmptyState extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: HomeSureColors.champagneInk,
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     message,
-                    style: TextStyle(color: Colors.grey.shade700, height: 1.4),
+                    style: const TextStyle(
+                      color: HomeSureColors.slateMuted,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),

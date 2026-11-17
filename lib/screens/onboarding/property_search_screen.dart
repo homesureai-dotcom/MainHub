@@ -7,6 +7,7 @@ import '../../features/property/models/krera_project_models.dart';
 import '../../features/property/services/property_repository.dart';
 import '../../features/property_submission/services/property_submission_service.dart';
 import '../../widgets/common/app_search_field.dart';
+import '../../widgets/property/bengaluru_taluk_filter_bar.dart';
 import '../../widgets/property/builder_card.dart';
 import 'builder_projects_screen.dart';
 import 'my_property_requests_screen.dart';
@@ -26,12 +27,24 @@ class PropertySearchScreen extends StatefulWidget {
 }
 
 class _PropertySearchScreenState extends State<PropertySearchScreen> {
-  List<BuilderCatalogueEntry> filteredBuilders = [];
+  List<BuilderCatalogueEntry> allFetchedBuilders = [];
   String searchQuery = '';
+  Set<BengaluruTalukFilter> selectedTaluks = const {};
   bool isLoadingCatalogue = true;
   String? catalogueError;
   bool isSubmitting = false;
   Timer? _searchDebounce;
+
+  List<BuilderCatalogueEntry> get filteredBuilders {
+    if (selectedTaluks.isEmpty ||
+        selectedTaluks.contains(BengaluruTalukFilter.all)) {
+      return allFetchedBuilders;
+    }
+    return allFetchedBuilders
+        .where((b) => b.matchesTalukFilters(selectedTaluks))
+        .map((b) => b.filteredByTaluks(selectedTaluks))
+        .toList();
+  }
 
   PropertySubmissionGateway get _submissionGateway =>
       widget.submissionGateway ?? PropertySubmissionService();
@@ -65,14 +78,14 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
       if (!mounted) return;
 
       setState(() {
-        filteredBuilders = results;
+        allFetchedBuilders = results;
         isLoadingCatalogue = false;
         catalogueError = null;
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        filteredBuilders = [];
+        allFetchedBuilders = [];
         isLoadingCatalogue = false;
         catalogueError = 'Unable to load K-RERA builder catalogue: $error';
       });
@@ -98,6 +111,7 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
         builder: (_) => BuilderProjectsScreen(
           builder: builder,
           catalogueGateway: widget.catalogueGateway,
+          initialTalukFilters: selectedTaluks,
         ),
       ),
     );
@@ -322,19 +336,42 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
     }
 
     if (filteredBuilders.isEmpty) {
+      final activeLocalities = selectedTaluks
+          .where((f) => f != BengaluruTalukFilter.all)
+          .toList();
+      final hasLocalityFilter = activeLocalities.isNotEmpty;
+      final localityLabel = activeLocalities.map((t) => t.label).join(', ');
+      final emptyMsg = searchQuery.isNotEmpty && hasLocalityFilter
+          ? 'No matching builder found for "$searchQuery" in $localityLabel.'
+          : searchQuery.isNotEmpty
+              ? 'No matching builder found for "$searchQuery".'
+              : hasLocalityFilter
+                  ? 'No builders found in $localityLabel.'
+                  : 'No builders available.';
       return Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 76),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                searchQuery.isEmpty
-                    ? 'No builders available.'
-                    : 'No matching builder found for "$searchQuery".',
+                emptyMsg,
                 textAlign: TextAlign.center,
                 style: HomeSureTypography.bodySecondary,
               ),
               const SizedBox(height: 12),
+              if (hasLocalityFilter) ...[
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      selectedTaluks = const {};
+                    });
+                  },
+                  icon: const Icon(Icons.filter_alt_off_outlined, size: 17),
+                  label: const Text('Show all localities'),
+                ),
+                const SizedBox(height: 4),
+              ],
               OutlinedButton.icon(
                 onPressed: _addManualProperty,
                 icon: const Icon(Icons.add_home_outlined),
@@ -347,6 +384,7 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
     }
 
     return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 92),
       itemCount: filteredBuilders.length,
       itemBuilder: (context, index) {
         final builder = filteredBuilders[index];
@@ -354,6 +392,17 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
           builder: builder,
           onTap: () => _openBuilderProjects(builder),
         );
+      },
+    );
+  }
+
+  Widget _buildTalukFilterBar() {
+    return BengaluruTalukFilterBar(
+      selectedTaluks: selectedTaluks,
+      onChanged: (filters) {
+        setState(() {
+          selectedTaluks = filters;
+        });
       },
     );
   }
@@ -415,6 +464,8 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
                 hintText: 'Search builders (e.g. Godrej, Prestige, Brigade)...',
                 onChanged: _search,
               ),
+              const SizedBox(height: 12),
+              _buildTalukFilterBar(),
               const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

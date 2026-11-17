@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/homesure_tokens.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../widgets/common/app_card.dart';
@@ -23,7 +24,7 @@ class ReportFooter extends StatelessWidget {
           const Icon(
             Icons.verified_outlined,
             size: 42,
-            color: Color(0xFF2563EB),
+            color: HomeSureColors.champagneHighlight,
           ),
 
           const SizedBox(height: AppSpacing.md),

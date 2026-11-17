@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/evidence/evidence.dart';
+import '../../core/theme/homesure_tokens.dart';
 import 'evidence_status_chip.dart';
 
 class EvidenceItemCard extends StatelessWidget {
@@ -54,31 +55,31 @@ class EvidenceItemCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: HomeSureColors.midnightDetail,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
+          color: HomeSureColors.borderSlate,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12),
+              color: HomeSureColors.midnightInteractive,
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               _icon,
-              color: const Color(0xFF475569),
-              size: 21,
+              color: HomeSureColors.champagneHighlight,
+              size: 19,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,17 +87,18 @@ class EvidenceItemCard extends StatelessWidget {
                 Text(
                   evidence.name,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 14.5,
                     fontWeight: FontWeight.w700,
                     height: 1.3,
+                    color: HomeSureColors.champagneInk,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 Text(
                   _typeLabel,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.blueGrey,
+                    fontSize: 12.5,
+                    color: HomeSureColors.slateMuted,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

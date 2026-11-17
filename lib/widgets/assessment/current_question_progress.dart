@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/phs/phs_question_progress.dart';
+import '../../core/theme/homesure_tokens.dart';
 
 /// Displays the user's current position within the Property Health
 /// Assessment and the actual completion progress of the current PHS pillar.
@@ -25,17 +26,17 @@ class CurrentQuestionProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: HomeSureColors.midnightCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: HomeSureColors.borderSlate),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildOverallProgress(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildPillarProgress(),
         ],
       ),
@@ -54,7 +55,7 @@ class CurrentQuestionProgress extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: HomeSureColors.slateMuted,
               ),
             ),
             Text(
@@ -62,7 +63,7 @@ class CurrentQuestionProgress extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
+                color: HomeSureColors.champagneInk,
               ),
             ),
           ],
@@ -73,8 +74,10 @@ class CurrentQuestionProgress extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress.overallCompletion,
             minHeight: 7,
-            backgroundColor: const Color(0xFFE2E8F0),
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+            backgroundColor: HomeSureColors.midnightInteractive,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              HomeSureColors.champagneGold,
+            ),
           ),
         ),
       ],
@@ -89,13 +92,14 @@ class CurrentQuestionProgress extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.10),
+            color: HomeSureColors.midnightSand,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: HomeSureColors.champagneBronze),
           ),
           child: const Icon(
             Icons.category_outlined,
-            size: 21,
-            color: Color(0xFF2563EB),
+            size: 20,
+            color: HomeSureColors.champagneHighlight,
           ),
         ),
         const SizedBox(width: 12),
@@ -108,7 +112,7 @@ class CurrentQuestionProgress extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
+                  color: HomeSureColors.champagneInk,
                 ),
               ),
               const SizedBox(height: 4),
@@ -117,7 +121,7 @@ class CurrentQuestionProgress extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+                  color: HomeSureColors.slateMuted,
                 ),
               ),
               const SizedBox(height: 3),
@@ -126,7 +130,7 @@ class CurrentQuestionProgress extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+                  color: HomeSureColors.slateMuted,
                 ),
               ),
               const SizedBox(height: 8),
@@ -135,9 +139,9 @@ class CurrentQuestionProgress extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress.categoryAnsweredCompletion,
                   minHeight: 6,
-                  backgroundColor: const Color(0xFFE2E8F0),
+                  backgroundColor: HomeSureColors.midnightInteractive,
                   valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFF16A34A),
+                    HomeSureColors.statusPositiveText,
                   ),
                 ),
               ),
@@ -150,7 +154,7 @@ class CurrentQuestionProgress extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF16A34A),
+            color: HomeSureColors.statusPositiveText,
           ),
         ),
       ],

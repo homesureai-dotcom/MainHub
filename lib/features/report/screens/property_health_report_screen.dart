@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/homesure_tokens.dart';
 import '../../../state/assessment_state.dart';
 
 import '../models/property_health_report.dart';
@@ -43,8 +44,8 @@ class PropertyHealthReportScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(title: const Text("Property Health Report")),
+      backgroundColor: HomeSureColors.midnightBg,
+      appBar: AppBar(title: const Text('Property Health Report')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

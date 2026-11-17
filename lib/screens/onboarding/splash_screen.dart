@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+import '../../features/auth/screens/auth_screen.dart';
 import '../../theme/app_gradients.dart';
-import 'welcome_screen.dart';
+import '../../widgets/common/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => const WelcomeScreen(),
+            builder: (_) => const AuthScreen(),
           ),
         );
       },
@@ -49,38 +51,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
               const Spacer(),
 
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(32),
-                ),
-                child: const Icon(
-                  Icons.shield_outlined,
-                  size: 64,
-                  color: Colors.white,
-                ),
+              const AppLogo(
+                variant: AppLogoVariant.full,
+                height: 190,
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
               const Text(
-                "HomeSure AI",
+                'Know Before You Buy',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              const Text(
-                "Know Before You Buy",
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 18,
+                  color: HomeSureColors.slateMuted,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
@@ -90,6 +73,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: 180,
                 child: LinearProgressIndicator(
                   minHeight: 5,
+                  backgroundColor: HomeSureColors.midnightInteractive,
+                  color: HomeSureColors.champagneGold,
                   borderRadius: BorderRadius.all(
                     Radius.circular(100),
                   ),
@@ -99,9 +84,9 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 20),
 
               const Text(
-                "Preparing your property intelligence...",
+                'Preparing your property intelligence...',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: HomeSureColors.slateMuted,
                 ),
               ),
 

@@ -6,10 +6,10 @@ class AppTextStyles {
   AppTextStyles._();
 
   static const TextStyle display = TextStyle(
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: FontWeight.w800,
     height: 1.15,
-    letterSpacing: -0.8,
+    letterSpacing: -0.6,
     color: HomeSureColors.textPrimary,
   );
 
@@ -35,7 +35,7 @@ class AppTextStyles {
 
   static const TextStyle button = TextStyle(
     fontSize: 15,
-    fontWeight: FontWeight.w600,
-    color: Colors.white,
+    fontWeight: FontWeight.w700,
+    color: HomeSureColors.midnightCard,
   );
 }

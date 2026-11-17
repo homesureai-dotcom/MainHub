@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
 import 'widgets/hero_module.dart';
 
 class PropertyCommandCenterScreen extends StatelessWidget {
@@ -10,12 +11,12 @@ class PropertyCommandCenterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: HomeSureColors.midnightHeader,
         title: const Text(
-          "Property Command Center",
+          'Property Command Center',
         ),
       ),
       body: SafeArea(

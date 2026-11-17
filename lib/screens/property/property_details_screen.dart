@@ -8,21 +8,20 @@ import '../../features/property/models/property_adapter.dart';
 import '../../features/property/services/property_repository.dart';
 import '../../features/property/state/property_state.dart';
 import '../../models/property.dart';
+import '../../theme/app_gradients.dart';
 import '../../widgets/common/app_button.dart';
 import '../../widgets/property/property_hero_card.dart';
 import '../assessment/surebot_screen.dart';
 
-enum _IntelligenceSectionFilter {
+enum _PropertyDetailSection {
   overview('Overview'),
-  regulatory('Regulatory'),
+  legal('Legal'),
   development('Development'),
   documents('Documents'),
-  complaints('Complaints'),
-  locationLand('Location & Land'),
-  myApartment('My Apartment');
+  issues('Issues');
 
   final String label;
-  const _IntelligenceSectionFilter(this.label);
+  const _PropertyDetailSection(this.label);
 }
 
 class PropertyDetailsScreen extends StatefulWidget {
@@ -41,6 +40,13 @@ class PropertyDetailsScreen extends StatefulWidget {
 
 class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   final PropertyState _propertyState = PropertyState.instance;
+  final ScrollController _scrollController = ScrollController();
+
+  final GlobalKey _overviewKey = GlobalKey();
+  final GlobalKey _legalKey = GlobalKey();
+  final GlobalKey _developmentKey = GlobalKey();
+  final GlobalKey _documentsKey = GlobalKey();
+  final GlobalKey _issuesKey = GlobalKey();
 
   late Property _property;
   ProjectRegulatoryDetailBundle? _detailBundle;
@@ -48,8 +54,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   ProjectUnitRecord? _buyerSelectedUnit;
   bool _isLoadingDetailBundle = false;
   String? _detailBundleError;
-  _IntelligenceSectionFilter _selectedFilter =
-      _IntelligenceSectionFilter.overview;
+  _PropertyDetailSection _activeSection = _PropertyDetailSection.overview;
+  bool _showAllDocuments = false;
+  bool _showAllComplaints = false;
 
   PropertyCatalogueGateway get _catalogueGateway =>
       widget.catalogueGateway ?? PropertyRepository.instance;
@@ -58,7 +65,18 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   void initState() {
     super.initState();
     _property = widget.property;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _selectCanonicalProperty();
+      }
+    });
     _loadProjectDetailAndUnits();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProjectDetailAndUnits() async {
@@ -88,12 +106,36 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         }
         _isLoadingDetailBundle = false;
       });
+      if (hydrated != null) {
+        _selectCanonicalProperty();
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _isLoadingDetailBundle = false;
         _detailBundleError = 'Unable to load extended K-RERA details: $error';
       });
+    }
+  }
+
+  void _jumpToSection(_PropertyDetailSection section) {
+    setState(() {
+      _activeSection = section;
+    });
+    final key = switch (section) {
+      _PropertyDetailSection.overview => _overviewKey,
+      _PropertyDetailSection.legal => _legalKey,
+      _PropertyDetailSection.development => _developmentKey,
+      _PropertyDetailSection.documents => _documentsKey,
+      _PropertyDetailSection.issues => _issuesKey,
+    };
+    final targetContext = key.currentContext;
+    if (targetContext != null) {
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOutCubic,
+      );
     }
   }
 
@@ -232,8 +274,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: HomeSureColors.primaryNavy,
+        gradient: AppGradients.hero,
         borderRadius: BorderRadius.circular(HomeSureRadius.xl),
+        border: Border.all(color: HomeSureColors.champagneBronze),
         boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Column(
@@ -263,7 +306,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           Text(
             _property.name,
             style: const TextStyle(
-              color: Colors.white,
+              color: HomeSureColors.champagneInk,
               fontSize: 22,
               fontWeight: FontWeight.w800,
               height: 1.25,
@@ -274,7 +317,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           Text(
             '${_property.builder} • $locationText',
             style: const TextStyle(
-              color: Color(0xFFD0DCEB),
+              color: HomeSureColors.slateDetailBody,
               fontSize: 13.5,
               height: 1.35,
             ),
@@ -286,11 +329,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: HomeSureColors.midnightCard.withValues(alpha: 0.72),
                 borderRadius: BorderRadius.circular(HomeSureRadius.md),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.14),
-                ),
+                border: Border.all(color: HomeSureColors.borderSlate),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +340,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     const Text(
                       'K-RERA REGISTRATION NUMBER',
                       style: TextStyle(
-                        color: Color(0xFF9FB3C8),
+                        color: HomeSureColors.champagneHighlight,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.8,
@@ -309,7 +350,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     Text(
                       _property.reraNumber,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: HomeSureColors.champagneInk,
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
@@ -322,7 +363,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     const Text(
                       'ACKNOWLEDGEMENT NUMBER',
                       style: TextStyle(
-                        color: Color(0xFF9FB3C8),
+                        color: HomeSureColors.champagneHighlight,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.8,
@@ -332,7 +373,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     Text(
                       _property.acknowledgementNumber,
                       style: const TextStyle(
-                        color: Color(0xFFBDD0E4),
+                        color: HomeSureColors.slateDetailBody,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -365,7 +406,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: HomeSureColors.surfaceWhite,
@@ -379,7 +420,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           const HomeSureSectionHeader(
             title: 'Regulatory Intelligence Summary',
             subtitle:
-                'Live snapshot of official K-RERA filings, disclosures, and registered complaints.',
+                'Consolidated K-RERA snapshot across filings, documents, and complaints.',
           ),
           const SizedBox(height: 12),
           Row(
@@ -402,7 +443,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   value: '$docCount',
                   sublabel: 'Uploaded records',
                   icon: Icons.description_outlined,
-                  accentColor: HomeSureColors.primaryNavy,
+                  accentColor: HomeSureColors.champagneHighlight,
                 ),
               ),
             ],
@@ -419,7 +460,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       : 'Requires review',
                   icon: Icons.gavel_outlined,
                   accentColor: complaintCount == 0
-                      ? HomeSureColors.accentTealDark
+                      ? HomeSureColors.champagneGold
                       : HomeSureColors.statusWarningText,
                 ),
               ),
@@ -443,109 +484,83 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildSectionNavigationBar() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _IntelligenceSectionFilter.values.map((section) {
-            final selected = _selectedFilter == section;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(section.label),
-                selected: selected,
-                showCheckmark: false,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedFilter = section;
-                  });
-                },
-                selectedColor: HomeSureColors.primaryNavy,
-                backgroundColor: HomeSureColors.surfaceWhite,
-                side: BorderSide(
-                  color: selected
-                      ? HomeSureColors.primaryNavy
-                      : HomeSureColors.borderDivider,
-                ),
-                labelStyle: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? Colors.white : HomeSureColors.textPrimary,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(HomeSureRadius.pill),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderSlate),
+      ),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: _PropertyDetailSection.values.map((section) {
+          final selected = _activeSection == section;
+          return ChoiceChip(
+            key: ValueKey<String>('property-section-${section.name}'),
+            label: Text(section.label),
+            selected: selected,
+            showCheckmark: false,
+            onSelected: (_) => _jumpToSection(section),
+            selectedColor: HomeSureColors.midnightSelected,
+            backgroundColor: HomeSureColors.midnightDetail,
+            side: BorderSide(
+              color: selected
+                  ? HomeSureColors.champagneGold
+                  : HomeSureColors.borderSlate,
+              width: selected ? 1.4 : 1,
+            ),
+            labelStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+              color: selected
+                  ? HomeSureColors.champagneHighlight
+                  : HomeSureColors.slateMuted,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildSummaryMetricsSection() {
-    if (_property.summaryMetrics.isEmpty) {
-      return const SizedBox.shrink();
+  /// Resolves the first available [RegulatoryMetric] from a list of canonical
+  /// and legacy alias keys without emitting duplicate rows.
+  RegulatoryMetric? _resolveMetric(List<String> candidateKeys) {
+    for (final key in candidateKeys) {
+      final metric = _property.summaryMetrics[key];
+      if (metric != null) return metric;
     }
+    return null;
+  }
 
-    const regulatoryKeys = <MapEntry<String, String>>[
-      MapEntry('registration_number', 'K-RERA Registration No.'),
-      MapEntry('ack_number', 'Acknowledgement No.'),
-      MapEntry('regulatory_status', 'K-RERA Portal Status'),
-      MapEntry('registration_date', 'Registration Approved On'),
-      MapEntry('proposed_completion_date', 'Proposed Completion Date'),
-      MapEntry('estimated_cost_inr', 'Estimated Project Cost (INR)'),
-      MapEntry('estimated_cost_crore', 'Estimated Project Cost'),
-      MapEntry('approving_authority', 'Plan Approving Authority'),
-      MapEntry('approved_plan_number', 'Approved Plan Number'),
-      MapEntry('plan_approval_date_iso', 'Plan Approval Date'),
-      MapEntry('plan_approval_date', 'Plan Approval Date'),
-      MapEntry('land_litigation_flag', 'Land Litigation Status'),
-    ];
-
-    const developmentAndLandKeys = <MapEntry<String, String>>[
-      MapEntry('project_sub_type', 'Project Sub-Type'),
-      MapEntry('total_land_area_sq_m', 'Total Land Area (Sq.M)'),
-      MapEntry('total_area_of_land_sqm', 'Total Land Area (Sq.M)'),
-      MapEntry('total_open_area_sq_m', 'Total Open Area (Sq.M)'),
-      MapEntry('total_open_area_sqm', 'Total Open Area (Sq.M)'),
-      MapEntry('total_covered_area_sq_m', 'Total Covered Area (Sq.M)'),
-      MapEntry('total_covered_area_sqm', 'Total Covered Area (Sq.M)'),
-      MapEntry('total_carpet_area_sq_m', 'Total Carpet Area (Sq.M)'),
-      MapEntry('carpet_area_range_sqm', 'Carpet Area Range'),
-      MapEntry('number_of_inventories', 'Total Inventory / Units'),
-      MapEntry('total_inventory_units', 'Total Inventory / Units'),
-      MapEntry('no_of_towers', 'Number of Towers / Blocks'),
-      MapEntry('number_of_towers', 'Number of Towers / Blocks'),
-      MapEntry('parking_spaces', 'Total Parking Spaces'),
-      MapEntry('total_parking', 'Total Parking Spaces'),
-      MapEntry('district', 'District'),
-      MapEntry('taluk', 'Taluk'),
-      MapEntry('latitude', 'Latitude'),
-      MapEntry('longitude', 'Longitude'),
-      MapEntry('coordinate_source', 'Location Coordinates'),
-    ];
-
-    final List<MapEntry<String, String>> activeKeys;
-    if (_selectedFilter == _IntelligenceSectionFilter.regulatory) {
-      activeKeys = regulatoryKeys;
-    } else if (_selectedFilter == _IntelligenceSectionFilter.development ||
-        _selectedFilter == _IntelligenceSectionFilter.locationLand) {
-      activeKeys = developmentAndLandKeys;
-    } else {
-      activeKeys = [...regulatoryKeys, ...developmentAndLandKeys];
-    }
-
+  Widget _buildMetricCardsCard({
+    required String title,
+    required String subtitle,
+    required List<({List<String> keys, String label, String? fallback})> specs,
+  }) {
     final rows = <Widget>[];
-    for (final item in activeKeys) {
-      final metric = _property.summaryMetrics[item.key];
-      if (metric == null) continue;
-      final isPresent =
-          metric.observationState == ObservationState.presentWithData;
+    for (final spec in specs) {
+      final metric = _resolveMetric(spec.keys);
+      final fallback = spec.fallback?.trim() ?? '';
+      if (metric == null && fallback.isEmpty) continue;
+
+      final bool isPresent = metric == null
+          ? fallback.isNotEmpty
+          : metric.observationState == ObservationState.presentWithData;
+      final String displayValue = metric != null ? metric.formattedValue : fallback;
+
       rows.add(
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 9),
           decoration: const BoxDecoration(
             border: Border(
               bottom: BorderSide(color: HomeSureColors.borderDivider),
@@ -557,7 +572,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               Expanded(
                 flex: 5,
                 child: Text(
-                  item.value,
+                  spec.label,
                   style: HomeSureTypography.bodySecondary.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -568,14 +583,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 flex: 6,
                 child: isPresent
                     ? Text(
-                        metric.formattedValue,
+                        displayValue,
                         textAlign: TextAlign.right,
                         style: HomeSureTypography.bodyMedium,
                       )
                     : Align(
                         alignment: Alignment.centerRight,
                         child: HomeSureObservationBadge(
-                          state: metric.observationState,
+                          state: metric!.observationState,
                         ),
                       ),
               ),
@@ -589,7 +604,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: HomeSureColors.surfaceWhite,
@@ -600,185 +615,558 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Official K-RERA Project Disclosures',
-            style: HomeSureTypography.sectionTitle,
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Extracted directly from K-RERA tabs. Missing portal fields are shown with their exact observation state.',
-            style: HomeSureTypography.caption,
-          ),
-          const SizedBox(height: 10),
+          HomeSureSectionHeader(title: title, subtitle: subtitle),
+          const SizedBox(height: 8),
           ...rows,
         ],
       ),
     );
   }
 
-  Widget _buildUnitHierarchySection() {
-    final configs = _detailBundle?.inventoryConfigurations.isNotEmpty == true
-        ? _detailBundle!.inventoryConfigurations
-        : _property.inventoryConfigurations;
-    final towers = _detailBundle?.towers.isNotEmpty == true
-        ? _detailBundle!.towers
-        : _property.towersSummary;
-    final hierarchy = _property.unitHierarchyStatus;
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: HomeSureColors.surfaceWhite,
-        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
-        border: Border.all(color: HomeSureColors.borderDivider),
-        boxShadow: HomeSureShadows.cardSubtle,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'Apartment / Unit & Tower Hierarchy',
-                  style: HomeSureTypography.sectionTitle,
-                ),
-              ),
-              HomeSureObservationBadge(
-                state: hierarchy.inventoryConfigsState,
-                showIcon: false,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Towers in K-RERA: ${hierarchy.towersState.displayLabel} (${towers.length}) • '
-            'Inventory Types: ${hierarchy.inventoryConfigsState.displayLabel} (${configs.length})',
-            style: HomeSureTypography.caption,
-          ),
-          if (configs.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: configs.take(10).map((cfg) {
-                final countStr = cfg.numberOfInventory != null
-                    ? ' (${cfg.numberOfInventory} units)'
-                    : '';
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: HomeSureColors.surfaceSubtle,
-                    borderRadius: BorderRadius.circular(HomeSureRadius.sm),
-                    border: Border.all(color: HomeSureColors.borderDivider),
-                  ),
-                  child: Text(
-                    '${cfg.typeOfInventory}$countStr',
-                    style: HomeSureTypography.caption.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: HomeSureColors.textPrimary,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-          if (_buyerSelectedUnit != null) ...[
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: HomeSureColors.statusPositiveBg,
-                borderRadius: BorderRadius.circular(HomeSureRadius.md),
-                border: Border.all(color: HomeSureColors.statusPositiveBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Evaluating Unit: ${_buyerSelectedUnit!.unitNumber}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13.5,
-                            color: HomeSureColors.statusPositiveText,
-                          ),
-                        ),
-                      ),
-                      HomeSureStatusBadge(
-                        label: _buyerSelectedUnit!.sourceType.displayLabel,
-                        tone: HomeSureBadgeTone.positive,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    [
-                      if (_buyerSelectedUnit!.towerName != null &&
-                          _buyerSelectedUnit!.towerName!.isNotEmpty)
-                        'Tower: ${_buyerSelectedUnit!.towerName}',
-                      if (_buyerSelectedUnit!.floorNumber != null &&
-                          _buyerSelectedUnit!.floorNumber!.isNotEmpty)
-                        'Floor: ${_buyerSelectedUnit!.floorNumber}',
-                      if (_buyerSelectedUnit!.unitConfiguration != null &&
-                          _buyerSelectedUnit!.unitConfiguration!.isNotEmpty)
-                        'Config: ${_buyerSelectedUnit!.unitConfiguration}',
-                      if (_buyerSelectedUnit!.carpetAreaSqM != null)
-                        'Carpet: ${_buyerSelectedUnit!.carpetAreaSqM} Sq.M',
-                      'Source: ${_buyerSelectedUnit!.sourceType.displayLabel}',
-                    ].join(' • '),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: HomeSureColors.statusPositiveText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _promptBuyerUnitSelection,
-              icon: const Icon(Icons.meeting_room_outlined, size: 18),
-              label: Text(
-                _buyerSelectedUnit == null
-                    ? 'Specify Apartment / Unit to Evaluate'
-                    : 'Update Evaluated Apartment / Unit',
-              ),
-            ),
-          ),
-        ],
-      ),
+  Widget _buildOverviewDetailsSection() {
+    return _buildMetricCardsCard(
+      title: 'Project Overview',
+      subtitle: 'Schedule, promoter entity, and site location summary.',
+      specs: [
+        (keys: const ['district'], label: 'District', fallback: null),
+        (
+          keys: const ['taluk'],
+          label: 'Taluk / Locality',
+          fallback: _property.locality.trim().isNotEmpty
+              ? _property.locality.trim()
+              : null,
+        ),
+        (
+          keys: const ['project_start_date'],
+          label: 'Project Start Date',
+          fallback: null,
+        ),
+        (
+          keys: const ['proposed_completion_date'],
+          label: 'Proposed Completion Date',
+          fallback: null,
+        ),
+        (
+          keys: const ['project_address'],
+          label: 'Registered Site Address',
+          fallback: null,
+        ),
+        (
+          keys: const ['project_description'],
+          label: 'Project Description',
+          fallback: null,
+        ),
+      ],
     );
   }
 
-  Widget _buildPortalTabsAndEvidenceSection() {
-    if (_property.tabObservations.isEmpty && _detailBundle == null) {
-      return const SizedBox.shrink();
-    }
+  Widget _buildLegalSection() {
+    final bundleSections = _detailBundle?.sections ?? const [];
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildMetricCardsCard(
+          title: 'Legal & Approvals',
+          subtitle:
+              'Statutory clearances, escrow banking, cost structure, and litigation disclosures.',
+          specs: [
+            if (_property.reraNumber.isEmpty)
+              (
+                keys: const ['registration_number'],
+                label: 'K-RERA Registration No.',
+                fallback: null,
+              ),
+            if (_property.acknowledgementNumber.isEmpty)
+              (
+                keys: const ['ack_number'],
+                label: 'Acknowledgement No.',
+                fallback: null,
+              ),
+            (
+              keys: const ['regulatory_status'],
+              label: 'K-RERA Portal Status',
+              fallback: null,
+            ),
+            (
+              keys: const ['registration_date'],
+              label: 'Registration Approved On',
+              fallback: null,
+            ),
+            (
+              keys: const ['approving_authority'],
+              label: 'Plan Approving Authority',
+              fallback: null,
+            ),
+            (
+              keys: const ['approved_plan_number'],
+              label: 'Approved Plan Number',
+              fallback: null,
+            ),
+            (
+              keys: const ['plan_approval_date', 'plan_approval_date_iso'],
+              label: 'Plan Approval Date',
+              fallback: null,
+            ),
+            (
+              keys: const ['land_litigation_flag'],
+              label: 'Land Litigation Status',
+              fallback: null,
+            ),
+            (
+              keys: const [
+                'total_project_cost_inr',
+                'estimated_cost_inr',
+                'estimated_cost_crore',
+              ],
+              label: 'Total Project Cost',
+              fallback: null,
+            ),
+            (
+              keys: const ['cost_of_land_inr'],
+              label: 'Land Cost (INR)',
+              fallback: null,
+            ),
+            (
+              keys: const ['cost_of_construction_inr'],
+              label: 'Construction Cost (INR)',
+              fallback: null,
+            ),
+            (
+              keys: const ['escrow_bank_name'],
+              label: 'RERA Escrow Bank',
+              fallback: null,
+            ),
+            (
+              keys: const ['escrow_bank_branch'],
+              label: 'Escrow Bank Branch',
+              fallback: null,
+            ),
+            (
+              keys: const ['escrow_ifsc_code'],
+              label: 'Escrow IFSC Code',
+              fallback: null,
+            ),
+          ],
+        ),
+        if (_property.tabObservations.isNotEmpty)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: HomeSureColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+              border: Border.all(color: HomeSureColors.borderDivider),
+              boxShadow: HomeSureShadows.cardSubtle,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const HomeSureSectionHeader(
+                  title: 'K-RERA Portal Tab Disclosures',
+                  subtitle:
+                      'Direct availability status of every official K-RERA section.',
+                ),
+                const SizedBox(height: 10),
+                ..._property.tabObservations.values.map((tab) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tab.label,
+                            style: HomeSureTypography.bodyPrimary.copyWith(
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        HomeSureObservationBadge(state: tab.observationState),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        if (bundleSections.isNotEmpty)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: HomeSureColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+              border: Border.all(color: HomeSureColors.borderDivider),
+              boxShadow: HomeSureShadows.cardSubtle,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                HomeSureSectionHeader(
+                  title: 'Detailed K-RERA Portal Filings',
+                  subtitle:
+                      '${bundleSections.length} structured regulatory sections from K-RERA.',
+                ),
+                const SizedBox(height: 8),
+                ...bundleSections.take(12).map((sec) {
+                  final subtitleParts = <String>[
+                    sec.tabLabel,
+                    if (sec.fieldCount > 0) '${sec.fieldCount} fields',
+                    if (sec.tableRowCount > 0) '${sec.tableRowCount} rows',
+                    if (sec.documentCount > 0) '${sec.documentCount} docs',
+                  ];
+                  return Material(
+                    color: Colors.transparent,
+                    child: ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: const EdgeInsets.only(bottom: 8),
+                      title: Text(
+                        sec.sectionLabel.isNotEmpty
+                            ? sec.sectionLabel
+                            : sec.tabLabel,
+                        style: HomeSureTypography.bodyMedium.copyWith(
+                          fontSize: 13.5,
+                        ),
+                      ),
+                      subtitle: Text(
+                        subtitleParts.join(' • '),
+                        style: HomeSureTypography.caption,
+                      ),
+                      trailing: HomeSureObservationBadge(
+                        state: sec.observationState,
+                        showIcon: false,
+                      ),
+                      children: [
+                        if (sec.fields.isEmpty && sec.emptyMessage != null)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              sec.emptyMessage!,
+                              style: HomeSureTypography.caption,
+                            ),
+                          )
+                        else
+                          ...sec.fields.take(15).map((f) {
+                            final keyLabel =
+                                (f['raw_label'] ?? f['label'] ?? f['key'] ?? '')
+                                    .toString();
+                            final valLabel = (f['value'] ?? '').toString();
+                            if (keyLabel.isEmpty && valLabel.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: Text(
+                                      keyLabel,
+                                      style: HomeSureTypography.caption,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 6,
+                                    child: Text(
+                                      valLabel.isEmpty ? '—' : valLabel,
+                                      textAlign: TextAlign.right,
+                                      style: HomeSureTypography.bodySecondary
+                                          .copyWith(
+                                        color: HomeSureColors.champagneInk,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDevelopmentSection() {
+    final towers = _detailBundle?.towers.isNotEmpty == true
+        ? _detailBundle!.towers
+        : _property.towersSummary;
+    final configs = _detailBundle?.inventoryConfigurations.isNotEmpty == true
+        ? _detailBundle!.inventoryConfigurations
+        : _property.inventoryConfigurations;
+    final hierarchy = _property.unitHierarchyStatus;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildMetricCardsCard(
+          title: 'Development & Land Specifications',
+          subtitle: 'Land area, built footprint, units, towers, and parking.',
+          specs: const [
+            (keys: ['project_sub_type'], label: 'Project Sub-Type', fallback: null),
+            (
+              keys: ['total_land_area_sq_m', 'total_area_of_land_sqm'],
+              label: 'Total Land Area (Sq.M)',
+              fallback: null,
+            ),
+            (
+              keys: ['total_open_area_sq_m', 'total_open_area_sqm'],
+              label: 'Total Open Area (Sq.M)',
+              fallback: null,
+            ),
+            (
+              keys: ['total_covered_area_sq_m', 'total_covered_area_sqm'],
+              label: 'Total Covered Area (Sq.M)',
+              fallback: null,
+            ),
+            (
+              keys: ['total_carpet_area_sq_m'],
+              label: 'Total Carpet Area (Sq.M)',
+              fallback: null,
+            ),
+            (
+              keys: ['carpet_area_range_sqm'],
+              label: 'Carpet Area Range',
+              fallback: null,
+            ),
+            (
+              keys: [
+                'total_units_inventories',
+                'number_of_inventories',
+                'total_inventory_units',
+              ],
+              label: 'Total Inventory / Units',
+              fallback: null,
+            ),
+            (
+              keys: [
+                'total_towers_blocks',
+                'no_of_towers',
+                'number_of_towers',
+              ],
+              label: 'Towers / Blocks',
+              fallback: null,
+            ),
+            (
+              keys: ['covered_parking_count'],
+              label: 'Covered Parking Spaces',
+              fallback: null,
+            ),
+            (
+              keys: ['open_parking_count'],
+              label: 'Open Parking Spaces',
+              fallback: null,
+            ),
+            (
+              keys: ['parking_spaces', 'total_parking'],
+              label: 'Total Parking Spaces',
+              fallback: null,
+            ),
+            (keys: ['latitude'], label: 'Latitude', fallback: null),
+            (keys: ['longitude'], label: 'Longitude', fallback: null),
+            (
+              keys: ['coordinate_source'],
+              label: 'Coordinate Source',
+              fallback: null,
+            ),
+          ],
+        ),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 14),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: HomeSureColors.surfaceWhite,
+            borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+            border: Border.all(color: HomeSureColors.borderDivider),
+            boxShadow: HomeSureShadows.cardSubtle,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Apartment / Unit & Tower Hierarchy',
+                      style: HomeSureTypography.sectionTitle,
+                    ),
+                  ),
+                  HomeSureObservationBadge(
+                    state: hierarchy.inventoryConfigsState,
+                    showIcon: false,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Towers in K-RERA: ${hierarchy.towersState.displayLabel} (${towers.length}) • '
+                'Inventory Types: ${hierarchy.inventoryConfigsState.displayLabel} (${configs.length})',
+                style: HomeSureTypography.caption,
+              ),
+              if (towers.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: towers.take(12).map((tower) {
+                    final details = [
+                      if (tower.totalFloors != null) '${tower.totalFloors}F',
+                      if (tower.totalUnits != null) '${tower.totalUnits}U',
+                    ].join(' · ');
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: HomeSureColors.midnightInteractive,
+                        borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                        border: Border.all(color: HomeSureColors.borderSlate),
+                      ),
+                      child: Text(
+                        details.isEmpty
+                            ? tower.towerName
+                            : '${tower.towerName} ($details)',
+                        style: HomeSureTypography.caption.copyWith(
+                          color: HomeSureColors.champagneHighlight,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+              if (configs.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: configs.take(10).map((cfg) {
+                    final countStr = cfg.numberOfInventory != null
+                        ? ' (${cfg.numberOfInventory} units)'
+                        : '';
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: HomeSureColors.surfaceSubtle,
+                        borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                        border: Border.all(color: HomeSureColors.borderDivider),
+                      ),
+                      child: Text(
+                        '${cfg.typeOfInventory}$countStr',
+                        style: HomeSureTypography.caption.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: HomeSureColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+              if (_buyerSelectedUnit != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: HomeSureColors.statusPositiveBg,
+                    borderRadius: BorderRadius.circular(HomeSureRadius.md),
+                    border: Border.all(
+                      color: HomeSureColors.statusPositiveBorder,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Evaluating Unit: ${_buyerSelectedUnit!.unitNumber}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
+                                color: HomeSureColors.statusPositiveText,
+                              ),
+                            ),
+                          ),
+                          HomeSureStatusBadge(
+                            label: _buyerSelectedUnit!.sourceType.displayLabel,
+                            tone: HomeSureBadgeTone.positive,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        [
+                          if (_buyerSelectedUnit!.towerName != null &&
+                              _buyerSelectedUnit!.towerName!.isNotEmpty)
+                            'Tower: ${_buyerSelectedUnit!.towerName}',
+                          if (_buyerSelectedUnit!.floorNumber != null &&
+                              _buyerSelectedUnit!.floorNumber!.isNotEmpty)
+                            'Floor: ${_buyerSelectedUnit!.floorNumber}',
+                          if (_buyerSelectedUnit!.unitConfiguration != null &&
+                              _buyerSelectedUnit!.unitConfiguration!.isNotEmpty)
+                            'Config: ${_buyerSelectedUnit!.unitConfiguration}',
+                          if (_buyerSelectedUnit!.carpetAreaSqM != null)
+                            'Carpet: ${_buyerSelectedUnit!.carpetAreaSqM} Sq.M',
+                          'Source: ${_buyerSelectedUnit!.sourceType.displayLabel}',
+                        ].join(' • '),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: HomeSureColors.statusPositiveText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _promptBuyerUnitSelection,
+                  icon: const Icon(Icons.meeting_room_outlined, size: 18),
+                  label: Text(
+                    _buyerSelectedUnit == null
+                        ? 'Specify Apartment / Unit to Evaluate'
+                        : 'Update Evaluated Apartment / Unit',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDocumentsSection() {
     final docs = _detailBundle?.documents ?? const [];
-    final complaints = _detailBundle?.complaints ?? const [];
     final docCount =
         _property.regulatoryCounts['total_documents'] ?? docs.length;
-    final complaintCount =
-        _property.regulatoryCounts['total_complaints'] ?? complaints.length;
+    final visibleDocs =
+        _showAllDocuments || docs.length <= 6 ? docs : docs.take(6).toList();
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: HomeSureColors.surfaceWhite,
@@ -789,41 +1177,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'K-RERA Portal Evidence & Tab Observations',
-            style: HomeSureTypography.sectionTitle,
+          HomeSureSectionHeader(
+            title: 'Uploaded Regulatory Documents',
+            subtitle: '$docCount document records indexed on K-RERA',
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Regulatory Documents: $docCount • Registered Portal Complaints: $complaintCount',
-            style: HomeSureTypography.bodySecondary,
-          ),
-          if (_property.tabObservations.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ..._property.tabObservations.values.map((tab) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        tab.label,
-                        style: HomeSureTypography.bodyPrimary.copyWith(
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    HomeSureObservationBadge(state: tab.observationState),
-                  ],
-                ),
-              );
-            }),
-          ],
           if (_isLoadingDetailBundle) ...[
             const SizedBox(height: 12),
             const LinearProgressIndicator(
-              color: HomeSureColors.accentTeal,
+              color: HomeSureColors.champagneGold,
               backgroundColor: HomeSureColors.surfaceSubtle,
             ),
           ],
@@ -837,130 +1198,181 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ),
             ),
           ],
-          if (docs.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Divider(),
-            Material(
-              color: Colors.transparent,
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                initiallyExpanded:
-                    _selectedFilter == _IntelligenceSectionFilter.documents,
-                title: Text(
-                  'Uploaded Regulatory Documents (${docs.length})',
-                  style: HomeSureTypography.bodyMedium,
+          const SizedBox(height: 12),
+          if (docs.isEmpty)
+            Text(
+              docCount > 0
+                  ? '$docCount document references reported on K-RERA portal. Full file table unavailable offline.'
+                  : 'No uploaded regulatory documents listed for this project on K-RERA.',
+              style: HomeSureTypography.bodySecondary,
+            )
+          else ...[
+            ...visibleDocs.map((d) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: HomeSureColors.surfaceSubtle,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                  border: Border.all(color: HomeSureColors.borderDivider),
                 ),
-                children: docs.take(25).map((d) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: HomeSureColors.surfaceSubtle,
-                      borderRadius: BorderRadius.circular(HomeSureRadius.sm),
-                      border: Border.all(color: HomeSureColors.borderDivider),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      d.hasDownloadableFile
+                          ? Icons.description_outlined
+                          : Icons.file_present_outlined,
+                      size: 18,
+                      color: HomeSureColors.champagneHighlight,
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          d.hasDownloadableFile
-                              ? Icons.description_outlined
-                              : Icons.file_present_outlined,
-                          size: 18,
-                          color: HomeSureColors.primaryNavy,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                d.documentCategory,
-                                style: HomeSureTypography.bodyMedium.copyWith(
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${d.sourceTab} > ${d.sourceSection}'
-                                '${d.displayedFilename != null ? " (${d.displayedFilename})" : ""}',
-                                style: HomeSureTypography.caption,
-                              ),
-                            ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            d.documentCategory,
+                            style: HomeSureTypography.bodyMedium.copyWith(
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        HomeSureStatusBadge(
-                          label: d.hasDownloadableFile ? 'On Portal' : 'Listed',
-                          tone: d.hasDownloadableFile
-                              ? HomeSureBadgeTone.positive
-                              : HomeSureBadgeTone.neutral,
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-          if (complaints.isNotEmpty) ...[
-            const Divider(),
-            Material(
-              color: Colors.transparent,
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                initiallyExpanded:
-                    _selectedFilter == _IntelligenceSectionFilter.complaints,
-                title: Text(
-                  'K-RERA Complaints (${complaints.length})',
-                  style: HomeSureTypography.bodyMedium,
-                ),
-                children: complaints.take(20).map((c) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: HomeSureColors.statusWarningBg,
-                      borderRadius: BorderRadius.circular(HomeSureRadius.sm),
-                      border: Border.all(
-                        color: HomeSureColors.statusWarningBorder,
+                          const SizedBox(height: 2),
+                          Text(
+                            '${d.sourceTab} > ${d.sourceSection}'
+                            '${d.displayedFilename != null ? " (${d.displayedFilename})" : ""}'
+                            '${d.approvalDate != null && d.approvalDate!.isNotEmpty ? " • Approved ${d.approvalDate}" : ""}',
+                            style: HomeSureTypography.caption,
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.report_problem_outlined,
-                          size: 18,
-                          color: HomeSureColors.statusWarningText,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                c.complaintSubject ??
-                                    c.complaintNumber ??
-                                    'Registered Complaint',
-                                style: HomeSureTypography.bodyMedium.copyWith(
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'No: ${c.complaintNumber ?? "N/A"} • Date: ${c.complaintDate ?? "N/A"} • Status: ${c.complaintStatus ?? "N/A"}',
-                                style: HomeSureTypography.caption,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 8),
+                    HomeSureStatusBadge(
+                      label: d.hasDownloadableFile ? 'On Portal' : 'Listed',
+                      tone: d.hasDownloadableFile
+                          ? HomeSureBadgeTone.positive
+                          : HomeSureBadgeTone.neutral,
                     ),
-                  );
-                }).toList(),
+                  ],
+                ),
+              );
+            }),
+            if (docs.length > 6)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showAllDocuments = !_showAllDocuments;
+                    });
+                  },
+                  child: Text(
+                    _showAllDocuments
+                        ? 'Show fewer documents'
+                        : 'Show all ${docs.length} documents',
+                  ),
+                ),
               ),
-            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIssuesSection() {
+    final complaints = _detailBundle?.complaints ?? const [];
+    final complaintCount =
+        _property.regulatoryCounts['total_complaints'] ?? complaints.length;
+    final visibleComplaints = _showAllComplaints || complaints.length <= 5
+        ? complaints
+        : complaints.take(5).toList();
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: HomeSureColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderDivider),
+        boxShadow: HomeSureShadows.cardSubtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HomeSureSectionHeader(
+            title: 'Complaints & Regulatory Issues',
+            subtitle:
+                'Registered K-RERA disputes ($complaintCount on record)',
+          ),
+          const SizedBox(height: 12),
+          if (complaints.isEmpty)
+            Text(
+              complaintCount > 0
+                  ? '$complaintCount registered K-RERA complaint(s) indicated in summary counts.'
+                  : 'No registered K-RERA complaints found on this project.',
+              style: HomeSureTypography.bodySecondary,
+            )
+          else ...[
+            ...visibleComplaints.map((c) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: HomeSureColors.statusWarningBg,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.sm),
+                  border: Border.all(color: HomeSureColors.statusWarningBorder),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.report_problem_outlined,
+                      size: 18,
+                      color: HomeSureColors.statusWarningText,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c.complaintSubject ??
+                                c.complaintNumber ??
+                                'Registered Complaint',
+                            style: HomeSureTypography.bodyMedium.copyWith(
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'No: ${c.complaintNumber ?? "N/A"} • Date: ${c.complaintDate ?? "N/A"} • Status: ${c.complaintStatus ?? "N/A"}',
+                            style: HomeSureTypography.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            if (complaints.length > 5)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showAllComplaints = !_showAllComplaints;
+                    });
+                  },
+                  child: Text(
+                    _showAllComplaints
+                        ? 'Show fewer complaints'
+                        : 'Show all ${complaints.length} complaints',
+                  ),
+                ),
+              ),
           ],
         ],
       ),
@@ -1023,32 +1435,48 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       backgroundColor: HomeSureColors.backgroundWarm,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: HomeSureColors.surfaceWhite,
+        backgroundColor: HomeSureColors.midnightHeader,
         title: const Text('Property Details'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          controller: _scrollController,
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (hasCatalogueScores)
-                PropertyHeroCard(property: _property)
-              else
-                _buildPropertyIdentityHeader(),
-
-              _buildIntelligenceSummaryGrid(),
-
-              _buildSectionNavigationBar(),
-
-              _buildSummaryMetricsSection(),
-
-              _buildUnitHierarchySection(),
-
-              _buildPortalTabsAndEvidenceSection(),
-
-              const SizedBox(height: 20),
-
+              KeyedSubtree(
+                key: _overviewKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (hasCatalogueScores)
+                      PropertyHeroCard(property: _property)
+                    else
+                      _buildPropertyIdentityHeader(),
+                    _buildIntelligenceSummaryGrid(),
+                    _buildSectionNavigationBar(),
+                    _buildOverviewDetailsSection(),
+                  ],
+                ),
+              ),
+              KeyedSubtree(
+                key: _legalKey,
+                child: _buildLegalSection(),
+              ),
+              KeyedSubtree(
+                key: _developmentKey,
+                child: _buildDevelopmentSection(),
+              ),
+              KeyedSubtree(
+                key: _documentsKey,
+                child: _buildDocumentsSection(),
+              ),
+              KeyedSubtree(
+                key: _issuesKey,
+                child: _buildIssuesSection(),
+              ),
+              const SizedBox(height: 18),
               if (hasCatalogueScores) ...[
                 const Text(
                   'Property DNA',
@@ -1075,19 +1503,17 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                 _buildScoreTile(
                   'Safety',
                   _property.safetyScore,
-                  HomeSureColors.primaryNavy,
+                  HomeSureColors.champagneHighlight,
                 ),
                 _buildScoreTile(
                   'Builder Reliability',
                   _property.builderScore,
-                  HomeSureColors.accentTealDark,
+                  HomeSureColors.champagneGold,
                 ),
               ] else ...[
                 _buildUnassessedState(),
               ],
-
               const SizedBox(height: 20),
-
               AppButton(
                 text: 'Start Assessment',
                 icon: Icons.play_arrow_rounded,
@@ -1100,9 +1526,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   );
                 },
               ),
-
               const SizedBox(height: 12),
-
               const Center(
                 child: Text(
                   'Always validate important project details against '

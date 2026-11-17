@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/phs/phs_assessment_progress.dart';
 import '../../core/phs/phs_categories.dart';
 import '../../core/phs/phs_category_progress.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../models/property_health/category_score.dart';
+import '../../theme/app_gradients.dart';
 import '../property_health/score_heatmap_legend.dart';
 
 /// Premium visual presentation of the Property Health assessment.
@@ -111,23 +113,18 @@ class PremiumAssessmentView extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1220),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: HomeSureColors.borderSlate),
+        boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeroScore(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
             _buildHeatmapHeader(),
             const SizedBox(height: 12),
             ScoreHeatmapLegend(
@@ -145,37 +142,33 @@ class PremiumAssessmentView extends StatelessWidget {
     final hasAssessment = assessmentCoverage > 0;
     final scoreColor = hasAssessment
         ? _scoreColor(overallScore)
-        : const Color(0xFF64748B);
+        : HomeSureColors.slateMuted;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF172033), Color(0xFF0F172A)],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF334155)),
+        gradient: AppGradients.hero,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: HomeSureColors.champagneBronze),
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 108,
-            height: 108,
+            width: 104,
+            height: 104,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: 108,
-                  height: 108,
+                  width: 104,
+                  height: 104,
                   child: CircularProgressIndicator(
                     value: hasAssessment
                         ? (overallScore / 100).clamp(0.0, 1.0)
                         : 0.0,
                     strokeWidth: 9,
-                    backgroundColor: const Color(0xFF263247),
+                    backgroundColor: HomeSureColors.midnightInteractive,
                     valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
                   ),
                 ),
@@ -187,7 +180,7 @@ class PremiumAssessmentView extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: HomeSureColors.champagneHighlight,
                         height: 1,
                       ),
                     ),
@@ -197,7 +190,7 @@ class PremiumAssessmentView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF94A3B8),
+                        color: HomeSureColors.slateMuted,
                       ),
                     ),
                   ],
@@ -216,7 +209,7 @@ class PremiumAssessmentView extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.4,
-                    color: Color(0xFF94A3B8),
+                    color: HomeSureColors.champagneHighlight,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -235,7 +228,7 @@ class PremiumAssessmentView extends StatelessWidget {
                   _coverageLabel(),
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFFCBD5E1),
+                    color: HomeSureColors.champagneInk,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -244,7 +237,7 @@ class PremiumAssessmentView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     height: 1.4,
-                    color: Color(0xFF64748B),
+                    color: HomeSureColors.slateMuted,
                   ),
                 ),
               ],
@@ -267,13 +260,16 @@ class PremiumAssessmentView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: HomeSureColors.champagneInk,
                 ),
               ),
               SizedBox(height: 4),
               Text(
                 'Tap a pillar to inspect its questions',
-                style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: HomeSureColors.slateMuted,
+                ),
               ),
             ],
           ),
@@ -281,15 +277,16 @@ class PremiumAssessmentView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: HomeSureColors.midnightInteractive,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: HomeSureColors.borderSlate),
           ),
           child: Text(
             '${progress.answeredQuestions}/${progress.totalQuestions}',
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: Color(0xFFCBD5E1),
+              color: HomeSureColors.champagneHighlight,
             ),
           ),
         ),
@@ -305,7 +302,7 @@ class PremiumAssessmentView extends StatelessWidget {
     final isSelected = selectedCategory == category;
     final score = categoryScore?.score ?? 0.0;
 
-    final color = assessed ? _scoreColor(score) : const Color(0xFF64748B);
+    final color = assessed ? _scoreColor(score) : HomeSureColors.slateMuted;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -321,14 +318,14 @@ class PremiumAssessmentView extends StatelessWidget {
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF18253A)
-                      : const Color(0xFF111B2D),
+                      ? HomeSureColors.midnightSelected
+                      : HomeSureColors.midnightDetail,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF3B82F6)
-                        : const Color(0xFF1E293B),
-                    width: isSelected ? 1.4 : 1,
+                        ? HomeSureColors.champagneGold
+                        : HomeSureColors.borderSlate,
+                    width: isSelected ? 1.5 : 1,
                   ),
                 ),
                 child: Row(
@@ -337,7 +334,7 @@ class PremiumAssessmentView extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.12),
+                        color: color.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(13),
                       ),
                       alignment: Alignment.center,
@@ -359,7 +356,7 @@ class PremiumAssessmentView extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    color: HomeSureColors.champagneInk,
                                   ),
                                 ),
                               ),
@@ -368,7 +365,7 @@ class PremiumAssessmentView extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF64748B),
+                                  color: HomeSureColors.slateMuted,
                                 ),
                               ),
                             ],
@@ -381,7 +378,8 @@ class PremiumAssessmentView extends StatelessWidget {
                                   ? (score / 100).clamp(0.0, 1.0)
                                   : categoryProgress.completion,
                               minHeight: 6,
-                              backgroundColor: const Color(0xFF263247),
+                              backgroundColor:
+                                  HomeSureColors.midnightInteractive,
                               valueColor: AlwaysStoppedAnimation<Color>(color),
                             ),
                           ),
@@ -403,7 +401,7 @@ class PremiumAssessmentView extends StatelessWidget {
                                 '${categoryProgress.answeredQuestions}/${categoryProgress.totalQuestions} questions',
                                 style: const TextStyle(
                                   fontSize: 10,
-                                  color: Color(0xFF64748B),
+                                  color: HomeSureColors.slateMuted,
                                 ),
                               ),
                             ],
@@ -417,7 +415,7 @@ class PremiumAssessmentView extends StatelessWidget {
                       turns: isSelected ? 0.25 : 0,
                       child: const Icon(
                         Icons.chevron_right,
-                        color: Color(0xFF64748B),
+                        color: HomeSureColors.champagneHighlight,
                         size: 22,
                       ),
                     ),

@@ -20,21 +20,21 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 50,
       child: FilledButton.icon(
         onPressed: enabled ? onPressed : null,
         icon: icon != null ? Icon(icon, size: 19) : const SizedBox.shrink(),
         label: Text(
           text,
           style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.1,
           ),
         ),
         style: FilledButton.styleFrom(
-          backgroundColor: HomeSureColors.primaryNavy,
-          foregroundColor: Colors.white,
+          backgroundColor: HomeSureColors.champagneGold,
+          foregroundColor: HomeSureColors.midnightCard,
           disabledBackgroundColor: HomeSureColors.disabledBg,
           disabledForegroundColor: HomeSureColors.disabledText,
           elevation: 0,

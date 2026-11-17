@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/homesure_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 import '../../../theme/app_spacing.dart';
@@ -36,8 +37,9 @@ class AIInsightsCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: HomeSureColors.midnightDetail,
               borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: HomeSureColors.borderSlate),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

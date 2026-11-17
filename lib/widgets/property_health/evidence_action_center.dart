@@ -4,6 +4,7 @@ import '../../core/evidence/assessment_evidence_summary.dart';
 import '../../core/evidence/evidence.dart';
 import '../../core/evidence/evidence_risk_signal.dart';
 import '../../core/evidence/evidence_validation_result.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../screens/assessment/evidence_details_screen.dart';
 
 /// Displays the most important evidence gaps that require
@@ -53,9 +54,9 @@ class EvidenceActionCenter extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderSlate),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,10 +65,10 @@ class EvidenceActionCenter extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             _subtitle,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               height: 1.4,
-              color: Colors.grey.shade700,
+              color: HomeSureColors.slateMuted,
             ),
           ),
           const SizedBox(height: 18),
@@ -460,28 +461,28 @@ class _StatusBadge extends StatelessWidget {
     switch (status) {
       case EvidenceValidationStatus.missing:
         return const _BadgeColors(
-          background: Color(0xFFFEE2E2),
-          foreground: Color(0xFFB91C1C),
+          background: HomeSureColors.statusCriticalBg,
+          foreground: HomeSureColors.statusCriticalText,
         );
       case EvidenceValidationStatus.provided:
         return const _BadgeColors(
-          background: Color(0xFFDBEAFE),
-          foreground: Color(0xFF1D4ED8),
+          background: HomeSureColors.midnightSand,
+          foreground: HomeSureColors.champagneHighlight,
         );
       case EvidenceValidationStatus.satisfied:
         return const _BadgeColors(
-          background: Color(0xFFDCFCE7),
-          foreground: Color(0xFF15803D),
+          background: HomeSureColors.statusPositiveBg,
+          foreground: HomeSureColors.statusPositiveText,
         );
       case EvidenceValidationStatus.needsReview:
         return const _BadgeColors(
-          background: Color(0xFFFEF3C7),
-          foreground: Color(0xFFB45309),
+          background: HomeSureColors.statusWarningBg,
+          foreground: HomeSureColors.statusWarningText,
         );
       case EvidenceValidationStatus.rejected:
         return const _BadgeColors(
-          background: Color(0xFFFEE2E2),
-          foreground: Color(0xFFB91C1C),
+          background: HomeSureColors.statusCriticalBg,
+          foreground: HomeSureColors.statusCriticalText,
         );
     }
   }
@@ -499,7 +500,7 @@ class _RiskBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: .10),
+        color: color.withValues(alpha: .14),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -529,13 +530,13 @@ class _RiskBadge extends StatelessWidget {
   static Color _color(EvidenceRiskLevel level) {
     switch (level) {
       case EvidenceRiskLevel.high:
-        return const Color(0xFFDC2626);
+        return HomeSureColors.statusCriticalText;
       case EvidenceRiskLevel.medium:
-        return const Color(0xFFD97706);
+        return HomeSureColors.statusWarningText;
       case EvidenceRiskLevel.low:
-        return const Color(0xFF2563EB);
+        return HomeSureColors.champagneHighlight;
       case EvidenceRiskLevel.none:
-        return const Color(0xFF64748B);
+        return HomeSureColors.slateMuted;
     }
   }
 }

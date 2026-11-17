@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/phs/phs_assessment_progress.dart';
 import '../../core/phs/phs_category_progress.dart';
 import '../../core/phs/phs_categories.dart';
+import '../../core/theme/homesure_tokens.dart';
 
 class PHSAssessmentPillarProgress extends StatelessWidget {
   final PHSAssessmentProgress progress;
@@ -20,27 +21,21 @@ class PHSAssessmentPillarProgress extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.borderSlate),
+        boxShadow: HomeSureShadows.cardSubtle,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           ...PHSCategory.values.map((category) {
             final categoryProgress = progress.progressFor(category);
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.only(bottom: 12),
               child: _PHSCategoryProgressRow(
                 progress:
                     categoryProgress ??
@@ -74,12 +69,13 @@ class PHSAssessmentPillarProgress extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(14),
+            color: HomeSureColors.midnightSand,
+            borderRadius: BorderRadius.circular(HomeSureRadius.md),
+            border: Border.all(color: HomeSureColors.champagneBronze),
           ),
           child: const Icon(
             Icons.health_and_safety_outlined,
-            color: Color(0xFF2563EB),
+            color: HomeSureColors.champagneHighlight,
           ),
         ),
         const SizedBox(width: 12),
@@ -92,13 +88,16 @@ class PHSAssessmentPillarProgress extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
+                  color: HomeSureColors.champagneInk,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 '$completed of $total pillars complete',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: HomeSureColors.slateMuted,
+                ),
               ),
             ],
           ),
@@ -106,15 +105,16 @@ class PHSAssessmentPillarProgress extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(20),
+            color: HomeSureColors.midnightInteractive,
+            borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+            border: Border.all(color: HomeSureColors.borderSlate),
           ),
           child: Text(
             '${progress.categoryCompletionPercentage}%',
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF334155),
+              color: HomeSureColors.champagneHighlight,
             ),
           ),
         ),
@@ -143,18 +143,22 @@ class _PHSCategoryProgressRow extends StatelessWidget {
     final hasQuestions = progress.totalQuestions > 0;
 
     final statusColor = isComplete
-        ? const Color(0xFF16A34A)
+        ? HomeSureColors.statusPositiveText
         : isActive
-        ? const Color(0xFF2563EB)
-        : const Color(0xFF94A3B8);
+        ? HomeSureColors.champagneGold
+        : HomeSureColors.slateMuted;
 
     final row = Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isCurrent ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(16),
+        color: isCurrent
+            ? HomeSureColors.midnightSelected
+            : HomeSureColors.midnightDetail,
+        borderRadius: BorderRadius.circular(HomeSureRadius.md),
         border: Border.all(
-          color: isCurrent ? const Color(0xFFBFDBFE) : const Color(0xFFE2E8F0),
+          color: isCurrent
+              ? HomeSureColors.champagneGold
+              : HomeSureColors.borderSlate,
         ),
       ),
       child: Row(
@@ -177,7 +181,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E293B),
+                          color: HomeSureColors.champagneInk,
                         ),
                       ),
                     ),
@@ -189,7 +193,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2563EB),
+                          color: HomeSureColors.champagneGold,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
@@ -197,7 +201,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: HomeSureColors.midnightBg,
                             letterSpacing: 0.4,
                           ),
                         ),
@@ -210,7 +214,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress.completion,
                     minHeight: 6,
-                    backgroundColor: const Color(0xFFE2E8F0),
+                    backgroundColor: HomeSureColors.midnightInteractive,
                     valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                   ),
                 ),
@@ -219,7 +223,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
                   _buildSupportingText(),
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF64748B),
+                    color: HomeSureColors.slateMuted,
                   ),
                 ),
               ],
@@ -240,7 +244,7 @@ class _PHSCategoryProgressRow extends StatelessWidget {
               child: Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: Color(0xFF94A3B8),
+                color: HomeSureColors.slateMuted,
               ),
             ),
         ],

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,334 +26,138 @@ void main() {
     await tester.pump();
   }
 
-  Future<void> tapAndSettle(
-    WidgetTester tester,
-    Finder finder,
-  ) async {
-    expect(finder, findsOneWidget);
-    await tester.ensureVisible(finder);
-    await tester.pump();
-    await tester.tap(finder);
-    await tester.pump(const Duration(milliseconds: 350));
-    await tester.pump();
-  }
-
-  Finder categoryDropdown() {
+  Finder pillarCard(PHSCategory category) {
     return find.byKey(
-      const ValueKey('assessment-category-dropdown'),
+      ValueKey<String>('assessment-pillar-${category.name}'),
     );
   }
 
-  Future<void> selectCategory(
-    WidgetTester tester,
-    PHSCategory category,
-  ) async {
-    final dropdown = categoryDropdown();
-
-    expect(dropdown, findsOneWidget);
-    await tester.tap(dropdown);
-    await tester.pumpAndSettle();
-
-    final option = find.byKey(
-      ValueKey('classic-category-option-${category.name}'),
-    );
-
-    expect(option, findsOneWidget);
-
-    final optionText = find.descendant(
-      of: option,
-      matching: find.byType(Text),
-    );
-
-    expect(optionText, findsOneWidget);
-
-    await tester.tap(optionText);
-    await tester.pumpAndSettle();
-  }
-
-  Finder questionChip(String questionId) {
-    return find.byKey(
-      ValueKey('classic-question-$questionId'),
+  Finder activePillarTitle(PHSCategory category) {
+    return find.byWidgetPredicate(
+      (w) =>
+          w is Text &&
+          w.key == const ValueKey<String>('active-pillar-title') &&
+          w.data == category.displayName,
     );
   }
 
   testWidgets(
-    'selecting a category does not change the active question',
+    'displays Assessment pillars strip, active pillar card, and all questions stacked for scrolling without Classic/Premium toggle',
     (tester) async {
       await pumpAssessmentScreen(tester);
 
-      final originalQuestionId = assessmentState.currentQuestionId;
-      expect(originalQuestionId, isNotNull);
+      expect(find.text('Classic'), findsNothing);
+      expect(find.text('Premium'), findsNothing);
+      expect(find.text('Assessment pillars'), findsOneWidget);
+      expect(find.text('ACTIVE ASSESSMENT PILLAR'), findsOneWidget);
+      expect(activePillarTitle(PHSCategory.legalOwnership), findsOneWidget);
 
-      const anotherCategory = PHSCategory.constructionQuality;
-
-      expect(
-        phsQuestions.any((q) => q.category == anotherCategory),
-        isTrue,
-      );
-
-      await selectCategory(tester, anotherCategory);
-
-      expect(
-        assessmentState.currentQuestionId,
-        originalQuestionId,
-        reason: 'Selecting a category should only show its question chips.',
-      );
+      final legalQuestions = phsQuestions
+          .where((q) => q.category == PHSCategory.legalOwnership)
+          .toList();
+      for (var i = 0; i < legalQuestions.length; i++) {
+        expect(
+          find.byKey(
+            ValueKey<String>('assessment-qcard-${legalQuestions[i].id}'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('QUESTION ${i + 1} OF ${legalQuestions.length}'),
+          findsOneWidget,
+        );
+      }
     },
   );
 
   testWidgets(
-    'selecting an individual question opens that exact question',
+    'tapping a pillar switches active pillar and renders all questions for that pillar',
     (tester) async {
       await pumpAssessmentScreen(tester);
 
-      final category = PHSCategory.constructionQuality;
-
-      final categoryQuestions = phsQuestions
-          .where((q) => q.category == category)
+      final targetCategory = PHSCategory.constructionQuality;
+      final targetQuestions = phsQuestions
+          .where((q) => q.category == targetCategory)
           .toList();
 
-      expect(categoryQuestions, isNotEmpty);
+      await tester.ensureVisible(pillarCard(targetCategory));
+      await tester.tap(pillarCard(targetCategory));
+      await tester.pumpAndSettle();
 
-      await selectCategory(tester, category);
+      expect(activePillarTitle(targetCategory), findsOneWidget);
 
-      final targetQuestion = categoryQuestions.last;
-
-      await tapAndSettle(
-        tester,
-        questionChip(targetQuestion.id),
-      );
-
-      expect(
-        assessmentState.currentQuestionId,
-        targetQuestion.id,
-      );
+      for (var i = 0; i < targetQuestions.length; i++) {
+        expect(
+          find.byKey(
+            ValueKey<String>('assessment-qcard-${targetQuestions[i].id}'),
+          ),
+          findsOneWidget,
+        );
+      }
     },
   );
 
   testWidgets(
-    'previous question updates persisted current question',
-    (tester) async {
-      expect(phsQuestions.length, greaterThanOrEqualTo(2));
-
-      final firstQuestion = phsQuestions[0];
-      final secondQuestion = phsQuestions[1];
-
-      assessmentState.startAssessment();
-
-      assessmentState.saveAnswer(
-        PHSAnswer(
-          questionId: firstQuestion.id,
-          response: PHSResponse.yes,
-        ),
-        currentQuestionId: secondQuestion.id,
-      );
-
-      expect(
-        assessmentState.currentQuestionId,
-        secondQuestion.id,
-      );
-
-      await pumpAssessmentScreen(tester);
-
-      expect(
-        assessmentState.currentQuestionId,
-        secondQuestion.id,
-      );
-
-      await tapAndSettle(
-        tester,
-        find.text('Previous Question'),
-      );
-
-      expect(
-        assessmentState.currentQuestionId,
-        firstQuestion.id,
-      );
-    },
-  );
-
-  testWidgets(
-    'category selection preserves answered progress',
+    'switching pillars and returning preserves answered answers and progress',
     (tester) async {
       await pumpAssessmentScreen(tester);
 
       final firstQuestion = phsQuestions.first;
-
-      assessmentState.saveAnswer(
-        PHSAnswer(
-          questionId: firstQuestion.id,
-          response: PHSResponse.yes,
-        ),
-        currentQuestionId: firstQuestion.id,
+      final firstCard = find.byKey(
+        ValueKey<String>('assessment-qcard-${firstQuestion.id}'),
       );
 
-      await tester.pump();
-
-      final anotherCategory =
-          firstQuestion.category == PHSCategory.constructionQuality
-              ? PHSCategory.legalOwnership
-              : PHSCategory.constructionQuality;
-
-      await selectCategory(tester, anotherCategory);
-
-      expect(
-        assessmentState.currentQuestionId,
-        firstQuestion.id,
-        reason: 'Category selection must not change the active question.',
+      final yesOption = find.descendant(
+        of: firstCard,
+        matching: find.text('Yes'),
       );
-
-      expect(assessmentState.answers, hasLength(1));
-      expect(
-        assessmentState.answers.first.questionId,
-        firstQuestion.id,
-      );
-
-      final categoryProgress =
-          assessmentState.assessmentProgress.progressFor(
-        firstQuestion.category,
-      );
-
-      expect(categoryProgress, isNotNull);
-      expect(
-        categoryProgress!.answeredQuestions,
-        greaterThanOrEqualTo(1),
-      );
-    },
-  );
-
-  testWidgets(
-    'an answered question can be reopened from its question chip',
-    (tester) async {
-      await pumpAssessmentScreen(tester);
-
-      final answeredQuestion = phsQuestions.first;
-
-      await tapAndSettle(
-        tester,
-        find.text('Yes'),
-      );
+      await tester.ensureVisible(yesOption);
+      await tester.tap(yesOption);
+      await tester.pumpAndSettle();
 
       expect(
         assessmentState.answers.any(
-          (answer) => answer.questionId == answeredQuestion.id,
-        ),
-        isTrue,
-        reason: 'Selecting Yes should save the answer through the UI.',
-      );
-
-      final anotherCategory =
-          answeredQuestion.category == PHSCategory.constructionQuality
-              ? PHSCategory.legalOwnership
-              : PHSCategory.constructionQuality;
-
-      final otherCategoryQuestions = phsQuestions
-          .where((question) => question.category == anotherCategory)
-          .toList();
-
-      expect(otherCategoryQuestions, isNotEmpty);
-
-      await selectCategory(tester, anotherCategory);
-
-      final otherQuestion = otherCategoryQuestions.first;
-
-      await tapAndSettle(
-        tester,
-        questionChip(otherQuestion.id),
-      );
-
-      expect(
-        assessmentState.currentQuestionId,
-        otherQuestion.id,
-      );
-
-      await selectCategory(tester, answeredQuestion.category);
-
-      await tapAndSettle(
-        tester,
-        questionChip(answeredQuestion.id),
-      );
-
-      expect(
-        assessmentState.currentQuestionId,
-        answeredQuestion.id,
-        reason: 'An answered question should remain accessible for review.',
-      );
-
-      expect(assessmentState.answers, hasLength(1));
-      expect(
-        assessmentState.answers.first.questionId,
-        answeredQuestion.id,
-      );
-      expect(
-        assessmentState.answers.first.response,
-        PHSResponse.yes,
-      );
-    },
-  );
-
-  testWidgets(
-    'switching categories and returning preserves answered status',
-    (tester) async {
-      await pumpAssessmentScreen(tester);
-
-      final answeredQuestion = phsQuestions.first;
-
-      // Save the answer through the actual UI so the screen rebuilds
-      // using the updated assessment state.
-      await tapAndSettle(
-        tester,
-        find.text('Yes'),
-      );
-
-      expect(
-        assessmentState.answers.any(
-          (answer) => answer.questionId == answeredQuestion.id,
-        ),
-        isTrue,
-        reason: 'Selecting Yes should save the answer through the UI.',
-      );
-
-      final anotherCategory =
-          answeredQuestion.category == PHSCategory.constructionQuality
-              ? PHSCategory.legalOwnership
-              : PHSCategory.constructionQuality;
-
-      await selectCategory(tester, anotherCategory);
-
-      expect(
-        assessmentState.answers.any(
-          (answer) => answer.questionId == answeredQuestion.id,
+          (a) =>
+              a.questionId == firstQuestion.id && a.response == PHSResponse.yes,
         ),
         isTrue,
       );
 
-      await selectCategory(tester, answeredQuestion.category);
+      await tester.ensureVisible(pillarCard(PHSCategory.constructionQuality));
+      await tester.tap(pillarCard(PHSCategory.constructionQuality));
+      await tester.pumpAndSettle();
 
-      final answeredChip = questionChip(answeredQuestion.id);
+      expect(activePillarTitle(PHSCategory.constructionQuality), findsOneWidget);
 
-      expect(answeredChip, findsOneWidget);
+      await tester.ensureVisible(pillarCard(PHSCategory.legalOwnership));
+      await tester.tap(pillarCard(PHSCategory.legalOwnership));
+      await tester.pumpAndSettle();
 
+      final legalCount = phsQuestions
+          .where((q) => q.category == PHSCategory.legalOwnership)
+          .length;
+      expect(find.textContaining('1 of $legalCount answered'), findsOneWidget);
       expect(
-        find.descendant(
-          of: answeredChip,
-          matching: find.byIcon(Icons.check_circle),
-        ),
+        find.byKey(ValueKey<String>('assessment-qcard-${firstQuestion.id}')),
         findsOneWidget,
-        reason: 'The answered question should display its completed indicator.',
-      );
-
-      final categoryProgress =
-          assessmentState.assessmentProgress.progressFor(
-        answeredQuestion.category,
-      );
-
-      expect(categoryProgress, isNotNull);
-      expect(
-        categoryProgress!.answeredQuestions,
-        greaterThanOrEqualTo(1),
       );
       expect(assessmentState.answers, hasLength(1));
+    },
+  );
+
+  testWidgets(
+    'Next pillar button advances through pillars in sequence',
+    (tester) async {
+      await pumpAssessmentScreen(tester);
+
+      final nextButton = find.byKey(
+        const ValueKey<String>('assessment-next-pillar-btn'),
+      );
+      await tester.ensureVisible(nextButton);
+      await tester.tap(nextButton);
+      await tester.pumpAndSettle();
+
+      expect(activePillarTitle(PHSCategory.values[1]), findsOneWidget);
     },
   );
 }

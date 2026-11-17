@@ -43,22 +43,25 @@ class HeroScoreCard extends StatelessWidget {
               const Text(
                 'PROPERTY HEALTH SCORE',
                 style: TextStyle(
-                  color: Color(0xFFB8C7DC),
+                  color: HomeSureColors.champagneHighlight,
                   letterSpacing: 1.4,
                   fontWeight: FontWeight.w700,
                   fontSize: 11.5,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: HomeSureColors.midnightInteractive,
                   borderRadius: BorderRadius.circular(HomeSureRadius.pill),
+                  border: Border.all(
+                    color: HomeSureColors.champagneBronze.withValues(alpha: 0.6),
+                  ),
                 ),
                 child: Text(
                   hasScore ? status : 'Due Diligence Pending',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: HomeSureColors.champagneInk,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -111,8 +114,8 @@ class HeroScoreCard extends StatelessWidget {
             width: double.infinity,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: HomeSureColors.primaryNavy,
+                backgroundColor: HomeSureColors.champagneGold,
+                foregroundColor: HomeSureColors.midnightBg,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(HomeSureRadius.md),
@@ -125,7 +128,7 @@ class HeroScoreCard extends StatelessWidget {
                     ? 'View Property Health Report'
                     : 'Start Property Health Assessment',
                 style: const TextStyle(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   fontSize: 14,
                 ),
               ),
@@ -147,9 +150,9 @@ class _NotAssessedState extends StatelessWidget {
       height: 164,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.07),
+        color: HomeSureColors.midnightCard.withValues(alpha: 0.45),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.22),
+          color: HomeSureColors.champagneBronze,
           width: 1.5,
         ),
       ),
@@ -157,15 +160,15 @@ class _NotAssessedState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.shield_outlined,
-            color: Color(0xFF8CE0D8),
+            Icons.verified_user_outlined,
+            color: HomeSureColors.champagneHighlight,
             size: 36,
           ),
           SizedBox(height: 10),
           Text(
             'Not Assessed',
             style: TextStyle(
-              color: Colors.white,
+              color: HomeSureColors.champagneInk,
               fontSize: 17,
               fontWeight: FontWeight.w700,
             ),
@@ -177,7 +180,7 @@ class _NotAssessedState extends StatelessWidget {
               'Complete your assessment',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Color(0xFFB8C7DC),
+                color: HomeSureColors.slateMuted,
                 fontSize: 11.5,
               ),
             ),
@@ -209,9 +212,11 @@ class _StatusCard extends StatelessWidget {
         horizontal: 8,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: HomeSureColors.midnightCard.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(HomeSureRadius.md),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(
+          color: HomeSureColors.borderSlate.withValues(alpha: 0.65),
+        ),
       ),
       child: Column(
         children: [
@@ -224,7 +229,7 @@ class _StatusCard extends StatelessWidget {
           Text(
             '$value',
             style: const TextStyle(
-              color: Colors.white,
+              color: HomeSureColors.champagneInk,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -233,7 +238,7 @@ class _StatusCard extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFFB8C7DC),
+              color: HomeSureColors.slateMuted,
               fontSize: 11.5,
             ),
           ),

@@ -429,14 +429,47 @@ class PropertyRepository implements PropertyCatalogueGateway {
     return entries.where((b) => b.matchesSearchQuery(trimmed)).toList();
   }
 
-  /// Filters a builder's project list by an optional [searchQuery].
+  /// Returns `true` if [property] belongs to the given [talukFilter].
+  static bool propertyMatchesTaluk(
+    legacy.Property property,
+    BengaluruTalukFilter talukFilter,
+  ) {
+    if (talukFilter == BengaluruTalukFilter.all) return true;
+    if (talukFilter.matchesTaluk(property.locality)) return true;
+    final metricTaluk = property.summaryMetrics['taluk']?.formattedValue;
+    return talukFilter.matchesTaluk(metricTaluk);
+  }
+
+  /// Returns `true` if [property] belongs to at least one filter in [talukFilters].
+  static bool propertyMatchesTaluks(
+    legacy.Property property,
+    Set<BengaluruTalukFilter> talukFilters,
+  ) {
+    if (talukFilters.isEmpty ||
+        talukFilters.contains(BengaluruTalukFilter.all)) {
+      return true;
+    }
+    return talukFilters.any((f) => propertyMatchesTaluk(property, f));
+  }
+
+  /// Filters a builder's project list by optional [searchQuery] and taluk filters.
   static List<legacy.Property> filterBuilderProjects(
     List<legacy.Property> projects, {
     String searchQuery = '',
+    BengaluruTalukFilter talukFilter = BengaluruTalukFilter.all,
+    Set<BengaluruTalukFilter> talukFilters = const {},
   }) {
+    final effectiveFilters = talukFilters.isNotEmpty
+        ? talukFilters
+        : (talukFilter == BengaluruTalukFilter.all
+            ? const <BengaluruTalukFilter>{}
+            : {talukFilter});
     final lower = searchQuery.trim().toLowerCase();
-    if (lower.isEmpty) return projects;
     return projects.where((p) {
+      if (!propertyMatchesTaluks(p, effectiveFilters)) {
+        return false;
+      }
+      if (lower.isEmpty) return true;
       return p.name.toLowerCase().contains(lower) ||
           p.builder.toLowerCase().contains(lower) ||
           p.locality.toLowerCase().contains(lower) ||

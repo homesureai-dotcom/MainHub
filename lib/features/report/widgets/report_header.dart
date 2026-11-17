@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/homesure_tokens.dart';
+import '../../../theme/app_gradients.dart';
 import '../models/property_health_report.dart';
 
 class ReportHeader extends StatelessWidget {
@@ -16,17 +18,11 @@ class ReportHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF2563EB),
-            Color(0xFF1D4ED8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        borderRadius: BorderRadius.circular(24),
+        gradient: AppGradients.hero,
+        border: Border.all(color: HomeSureColors.champagneBronze),
       ),
 
       child: Column(
@@ -38,30 +34,30 @@ class ReportHeader extends StatelessWidget {
             children: const [
               Icon(
                 Icons.verified_user,
-                color: Colors.white,
+                color: HomeSureColors.champagneHighlight,
               ),
 
               SizedBox(width: 8),
 
               Text(
-                "PROPERTY HEALTH REPORT",
+                'PROPERTY HEALTH REPORT',
                 style: TextStyle(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
+                  color: HomeSureColors.champagneHighlight,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
           /// Property Name
           Text(
             report.propertyName,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
+              color: HomeSureColors.champagneInk,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -71,12 +67,12 @@ class ReportHeader extends StatelessWidget {
           Text(
             report.address,
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
+              color: HomeSureColors.slateMuted,
+              fontSize: 15,
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 26),
 
           /// Score
           Row(
@@ -86,9 +82,9 @@ class ReportHeader extends StatelessWidget {
               Text(
                 assessment.overallScore.round().toString(),
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 72,
-                  fontWeight: FontWeight.bold,
+                  color: HomeSureColors.champagneHighlight,
+                  fontSize: 68,
+                  fontWeight: FontWeight.w900,
                   height: .9,
                 ),
               ),
@@ -114,8 +110,9 @@ class ReportHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .12),
+              color: HomeSureColors.midnightCard.withValues(alpha: 0.72),
               borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: HomeSureColors.champagneBronze),
             ),
 
             child: Row(
@@ -123,23 +120,23 @@ class ReportHeader extends StatelessWidget {
 
                 Expanded(
                   child: _InfoTile(
-                    label: "Owner",
+                    label: 'Owner',
                     value: report.ownerName,
                   ),
                 ),
 
                 Expanded(
                   child: _InfoTile(
-                    label: "Builder",
+                    label: 'Builder',
                     value: report.builderName,
                   ),
                 ),
 
                 Expanded(
                   child: _InfoTile(
-                    label: "Assessment",
+                    label: 'Assessment',
                     value:
-                        "${report.assessmentDate.day}/${report.assessmentDate.month}/${report.assessmentDate.year}",
+                        '${report.assessmentDate.day}/${report.assessmentDate.month}/${report.assessmentDate.year}',
                   ),
                 ),
               ],
@@ -169,7 +166,7 @@ class _InfoTile extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white70,
+            color: HomeSureColors.champagneHighlight,
             fontSize: 12,
           ),
         ),
@@ -179,7 +176,7 @@ class _InfoTile extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: HomeSureColors.champagneInk,
             fontWeight: FontWeight.bold,
             fontSize: 15,
           ),

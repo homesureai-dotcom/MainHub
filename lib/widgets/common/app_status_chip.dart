@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 enum StatusType {
   success,
   warning,
@@ -17,38 +19,54 @@ class AppStatusChip extends StatelessWidget {
     required this.status,
   });
 
-  Color get color {
+  (Color fg, Color bg, Color border) get _colors {
     switch (status) {
       case StatusType.success:
-        return Colors.green;
-
+        return (
+          HomeSureColors.statusPositiveText,
+          HomeSureColors.statusPositiveBg,
+          HomeSureColors.statusPositiveBorder,
+        );
       case StatusType.warning:
-        return Colors.orange;
-
+        return (
+          HomeSureColors.statusWarningText,
+          HomeSureColors.statusWarningBg,
+          HomeSureColors.statusWarningBorder,
+        );
       case StatusType.danger:
-        return Colors.red;
-
+        return (
+          HomeSureColors.statusCriticalText,
+          HomeSureColors.statusCriticalBg,
+          HomeSureColors.statusCriticalBorder,
+        );
       case StatusType.info:
-        return Colors.blue;
+        return (
+          HomeSureColors.champagneHighlight,
+          HomeSureColors.midnightInteractive,
+          HomeSureColors.champagneBronze,
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final (fg, bg, border) = _colors;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 8,
+        horizontal: 12,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: bg,
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: border),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
+          color: fg,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

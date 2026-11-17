@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class HSInfoBottomSheet {
   static Future<void> show(
     BuildContext context, {
@@ -50,10 +52,11 @@ class _QuestionRationalePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: HomeSureColors.midnightHeader,
+        surfaceTintColor: HomeSureColors.midnightHeader,
+        foregroundColor: HomeSureColors.champagneInk,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Close',
@@ -62,7 +65,11 @@ class _QuestionRationalePage extends StatelessWidget {
         ),
         title: const Text(
           'Why this is important',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: HomeSureColors.champagneInk,
+          ),
         ),
       ),
       body: SafeArea(
@@ -71,47 +78,53 @@ class _QuestionRationalePage extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 26,
-                        height: 1.2,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        fontSize: 24,
+                        height: 1.25,
+                        fontWeight: FontWeight.w800,
+                        color: HomeSureColors.champagneInk,
                       ),
                     ),
                     const SizedBox(height: 14),
                     Chip(
                       label: Text(category),
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      side: BorderSide.none,
+                      backgroundColor: HomeSureColors.midnightSand,
+                      labelStyle: const TextStyle(
+                        color: HomeSureColors.champagneHighlight,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      side: const BorderSide(
+                        color: HomeSureColors.champagneBronze,
+                      ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
                     _section(
                       icon: Icons.lightbulb_outline_rounded,
-                      color: Colors.amber.shade800,
+                      color: HomeSureColors.champagneHighlight,
                       title: 'Why this matters',
                       body: whyItMatters,
                     ),
                     _section(
                       icon: Icons.warning_amber_rounded,
-                      color: Colors.orange.shade800,
+                      color: HomeSureColors.statusWarningText,
                       title: 'Impact',
                       body: impact,
                     ),
                     _section(
                       icon: Icons.priority_high_rounded,
-                      color: Colors.red.shade700,
+                      color: HomeSureColors.statusCriticalText,
                       title: 'Priority',
                       body: priority,
                     ),
                     _section(
                       icon: Icons.trending_up_rounded,
-                      color: Colors.green.shade700,
+                      color: HomeSureColors.statusPositiveText,
                       title: 'Potential Property Health Gain',
                       body: '+$phiGain PHI',
                     ),
@@ -119,9 +132,9 @@ class _QuestionRationalePage extends StatelessWidget {
                     const Text(
                       'Required Evidence',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 17,
+                        color: HomeSureColors.champagneInk,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -131,21 +144,43 @@ class _QuestionRationalePage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           height: 1.5,
-                          color: Color(0xFF475569),
+                          color: HomeSureColors.slateMuted,
                         ),
                       )
                     else
                       ...evidence.map(
-                        (item) => ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.description_outlined,
-                            color: Color(0xFF475569),
+                        (item) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
                           ),
-                          title: Text(
-                            item,
-                            style: const TextStyle(fontSize: 15, height: 1.4),
+                          decoration: BoxDecoration(
+                            color: HomeSureColors.midnightCard,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: HomeSureColors.borderSlate,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.description_outlined,
+                                color: HomeSureColors.champagneHighlight,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  item,
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    height: 1.4,
+                                    color: HomeSureColors.champagneInk,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -155,10 +190,12 @@ class _QuestionRationalePage extends StatelessWidget {
             ),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
               decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+                color: HomeSureColors.midnightHeader,
+                border: Border(
+                  top: BorderSide(color: HomeSureColors.borderSlate),
+                ),
               ),
               child: FilledButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -183,34 +220,51 @@ class _QuestionRationalePage extends StatelessWidget {
     required String title,
     required String body,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 26),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        color: HomeSureColors.midnightCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: HomeSureColors.borderSlate),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 22),
+              Icon(icon, color: color, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Color(0xFF0F172A),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16.5,
+                    color: HomeSureColors.champagneInk,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            body,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.6,
-              color: Color(0xFF334155),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.only(left: 10),
+            decoration: const BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: HomeSureColors.champagneGold,
+                  width: 3,
+                ),
+              ),
+            ),
+            child: Text(
+              body,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.55,
+                color: HomeSureColors.slateDetailBody,
+              ),
             ),
           ),
         ],

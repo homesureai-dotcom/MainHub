@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/assessment/assessment_result.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../state/assessment_state.dart';
 
 import '../../widgets/common/app_button.dart';
@@ -33,133 +34,112 @@ class ScoreRevealScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-
               const SizedBox(height: 10),
-
               const Icon(
                 Icons.verified_rounded,
                 size: 64,
-                color: Colors.green,
+                color: HomeSureColors.statusPositiveText,
               ),
-
               const SizedBox(height: 16),
-
               const Text(
-                "Assessment Complete",
+                'Assessment Complete',
                 style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: HomeSureColors.champagneInk,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               const Text(
-                "Your Property Health Report is Ready",
+                'Your Property Health Report is Ready',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black87,
+                  fontSize: 17,
+                  color: HomeSureColors.champagneHighlight,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-
               const SizedBox(height: 12),
-
               const Text(
                 "We've evaluated your property across Legal, Construction, Utilities, Safety, Community and Documentation.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 15,
-                  height: 1.6,
-                  color: Colors.grey,
+                  fontSize: 14.5,
+                  height: 1.55,
+                  color: HomeSureColors.slateMuted,
                 ),
               ),
-
-              const SizedBox(height: 36),
-
+              const SizedBox(height: 32),
               const Text(
-                "PROPERTY HEALTH INDEX™",
+                'PROPERTY HEALTH INDEX™',
                 style: TextStyle(
                   letterSpacing: 2,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey,
+                  fontWeight: FontWeight.w700,
+                  color: HomeSureColors.champagneHighlight,
+                  fontSize: 12,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
-                "Based on ${result.categoryResults.length} assessment categories",
+                'Based on ${result.categoryResults.length} assessment categories',
                 style: const TextStyle(
-                  color: Colors.grey,
+                  color: HomeSureColors.slateMuted,
                 ),
               ),
-
               const SizedBox(height: 24),
-
               ScoreCircle(
                 score: result.overallScore.round(),
               ),
-
               const SizedBox(height: 24),
-
               ScoreBadge(
                 score: result.overallScore.round(),
               ),
-
-              const SizedBox(height: 30),
-
-              Card(
-                elevation: 0,
-                color: Colors.green.shade50,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+              const SizedBox(height: 28),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: HomeSureColors.midnightCard,
+                  borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+                  border: Border.all(color: HomeSureColors.champagneBronze),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: Colors.green,
-                        size: 34,
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      color: HomeSureColors.champagneHighlight,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Great News!',
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        color: HomeSureColors.champagneInk,
                       ),
-
-                      const SizedBox(height: 12),
-
-                      const Text(
-                        "Great News!",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      result.summary,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        height: 1.55,
+                        fontSize: 15,
+                        color: HomeSureColors.slateDetailBody,
                       ),
-
-                      const SizedBox(height: 10),
-
-                      Text(
-                        result.summary,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          height: 1.6,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 

@@ -18,6 +18,7 @@ import '../../core/evidence/phs_assessment_evidence_context_service.dart';
 import '../../core/evidence/phs_assessment_evidence_integration.dart';
 import '../../core/evidence/phs_question_evidence_context_builder.dart';
 import '../../core/evidence/phs_question_evidence_context_service.dart';
+import '../../core/theme/homesure_tokens.dart';
 import '../../data/phs_questions.dart';
 import '../../state/assessment_state.dart';
 import '../../widgets/assessment/analyzing_step.dart';
@@ -170,7 +171,7 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: HomeSureColors.midnightBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -180,38 +181,56 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
             ),
             child: Column(
               children: [
-                const SizedBox(height: 40),
-                const CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Color(0xFF2563EB),
-                  child: Icon(
-                    Icons.smart_toy,
-                    color: Colors.white,
-                    size: 60,
+                const SizedBox(height: 36),
+                Container(
+                  width: 112,
+                  height: 112,
+                  decoration: BoxDecoration(
+                    color: HomeSureColors.midnightCard,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: HomeSureColors.champagneGold,
+                      width: 2,
+                    ),
+                    boxShadow: HomeSureShadows.cardElevated,
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: HomeSureColors.champagneHighlight,
+                    size: 52,
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 28),
                 const Text(
                   'Analyzing your Property',
                   style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: HomeSureColors.champagneInk,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 const Text(
                   'SureBot is evaluating your responses using the '
                   'HomeSure Property Health Standard.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
+                    color: HomeSureColors.slateMuted,
+                    fontSize: 15.5,
+                    height: 1.5,
                   ),
                 ),
-                const SizedBox(height: 40),
-                const LinearProgressIndicator(),
-                const SizedBox(height: 40),
+                const SizedBox(height: 34),
+                const ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(999)),
+                  child: LinearProgressIndicator(
+                    minHeight: 6,
+                    backgroundColor: HomeSureColors.midnightInteractive,
+                    color: HomeSureColors.champagneGold,
+                  ),
+                ),
+                const SizedBox(height: 34),
                 const AnalyzingStep(
                   title: 'Legal & Ownership',
                   completed: true,
@@ -228,7 +247,7 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
                   title: 'Safety & Compliance',
                   completed: true,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 36),
               ],
             ),
           ),

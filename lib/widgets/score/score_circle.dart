@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/homesure_tokens.dart';
+
 class ScoreCircle extends StatelessWidget {
   final int score;
 
@@ -9,9 +11,9 @@ class ScoreCircle extends StatelessWidget {
   });
 
   Color get scoreColor {
-    if (score >= 85) return Colors.green;
-    if (score >= 70) return Colors.orange;
-    return Colors.red;
+    if (score >= 85) return HomeSureColors.statusPositiveText;
+    if (score >= 70) return HomeSureColors.champagneHighlight;
+    return HomeSureColors.statusCriticalText;
   }
 
   @override
@@ -21,18 +23,12 @@ class ScoreCircle extends StatelessWidget {
       height: 190,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
+        color: HomeSureColors.midnightCard,
         border: Border.all(
           color: scoreColor,
-          width: 8,
+          width: 7,
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+        boxShadow: HomeSureShadows.cardElevated,
       ),
       child: Center(
         child: Column(
@@ -40,20 +36,22 @@ class ScoreCircle extends StatelessWidget {
           children: [
 
             Text(
-              "$score",
+              '$score',
               style: const TextStyle(
-                fontSize: 64,
-                fontWeight: FontWeight.bold,
+                fontSize: 60,
+                fontWeight: FontWeight.w900,
+                color: HomeSureColors.champagneInk,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             const Text(
-              "HomeSure Score™",
+              'HomeSure Score™',
               style: TextStyle(
-                color: Colors.grey,
-                fontSize: 15,
+                color: HomeSureColors.champagneHighlight,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
