@@ -378,7 +378,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
     );
   }
 
-  Widget _buildBrandTopBar({int? phiScore}) {
+  Widget _buildBrandTopBar() {
     return Container(
       padding: const EdgeInsets.only(bottom: 14),
       decoration: const BoxDecoration(
@@ -386,43 +386,13 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
           bottom: BorderSide(color: HomeSureColors.borderSlate, width: 1),
         ),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const Expanded(
+          Expanded(
             child: AppLogo(
               variant: AppLogoVariant.brandHeader,
               height: 32,
               showSubtitle: true,
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-            decoration: BoxDecoration(
-              color: HomeSureColors.midnightCard,
-              borderRadius: BorderRadius.circular(HomeSureRadius.pill),
-              border: Border.all(color: HomeSureColors.borderSlate),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'PHI',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: HomeSureColors.slateMuted,
-                  ),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  phiScore != null ? '$phiScore' : '--',
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w900,
-                    color: HomeSureColors.champagneHighlight,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -600,7 +570,7 @@ class _HomeScreenV2State extends State<HomeScreenV2> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildBrandTopBar(phiScore: score),
+              _buildBrandTopBar(),
               const SizedBox(height: 16),
               GreetingHeader(userName: _resolveGreetingName(property)),
               const SizedBox(height: 18),

@@ -128,6 +128,7 @@ class FakePropertyCatalogueGateway extends PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   }) async {
     return ProjectUnitRecord(
       unitId: 'unit_test_$unitNumber',

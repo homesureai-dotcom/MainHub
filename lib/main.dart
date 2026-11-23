@@ -84,7 +84,7 @@ class HomeSureAIApp extends StatelessWidget {
       valueListenable: localeController.locale,
       builder: (context, locale, child) {
         return MaterialApp(
-          title: 'HomeSure AI',
+          title: 'HomeSureAI',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           locale: locale,

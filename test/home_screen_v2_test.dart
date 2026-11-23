@@ -694,4 +694,27 @@ void main() {
 
     expect(find.text('• Registered Sale Deed'), findsOneWidget);
   });
+
+  testWidgets('HomeScreenV2 top bar does not display PHI badge before or after property selection', (
+    tester,
+  ) async {
+    PropertyState.instance.initialize(
+      properties: const [],
+      selectedProperty: null,
+    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('PHI'), findsNothing);
+
+    final property = createProperty();
+    PropertyState.instance.initialize(
+      properties: [property],
+      selectedProperty: property,
+    );
+    await tester.pumpWidget(const MaterialApp(home: HomeScreenV2()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('PHI'), findsNothing);
+  });
 }

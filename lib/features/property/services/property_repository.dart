@@ -83,7 +83,14 @@ abstract class PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   });
+
+  /// Delete a buyer-provided unit evaluation record under `projects/{projectId}/units/{unitId}`.
+  Future<void> deleteBuyerUnit({
+    required String projectId,
+    required String unitId,
+  }) async {}
 }
 
 class PropertyRepository implements PropertyCatalogueGateway {
@@ -339,6 +346,7 @@ class PropertyRepository implements PropertyCatalogueGateway {
       }
 
       if (loadedFromChunks.isNotEmpty) {
+        loadedFromChunks.sort(compareBuildersAlphabetically);
         _cachedBuilders = loadedFromChunks;
         _cachedCatalogUpdatedAt = latestMetaUpdatedAt;
       } else {
@@ -462,8 +470,21 @@ class PropertyRepository implements PropertyCatalogueGateway {
     );
   }
 
+  /// Deterministic alphabetical A -> Z comparator for builders by display name (with ID tie-breaker).
+  static int compareBuildersAlphabetically(
+    BuilderCatalogueEntry a,
+    BuilderCatalogueEntry b,
+  ) {
+    final nameCmp = a.builderName
+        .trim()
+        .toLowerCase()
+        .compareTo(b.builderName.trim().toLowerCase());
+    if (nameCmp != 0) return nameCmp;
+    return a.builderId.compareTo(b.builderId);
+  }
+
   /// Groups a list of [legacy.Property] records into canonical [BuilderCatalogueEntry]
-  /// records sorted by featured brand status, project count descending, and name.
+  /// records sorted alphabetically A -> Z by builder name.
   static List<BuilderCatalogueEntry> groupProjectsIntoBuilders(
     List<legacy.Property> projects, {
     String searchQuery = '',
@@ -570,15 +591,7 @@ class PropertyRepository implements PropertyCatalogueGateway {
       );
     }).toList();
 
-    entries.sort((a, b) {
-      final aMajor = a.isFeaturedBrand || a.projectCount >= 2 ? 0 : 1;
-      final bMajor = b.isFeaturedBrand || b.projectCount >= 2 ? 0 : 1;
-      if (aMajor != bMajor) return aMajor.compareTo(bMajor);
-      if (a.projectCount != b.projectCount) {
-        return b.projectCount.compareTo(a.projectCount);
-      }
-      return a.builderName.toLowerCase().compareTo(b.builderName.toLowerCase());
-    });
+    entries.sort(compareBuildersAlphabetically);
 
     final trimmed = searchQuery.trim();
     if (trimmed.isEmpty) return entries;
@@ -744,12 +757,15 @@ class PropertyRepository implements PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   }) async {
     final userId = _auth.currentUser?.uid ?? 'anonymous_buyer';
     final sanitizedUnit = unitNumber
         .trim()
         .replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
-    final unitId = 'unit_${userId}_$sanitizedUnit';
+    final unitId = (existingUnitId != null && existingUnitId.trim().isNotEmpty)
+        ? existingUnitId.trim()
+        : 'unit_${userId}_$sanitizedUnit';
     final nowIso = DateTime.now().toUtc().toIso8601String();
 
     final record = ProjectUnitRecord(
@@ -780,6 +796,25 @@ class PropertyRepository implements PropertyCatalogueGateway {
     }
 
     return record;
+  }
+
+  @override
+  Future<void> deleteBuyerUnit({
+    required String projectId,
+    required String unitId,
+  }) async {
+    final pId = projectId.trim();
+    final uId = unitId.trim();
+    if (pId.isEmpty || uId.isEmpty) return;
+
+    if (_auth.currentUser != null) {
+      await _firestore
+          .collection('projects')
+          .doc(pId)
+          .collection('units')
+          .doc(uId)
+          .delete();
+    }
   }
 }
 

@@ -157,18 +157,24 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
     if (canonicalProperty != null) {
       _propertyState.selectProperty(
-        canonicalProperty.copyWith(selectedUnit: _buyerSelectedUnit),
+        canonicalProperty.copyWith(
+          selectedUnit: _buyerSelectedUnit,
+          clearSelectedUnit: _buyerSelectedUnit == null,
+        ),
       );
     } else {
       _propertyState.selectProperty(
         PropertyAdapter.fromLegacy(
           _property,
-        ).copyWith(selectedUnit: _buyerSelectedUnit),
+        ).copyWith(
+          selectedUnit: _buyerSelectedUnit,
+          clearSelectedUnit: _buyerSelectedUnit == null,
+        ),
       );
     }
   }
 
-  Future<void> _promptBuyerUnitSelection() async {
+  Future<void> _promptBuyerUnitSelection({ProjectUnitRecord? unitToEdit}) async {
     final result = await showDialog<ProjectUnitRecord>(
       context: context,
       builder: (_) => _BuyerUnitDialog(
@@ -180,7 +186,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             _detailBundle?.inventoryConfigurations.isNotEmpty == true
                 ? _detailBundle!.inventoryConfigurations
                 : _property.inventoryConfigurations,
-        initialUnit: _buyerSelectedUnit,
+        initialUnit: unitToEdit ?? _buyerSelectedUnit,
         gateway: _catalogueGateway,
       ),
     );
@@ -190,10 +196,55 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
       _buyerSelectedUnit = result;
       _projectUnits = [
         result,
-        ..._projectUnits.where((u) => u.unitId != result.unitId),
+        ..._projectUnits.where(
+          (u) => u.unitId != result.unitId && u.unitId != unitToEdit?.unitId,
+        ),
       ];
     });
     _selectCanonicalProperty();
+  }
+
+  Future<void> _confirmAndRemoveBuyerUnit(ProjectUnitRecord unit) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Remove Saved Unit?'),
+        content: Text(
+          'Remove unit "${unit.unitNumber}" from this property evaluation?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: HomeSureColors.statusCriticalText,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+    await _catalogueGateway.deleteBuyerUnit(
+      projectId: _property.id,
+      unitId: unit.unitId,
+    );
+    if (!mounted) return;
+    setState(() {
+      _projectUnits =
+          _projectUnits.where((u) => u.unitId != unit.unitId).toList();
+      _buyerSelectedUnit =
+          _projectUnits.isNotEmpty ? _projectUnits.first : null;
+    });
+    _selectCanonicalProperty();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Saved unit removed.')),
+    );
   }
 
   HomeSureBadgeTone _regulatoryStatusTone(String status) {
@@ -1302,6 +1353,31 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           color: HomeSureColors.statusPositiveText,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => _promptBuyerUnitSelection(
+                              unitToEdit: _buyerSelectedUnit,
+                            ),
+                            icon: const Icon(Icons.edit_outlined, size: 16),
+                            label: const Text('Edit'),
+                          ),
+                          const SizedBox(width: 8),
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                _confirmAndRemoveBuyerUnit(_buyerSelectedUnit!),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: HomeSureColors.statusCriticalText,
+                              side: const BorderSide(
+                                color: HomeSureColors.statusCriticalText,
+                              ),
+                            ),
+                            icon: const Icon(Icons.delete_outline, size: 16),
+                            label: const Text('Remove'),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -1310,7 +1386,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: _promptBuyerUnitSelection,
+                  onPressed: () => _promptBuyerUnitSelection(
+                    unitToEdit: _buyerSelectedUnit,
+                  ),
                   icon: const Icon(Icons.meeting_room_outlined, size: 18),
                   label: Text(
                     _buyerSelectedUnit == null
@@ -1858,6 +1936,7 @@ class _BuyerUnitDialogState extends State<_BuyerUnitDialog> {
         floorNumber: _floorCtrl.text.trim(),
         unitConfiguration: _configCtrl.text.trim(),
         carpetAreaSqM: carpet,
+        existingUnitId: widget.initialUnit?.unitId,
       );
       if (!mounted) return;
       Navigator.of(context).pop(saved);
@@ -1868,8 +1947,9 @@ class _BuyerUnitDialogState extends State<_BuyerUnitDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.initialUnit != null;
     return AlertDialog(
-      title: const Text('Specify Apartment / Unit'),
+      title: Text(isEditing ? 'Edit Apartment / Unit' : 'Specify Apartment / Unit'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,

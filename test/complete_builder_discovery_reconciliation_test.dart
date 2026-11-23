@@ -180,7 +180,7 @@ void main() {
 
       final repo = PropertyRepository.withFirestore(db);
       final builders = await repo.fetchBuilders();
-      expect(builders.map((b) => b.builderId), ['b1', 'b2', 'b3', 'b4', 'b5']);
+      expect(builders.map((b) => b.builderId), ['b5', 'b4', 'b1', 'b3', 'b2']);
     });
 
     test('fetchProjectsForBuilder retrieves both deep_extracted and catalogue_summary across >10 batches with batch-failure fallback', () async {
@@ -670,6 +670,60 @@ void main() {
           ),
           findsOneWidget,
         );
+      },
+    );
+
+    testWidgets(
+      'PropertySearchScreen sorts builders alphabetically A to Z regardless of Firestore chunk order',
+      (WidgetTester tester) async {
+        final db = _FakeFirestore({
+          'builders': {
+            '_catalog_meta': {
+              'chunk_ids': ['_catalog_chunk_1'],
+            },
+            '_catalog_chunk_1': {
+              'builders': [
+                {
+                  'builder_id': 'b_z',
+                  'builder_name': 'Zed Enterprises',
+                  'project_count': 10,
+                  'projects': [],
+                },
+                {
+                  'builder_id': 'b_a',
+                  'builder_name': 'Aashish Developers',
+                  'project_count': 1,
+                  'projects': [],
+                },
+                {
+                  'builder_id': 'b_m',
+                  'builder_name': 'Mantri Developers',
+                  'project_count': 25,
+                  'is_featured_brand': true,
+                  'projects': [],
+                },
+              ],
+            },
+          },
+          'projects': {},
+        });
+
+        final repo = PropertyRepository.withFirestore(db);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: PropertySearchScreen(
+              catalogueGateway: repo,
+              submissionGateway: _NoopSubmissionGateway(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final aTop = tester.getTopLeft(find.text('Aashish Developers')).dy;
+        final mTop = tester.getTopLeft(find.text('Mantri Developers')).dy;
+        final zTop = tester.getTopLeft(find.text('Zed Enterprises')).dy;
+        expect(aTop, lessThan(mTop));
+        expect(mTop, lessThan(zTop));
       },
     );
   });

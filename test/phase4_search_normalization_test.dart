@@ -45,6 +45,7 @@ class _TestCatalogueGateway extends PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   }) async {
     throw UnimplementedError();
   }

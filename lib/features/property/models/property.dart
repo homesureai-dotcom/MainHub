@@ -87,6 +87,7 @@ class Property {
   Property copyWith({
     String? dataTier,
     ProjectUnitRecord? selectedUnit,
+    bool clearSelectedUnit = false,
     ComplianceSummary? compliance,
     AssessmentSummary? assessment,
     DocumentSummary? documents,
@@ -108,7 +109,7 @@ class Property {
       summaryMetrics: summaryMetrics,
       unitHierarchyStatus: unitHierarchyStatus,
       dataTier: dataTier ?? this.dataTier,
-      selectedUnit: selectedUnit ?? this.selectedUnit,
+      selectedUnit: clearSelectedUnit ? null : (selectedUnit ?? this.selectedUnit),
       compliance: compliance ?? this.compliance,
       assessment: assessment ?? this.assessment,
       documents: documents ?? this.documents,

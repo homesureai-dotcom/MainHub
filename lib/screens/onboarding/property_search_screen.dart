@@ -36,14 +36,18 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
   Timer? _searchDebounce;
 
   List<BuilderCatalogueEntry> get filteredBuilders {
+    final List<BuilderCatalogueEntry> items;
     if (selectedTaluks.isEmpty ||
         selectedTaluks.contains(BengaluruTalukFilter.all)) {
-      return allFetchedBuilders;
+      items = List<BuilderCatalogueEntry>.from(allFetchedBuilders);
+    } else {
+      items = allFetchedBuilders
+          .where((b) => b.matchesTalukFilters(selectedTaluks))
+          .map((b) => b.filteredByTaluks(selectedTaluks))
+          .toList();
     }
-    return allFetchedBuilders
-        .where((b) => b.matchesTalukFilters(selectedTaluks))
-        .map((b) => b.filteredByTaluks(selectedTaluks))
-        .toList();
+    items.sort(PropertyRepository.compareBuildersAlphabetically);
+    return items;
   }
 
   PropertySubmissionGateway get _submissionGateway =>

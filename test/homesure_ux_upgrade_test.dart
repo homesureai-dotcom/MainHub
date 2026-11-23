@@ -78,6 +78,7 @@ class _TalukCatalogueGateway extends PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   }) async {
     return ProjectUnitRecord(
       unitId: 'u1',

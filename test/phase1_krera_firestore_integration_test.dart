@@ -47,9 +47,13 @@ class _TestCatalogueGateway extends PropertyCatalogueGateway {
     String? floorNumber,
     String? unitConfiguration,
     double? carpetAreaSqM,
+    String? existingUnitId,
   }) async {
+    final unitId = (existingUnitId != null && existingUnitId.trim().isNotEmpty)
+        ? existingUnitId.trim()
+        : 'unit_buyer_$unitNumber';
     final record = ProjectUnitRecord(
-      unitId: 'unit_buyer_$unitNumber',
+      unitId: unitId,
       projectId: projectId,
       unitNumber: unitNumber,
       towerName: towerName,
@@ -59,8 +63,17 @@ class _TestCatalogueGateway extends PropertyCatalogueGateway {
       sourceType: EvidenceSourceType.buyerProvided,
       observationState: ObservationState.presentWithData,
     );
+    savedUnits.removeWhere((u) => u.unitId == unitId);
     savedUnits.add(record);
     return record;
+  }
+
+  @override
+  Future<void> deleteBuyerUnit({
+    required String projectId,
+    required String unitId,
+  }) async {
+    savedUnits.removeWhere((u) => u.unitId == unitId);
   }
 }
 
@@ -338,6 +351,45 @@ void main() {
         expect(
           PropertyState.instance.selectedProperty?.selectedUnit?.unitNumber,
           'Flat 402',
+        );
+
+        // Edit the saved unit (wrong unit number/tower -> corrected)
+        final editBtn = find.widgetWithText(OutlinedButton, 'Edit');
+        await tester.ensureVisible(editBtn);
+        await tester.tap(editBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit Apartment / Unit'), findsOneWidget);
+        final editFields = find.byType(TextFormField);
+        await tester.enterText(editFields.at(0), 'Flat 504');
+        await tester.enterText(editFields.at(1), 'Tower B');
+        await tester.tap(find.text('Save Unit'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Evaluating Unit: Flat 504'), findsOneWidget);
+        expect(find.textContaining('Tower: Tower B'), findsOneWidget);
+        expect(gateway.savedUnits.length, 1);
+        expect(
+          PropertyState.instance.selectedProperty?.selectedUnit?.unitNumber,
+          'Flat 504',
+        );
+
+        // Remove the saved unit cleanly
+        final removeBtn = find.widgetWithText(OutlinedButton, 'Remove');
+        await tester.ensureVisible(removeBtn);
+        await tester.tap(removeBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Remove Saved Unit?'), findsOneWidget);
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Remove'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Evaluating Unit: Flat 504'), findsNothing);
+        expect(gateway.savedUnits, isEmpty);
+        expect(PropertyState.instance.selectedProperty?.selectedUnit, isNull);
+        expect(
+          find.text('Specify Apartment / Unit to Evaluate'),
+          findsOneWidget,
         );
       },
     );
