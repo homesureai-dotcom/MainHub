@@ -71,6 +71,7 @@ class PropertyAdapter {
       proposedCompletionDate: property.proposedCompletionDate,
       summaryMetrics: property.summaryMetrics,
       unitHierarchyStatus: property.unitHierarchyStatus,
+      dataTier: property.dataTier,
       compliance: const ComplianceSummary(
         verifiedCount: 0,
         pendingCount: 1,

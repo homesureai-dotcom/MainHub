@@ -807,10 +807,82 @@ enum BengaluruTalukFilter {
   }
 }
 
+/// Normalizes a builder/project/search string so queries handle case, extra spaces,
+/// HTML-encoded `&amp;` / `&quot;` / `&#39;`, apostrophes, `&` <-> `and`, hyphens,
+/// punctuation, and `degree`/`degrees`.
+String normalizeSearchText(String? raw) {
+  if (raw == null || raw.isEmpty) return '';
+  var s = raw
+      .replaceAll(RegExp(r'&amp;', caseSensitive: false), ' & ')
+      .replaceAll(RegExp(r'&quot;', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'&#0*39;|&#x0*27;|&apos;', caseSensitive: false), '')
+      .replaceAll(RegExp(r"['’`]+"), '')
+      .replaceAll('&', ' and ')
+      .replaceAll(RegExp(r'[–—\-_/.,:;()\[\]{}"@!#*+]+'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim()
+      .toLowerCase();
+  s = s.replaceAll(RegExp(r'\band\s+amp\b'), 'and');
+  s = s.replaceAll(RegExp(r'\bdegrees\b'), 'degree');
+  return s.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+/// Evaluates token-aware normalized matching against a single entity string
+/// (or compact RERA registration number), preventing substring false positives
+/// (`ren` matching `bren`) and single-digit/phase leaks (`1` matching `12`).
+bool matchesNormalizedSearchTokens(
+  String candidateText,
+  String rawQuery, {
+  String? registrationNumber,
+}) {
+  final normQuery = normalizeSearchText(rawQuery);
+  if (normQuery.isEmpty) return true;
+
+  final compactQuery =
+      rawQuery.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  final compactRera = (registrationNumber ?? '')
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]'), '');
+  if (compactQuery.length >= 4 &&
+      compactRera.isNotEmpty &&
+      compactRera.contains(compactQuery)) {
+    return true;
+  }
+
+  final normCandidate = normalizeSearchText(candidateText);
+  if (normCandidate.isEmpty) return false;
+
+  final qTokens =
+      normQuery.split(' ').where((t) => t.isNotEmpty).toList(growable: false);
+  final cWords =
+      normCandidate.split(' ').where((w) => w.isNotEmpty).toSet();
+  if (qTokens.isEmpty || cWords.isEmpty) return false;
+
+  for (final token in qTokens) {
+    final bool requireExactWord =
+        token.length == 1 ||
+        (RegExp(r'^\d+$').hasMatch(token) && token.length < 4);
+    if (requireExactWord) {
+      if (!cWords.contains(token)) return false;
+    } else {
+      final matchedPrefix = cWords.any((w) => w.startsWith(token));
+      final matchedRera = compactQuery.length >= 4 &&
+          compactRera.isNotEmpty &&
+          compactRera.contains(token);
+      if (!matchedPrefix && !matchedRera) return false;
+    }
+  }
+  return true;
+}
+
 /// Lightweight project entry embedded inside a [BuilderCatalogueEntry].
 class BuilderProjectSummary {
   final String projectId;
   final String projectName;
+  final String officialProjectName;
+  final String normalizedProjectName;
+  final List<String> projectAliases;
   final String promoterName;
   final String registrationNumber;
   final String acknowledgementNumber;
@@ -818,16 +890,21 @@ class BuilderProjectSummary {
   final String regulatoryStatus;
   final String district;
   final String taluk;
+  final String normalizedTaluk;
   final String city;
   final String approvedOn;
   final String proposedCompletionDate;
   final String projectStartDate;
   final int totalUnits;
   final int totalTowers;
+  final String dataTier;
 
   const BuilderProjectSummary({
     required this.projectId,
     required this.projectName,
+    this.officialProjectName = '',
+    this.normalizedProjectName = '',
+    this.projectAliases = const [],
     required this.promoterName,
     this.registrationNumber = '',
     this.acknowledgementNumber = '',
@@ -835,18 +912,34 @@ class BuilderProjectSummary {
     this.regulatoryStatus = 'APPROVED',
     this.district = 'Bengaluru Urban',
     this.taluk = '',
+    this.normalizedTaluk = '',
     this.city = 'Bengaluru',
     this.approvedOn = '',
     this.proposedCompletionDate = '',
     this.projectStartDate = '',
     this.totalUnits = 0,
     this.totalTowers = 0,
+    this.dataTier = '',
   });
 
   factory BuilderProjectSummary.fromMap(Map<String, dynamic> map) {
+    final pName = (map['project_name'] ?? map['name'] ?? '').toString();
+    final rawAliases = (map['project_aliases'] as List<dynamic>?) ??
+        (map['projectAliases'] as List<dynamic>?) ??
+        const [];
+    final rawTaluk = (map['taluk'] ?? map['locality'] ?? '').toString();
     return BuilderProjectSummary(
       projectId: (map['project_id'] ?? map['id'] ?? '').toString(),
-      projectName: (map['project_name'] ?? map['name'] ?? '').toString(),
+      projectName: pName,
+      officialProjectName:
+          (map['official_project_name'] ?? map['officialProjectName'] ?? pName)
+              .toString(),
+      normalizedProjectName:
+          (map['normalized_project_name'] ??
+                  map['normalizedProjectName'] ??
+                  normalizeSearchText(pName))
+              .toString(),
+      projectAliases: rawAliases.map((e) => e.toString()).toList(),
       promoterName: (map['promoter_name'] ?? map['builder'] ?? '').toString(),
       registrationNumber:
           (map['registration_number'] ?? map['reraNumber'] ?? '').toString(),
@@ -856,7 +949,10 @@ class BuilderProjectSummary {
       projectType: (map['project_type'] ?? '').toString(),
       regulatoryStatus: (map['regulatory_status'] ?? 'APPROVED').toString(),
       district: (map['district'] ?? 'Bengaluru Urban').toString(),
-      taluk: (map['taluk'] ?? map['locality'] ?? '').toString(),
+      taluk: rawTaluk,
+      normalizedTaluk:
+          (map['normalized_taluk'] ?? map['normalizedTaluk'] ?? rawTaluk)
+              .toString(),
       city: (map['city'] ?? 'Bengaluru').toString(),
       approvedOn: (map['approved_on'] ?? '').toString(),
       proposedCompletionDate:
@@ -864,12 +960,18 @@ class BuilderProjectSummary {
       projectStartDate: (map['project_start_date'] ?? '').toString(),
       totalUnits: _toInt(map['total_units']),
       totalTowers: _toInt(map['total_towers']),
+      dataTier: (map['data_tier'] ?? '').toString(),
     );
   }
 
   Map<String, dynamic> toMap() => {
     'project_id': projectId,
     'project_name': projectName,
+    if (officialProjectName.isNotEmpty)
+      'official_project_name': officialProjectName,
+    if (normalizedProjectName.isNotEmpty)
+      'normalized_project_name': normalizedProjectName,
+    if (projectAliases.isNotEmpty) 'project_aliases': projectAliases,
     'promoter_name': promoterName,
     'registration_number': registrationNumber,
     'acknowledgement_number': acknowledgementNumber,
@@ -877,17 +979,19 @@ class BuilderProjectSummary {
     'regulatory_status': regulatoryStatus,
     'district': district,
     'taluk': taluk,
+    if (normalizedTaluk.isNotEmpty) 'normalized_taluk': normalizedTaluk,
     'city': city,
     'approved_on': approvedOn,
     'proposed_completion_date': proposedCompletionDate,
     'project_start_date': projectStartDate,
     'total_units': totalUnits,
     'total_towers': totalTowers,
+    if (dataTier.isNotEmpty) 'data_tier': dataTier,
   };
 
   bool matchesTalukFilter(BengaluruTalukFilter filter) {
     if (filter == BengaluruTalukFilter.all) return true;
-    return filter.matchesTaluk(taluk);
+    return filter.matchesTaluk(normalizedTaluk.isNotEmpty ? normalizedTaluk : taluk);
   }
 
   bool matchesTalukFilters(Set<BengaluruTalukFilter> filters) {
@@ -906,6 +1010,8 @@ class BuilderProjectSummary {
 class BuilderCatalogueEntry {
   final String builderId;
   final String builderName;
+  final String normalizedBuilderName;
+  final List<String> builderAliases;
   final bool isFeaturedBrand;
   final int projectCount;
   final List<String> legalPromoterNames;
@@ -913,10 +1019,19 @@ class BuilderCatalogueEntry {
   final List<String> projectIds;
   final List<BuilderProjectSummary> projects;
   final List<String> searchTokens;
+  final bool provisionalIdentity;
+  final bool identityReviewRequired;
+  final String identityReviewReason;
+  final String corporateVerificationStatus;
+
+  bool get isProvisional =>
+      provisionalIdentity || builderId.contains('_provisional_');
 
   const BuilderCatalogueEntry({
     required this.builderId,
     required this.builderName,
+    this.normalizedBuilderName = '',
+    this.builderAliases = const [],
     this.isFeaturedBrand = false,
     required this.projectCount,
     this.legalPromoterNames = const [],
@@ -924,6 +1039,10 @@ class BuilderCatalogueEntry {
     this.projectIds = const [],
     this.projects = const [],
     this.searchTokens = const [],
+    this.provisionalIdentity = false,
+    this.identityReviewRequired = false,
+    this.identityReviewReason = '',
+    this.corporateVerificationStatus = 'NOT_PERFORMED',
   });
 
   factory BuilderCatalogueEntry.fromMap(Map<String, dynamic> map) {
@@ -933,15 +1052,22 @@ class BuilderCatalogueEntry {
     final rawProjectIds = (map['project_ids'] as List<dynamic>?) ?? const [];
     final rawProjects = (map['projects'] as List<dynamic>?) ?? const [];
     final rawTokens = (map['search_tokens'] as List<dynamic>?) ?? const [];
+    final rawAliases = (map['builder_aliases'] as List<dynamic>?) ?? const [];
 
     final parsedProjects = rawProjects
         .whereType<Map>()
         .map((e) => BuilderProjectSummary.fromMap(Map<String, dynamic>.from(e)))
         .toList();
 
+    final bId = (map['builder_id'] ?? '').toString();
+    final bName = (map['builder_name'] ?? '').toString();
     return BuilderCatalogueEntry(
-      builderId: (map['builder_id'] ?? '').toString(),
-      builderName: (map['builder_name'] ?? '').toString(),
+      builderId: bId,
+      builderName: bName,
+      normalizedBuilderName:
+          (map['normalized_builder_name'] ?? normalizeSearchText(bName))
+              .toString(),
+      builderAliases: rawAliases.map((e) => e.toString()).toList(),
       isFeaturedBrand: map['is_featured_brand'] == true,
       projectCount: _toInt(map['project_count'] ?? parsedProjects.length),
       legalPromoterNames: rawPromoters.map((e) => e.toString()).toList(),
@@ -949,37 +1075,51 @@ class BuilderCatalogueEntry {
       projectIds: rawProjectIds.map((e) => e.toString()).toList(),
       projects: parsedProjects,
       searchTokens: rawTokens.map((e) => e.toString()).toList(),
+      provisionalIdentity:
+          map['provisional_identity'] == true || bId.contains('_provisional_'),
+      identityReviewRequired: map['identity_review_required'] == true,
+      identityReviewReason: (map['identity_review_reason'] ?? '').toString(),
+      corporateVerificationStatus:
+          (map['corporate_verification_status'] ?? 'NOT_PERFORMED').toString(),
     );
   }
 
   bool matchesSearchQuery(String rawQuery) {
-    final lower = rawQuery.trim().toLowerCase();
-    if (lower.isEmpty) return true;
+    if (normalizeSearchText(rawQuery).isEmpty) return true;
 
-    if (builderName.toLowerCase().contains(lower)) return true;
-    for (final legal in legalPromoterNames) {
-      if (legal.toLowerCase().contains(lower)) return true;
+    final builderSurface = [
+      builderName,
+      normalizedBuilderName,
+      ...builderAliases,
+      ...legalPromoterNames,
+      ...localities,
+    ].where((e) => e.trim().isNotEmpty).join(' ');
+    if (matchesNormalizedSearchTokens(builderSurface, rawQuery)) {
+      return true;
     }
-    for (final loc in localities) {
-      if (loc.toLowerCase().contains(lower)) return true;
-    }
+
     for (final proj in projects) {
-      if (proj.projectName.toLowerCase().contains(lower) ||
-          proj.promoterName.toLowerCase().contains(lower) ||
-          proj.registrationNumber.toLowerCase().contains(lower)) {
+      final projSurface = [
+        proj.projectName,
+        proj.officialProjectName,
+        proj.normalizedProjectName,
+        ...proj.projectAliases,
+        proj.promoterName,
+        proj.taluk,
+        proj.normalizedTaluk,
+        proj.city,
+        proj.registrationNumber,
+        proj.acknowledgementNumber,
+        builderName,
+        ...builderAliases,
+      ].where((e) => e.trim().isNotEmpty).join(' ');
+      if (matchesNormalizedSearchTokens(
+        projSurface,
+        rawQuery,
+        registrationNumber: proj.registrationNumber,
+      )) {
         return true;
       }
-    }
-
-    final words = lower
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .toList();
-    if (words.length > 1) {
-      final combined =
-          '$builderName ${legalPromoterNames.join(' ')} ${localities.join(' ')} ${projects.map((p) => p.projectName).join(' ')}'
-              .toLowerCase();
-      return words.every((w) => combined.contains(w));
     }
 
     return false;
@@ -1022,6 +1162,8 @@ class BuilderCatalogueEntry {
     return BuilderCatalogueEntry(
       builderId: builderId,
       builderName: builderName,
+      normalizedBuilderName: normalizedBuilderName,
+      builderAliases: builderAliases,
       isFeaturedBrand: isFeaturedBrand,
       projectCount:
           matchedProjects.isNotEmpty ? matchedProjects.length : projectCount,
@@ -1032,147 +1174,285 @@ class BuilderCatalogueEntry {
           : projectIds,
       projects: matchedProjects,
       searchTokens: searchTokens,
+      provisionalIdentity: provisionalIdentity,
+      identityReviewRequired: identityReviewRequired,
+      identityReviewReason: identityReviewReason,
+      corporateVerificationStatus: corporateVerificationStatus,
     );
   }
 
   /// Resolves the canonical brand `(builderId, builderName, isFeaturedBrand)`
-  /// for a given `(promoterName, projectName)` pair so SPVs under major brands
-  /// (e.g. Godrej, Prestige, Brigade, Sobha, Shriram) are grouped cleanly.
+  /// for a given `(promoterName, projectName)` pair using strict corporate/SPV
+  /// and prefix rules so false positives (`SOBHA RANI`, `... Pride`) are prevented
+  /// while verified brand SPVs (`APG ...` for Assetz) group cleanly.
   static ({String id, String name, bool isBrand}) resolveCanonicalBrand({
     required String promoterName,
     required String projectName,
   }) {
-    final combined = '$promoterName $projectName';
-    const rules = <({String id, String name, String pattern})>[
-      (
-        id: 'builder_godrej_properties',
-        name: 'Godrej Properties',
-        pattern: r'\bgodrej\b',
-      ),
-      (
-        id: 'builder_prestige_group',
-        name: 'Prestige Group',
-        pattern: r'\bprestige\b',
-      ),
-      (
-        id: 'builder_brigade_group',
-        name: 'Brigade Group',
-        pattern: r'\bbrigade\b',
-      ),
+    final cleanPromoter = promoterName.trim();
+    final cleanProject = projectName.trim();
+
+    const rules = <({
+      String id,
+      String name,
+      String promoterPattern,
+      String projectPattern,
+    })>[
       (
         id: 'builder_sobha_limited',
         name: 'Sobha Limited',
-        pattern: r'\bsobha\b',
-      ),
-      (
-        id: 'builder_shriram_properties',
-        name: 'Shriram Properties',
-        pattern: r'\bshriram\b',
-      ),
-      (
-        id: 'builder_puravankara_group',
-        name: 'Puravankara & Provident',
-        pattern: r'\b(puravankara|provident)\b',
-      ),
-      (
-        id: 'builder_sattva_group',
-        name: 'Sattva Group (Salarpuria Sattva)',
-        pattern: r'\b(sattva|salarpuria)\b',
-      ),
-      (
-        id: 'builder_embassy_group',
-        name: 'Embassy Group',
-        pattern: r'\bembassy\b',
-      ),
-      (
-        id: 'builder_total_environment',
-        name: 'Total Environment',
-        pattern:
-            r'\b(total environment|faraway tree hospitality|autumnleaf)\b',
-      ),
-      (
-        id: 'builder_sumadhura_group',
-        name: 'Sumadhura Group',
-        pattern: r'\bsumadhura\b',
+        promoterPattern:
+            r'^(?:m\s*/\s*s\.?\s+)?sobha\s+(?:limited|ltd\.?|developers|projects|estates|constructions|city|ventures)\b|^sobha$',
+        projectPattern: r'\bsobha\b',
       ),
       (
         id: 'builder_assetz_group',
         name: 'Assetz Property Group',
-        pattern: r'\bassetz\b',
+        promoterPattern:
+            r'\bassetz\b|^(?:m\s*/\s*s\.?\s+)?apg\s+[a-z0-9\s&\.\-]+\b(?:private\s+limited|pvt\.?\s*ltd\.?|limited|ltd\.?|llp|homes|residential|habitat|abode|environment|imperial|lifestyle|townships|green|community|skywards|projects|intelli)\b',
+        projectPattern: r'\bassetz\b',
+      ),
+      (
+        id: 'builder_godrej_properties',
+        name: 'Godrej Properties',
+        promoterPattern: r'\bgodrej\b',
+        projectPattern: r'\bgodrej\b',
+      ),
+      (
+        id: 'builder_brigade_group',
+        name: 'Brigade Group',
+        promoterPattern: r'\bbrigade\b',
+        projectPattern: r'\bbrigade\b',
+      ),
+      (
+        id: 'builder_prestige_group',
+        name: 'Prestige Group',
+        promoterPattern: r'\bprestige\b',
+        projectPattern: r'^(?:the\s+)?prestige\b',
+      ),
+      (
+        id: 'builder_sattva_group',
+        name: 'Sattva Group (Salarpuria Sattva)',
+        promoterPattern: r'\b(?:sattva|salarpuria)\b',
+        projectPattern: r'^\s*(?:salarpuria|sattva)\b',
+      ),
+      (
+        id: 'builder_shriram_properties',
+        name: 'Shriram Properties',
+        promoterPattern: r'\b(?:shriram|shriprop|shrivision)\b',
+        projectPattern: r'^\s*shriram\b',
+      ),
+      (
+        id: 'builder_puravankara_group',
+        name: 'Puravankara & Provident',
+        promoterPattern: r'\b(?:puravankara|provident)\b',
+        projectPattern: r'^(?:purva|puravankara|provident)\b',
+      ),
+      (
+        id: 'builder_total_environment',
+        name: 'Total Environment',
+        promoterPattern:
+            r'\b(?:total environment|faraway tree hospitality|autumnleaf)\b',
+        projectPattern: r'\btotal environment\b',
+      ),
+      (
+        id: 'builder_embassy_group',
+        name: 'Embassy Group',
+        promoterPattern: r'\bembassy\b',
+        projectPattern: r'^\s*embassy\b',
+      ),
+      (
+        id: 'builder_sumadhura_group',
+        name: 'Sumadhura Group',
+        promoterPattern: r'\bsumadhura\b',
+        projectPattern: r'^\s*sumadhura\b',
       ),
       (
         id: 'builder_century_real_estate',
         name: 'Century Real Estate',
-        pattern: r'\bcentury\b',
+        promoterPattern: r'\bcentury\b',
+        projectPattern: r'^\s*century\s+(?!21\b)',
       ),
-      (id: 'builder_adarsh_group', name: 'Adarsh Group', pattern: r'\badarsh\b'),
       (
-        id: 'builder_mantri_developers',
-        name: 'Mantri Developers',
-        pattern: r'\bmantri\b',
+        id: 'builder_ds_max_properties',
+        name: 'DS-Max Properties',
+        promoterPattern: r'\bds[\s\-]*max\b',
+        projectPattern: r'\bds[\s\-]*max\b',
       ),
-      (id: 'builder_rmz_corp', name: 'RMZ Corp', pattern: r'\brmz\b'),
+      (
+        id: 'builder_concorde_group',
+        name: 'Concorde Group',
+        promoterPattern: r'\bconcorde\b',
+        projectPattern: r'^\s*concorde\b',
+      ),
+      (
+        id: 'builder_mana_projects',
+        name: 'Mana Projects',
+        promoterPattern: r'\bmana\s+(?:projects|constructions|infra|developers)\b',
+        projectPattern: r'^\s*mana\b|@\s*mana\b',
+      ),
+      (
+        id: 'builder_sbr_group',
+        name: 'SBR Group',
+        promoterPattern: r'\bsbr\b',
+        projectPattern: r'^\s*sbr\b',
+      ),
+      (
+        id: 'builder_pride_group',
+        name: 'Pride Group',
+        promoterPattern: r'\bpride\b',
+        projectPattern: r'^\s*pride\s+',
+      ),
+      (
+        id: 'builder_kns_infrastructure',
+        name: 'KNS Infrastructure',
+        promoterPattern: r'\bkns\b',
+        projectPattern: r'^\s*kns\b',
+      ),
+      (
+        id: 'builder_adarsh_group',
+        name: 'Adarsh Group',
+        promoterPattern: r'\badarsh\b',
+        projectPattern: r'^\s*adarsh\b',
+      ),
+      (
+        id: 'builder_rohan_builders',
+        name: 'Rohan Builders',
+        promoterPattern: r'\brohan\b',
+        projectPattern: r'^\s*rohan\s+(?:tech|iksha|upavan|jharoka|nidhi|avasha|akriti|antara|harita)\b',
+      ),
+      (
+        id: 'builder_vajram_group',
+        name: 'Vajram Group',
+        promoterPattern: r'\bvajram\b',
+        projectPattern: r'^\s*vajram\b',
+      ),
+      (
+        id: 'builder_keerthi_estates',
+        name: 'Keerthi Estates',
+        promoterPattern: r'\bkeerthi\b',
+        projectPattern: r'^\s*keerthi\b',
+      ),
       (
         id: 'builder_mahindra_lifespaces',
         name: 'Mahindra Lifespaces',
-        pattern: r'\bmahindra\b',
+        promoterPattern: r'\bmahindra\b',
+        projectPattern: r'^\s*mahindra\b',
       ),
       (
-        id: 'builder_tata_housing',
-        name: 'Tata Housing & Value Homes',
-        pattern: r'\btata\b',
+        id: 'builder_bhartiya_urban',
+        name: 'Bhartiya Urban',
+        promoterPattern: r'\bbhartiya\b',
+        projectPattern: r'^(?:bhartiya|nikoo)\b',
+      ),
+      (
+        id: 'builder_aratt_builders',
+        name: 'Aratt Builders',
+        promoterPattern: r'\baratt\b',
+        projectPattern: r'^\s*aratt\b',
+      ),
+      (
+        id: 'builder_bren_corporation',
+        name: 'Bren Corporation',
+        promoterPattern: r'\bbren\b',
+        projectPattern: r'^\s*bren\b',
+      ),
+      (
+        id: 'builder_nambiar_builders',
+        name: 'Nambiar Builders',
+        promoterPattern: r'\bnambiar\b',
+        projectPattern: r'^\s*nambiar\b',
+      ),
+      (
+        id: 'builder_snn_builders',
+        name: 'SNN Builders',
+        promoterPattern: r'\bsnn\b',
+        projectPattern: r'^\s*snn\b',
+      ),
+      (
+        id: 'builder_casagrand',
+        name: 'Casagrand',
+        promoterPattern: r'\bcasa\s*grand(?:e)?\b',
+        projectPattern: r'^\s*casa\s*grand(?:e)?\b',
+      ),
+      (
+        id: 'builder_goyal_and_co',
+        name: 'Goyal & Co',
+        promoterPattern: r'\bgoyal\b',
+        projectPattern: r'^\s*goyal\b',
+      ),
+      (
+        id: 'builder_mantri_developers',
+        name: 'Mantri Developers',
+        promoterPattern: r'\bmantri\b',
+        projectPattern: r'^\s*mantri\b',
       ),
       (
         id: 'builder_birla_estates',
         name: 'Birla Estates',
-        pattern: r'\bbirla\b',
+        promoterPattern: r'\bbirla\b',
+        projectPattern: r'^\s*birla\b',
       ),
-      (id: 'builder_lodha_group', name: 'Lodha (Macrotech)', pattern: r'\blodha\b'),
-      (id: 'builder_casagrand', name: 'Casagrand', pattern: r'\bcasagrand\b'),
       (
-        id: 'builder_concorde_group',
-        name: 'Concorde Group',
-        pattern: r'\bconcorde\b',
+        id: 'builder_lodha_group',
+        name: 'Lodha (Macrotech)',
+        promoterPattern: r'\blodha\b',
+        projectPattern: r'^\s*lodha\b',
       ),
-      (id: 'builder_ds_max', name: 'DS-Max Properties', pattern: r'\bds[\s\-]*max\b'),
-      (id: 'builder_mana_projects', name: 'Mana Projects', pattern: r'\bmana\b'),
-      (id: 'builder_sbr_group', name: 'SBR Group', pattern: r'\bsbr\b'),
-      (id: 'builder_pride_group', name: 'Pride Group', pattern: r'\bpride\b'),
       (
         id: 'builder_gopalan_enterprises',
         name: 'Gopalan Enterprises',
-        pattern: r'\bgopalan\b',
+        promoterPattern: r'\bgopalan\b',
+        projectPattern: r'^\s*gopalan\b',
       ),
       (
         id: 'builder_confident_group',
         name: 'Confident Group',
-        pattern: r'\bconfident\b',
+        promoterPattern: r'\bconfident\b',
+        projectPattern: r'^\s*confident\b',
       ),
       (
         id: 'builder_vaishnavi_group',
         name: 'Vaishnavi Group',
-        pattern: r'\bvaishnavi\b',
+        promoterPattern: r'\bvaishnavi\b',
+        projectPattern: r'^\s*vaishnavi\b',
       ),
-      (id: 'builder_nikoo_bhartiya', name: 'Bhartiya City', pattern: r'\bbhartiya\b'),
       (
         id: 'builder_radiance_realty',
         name: 'Radiance Realty',
-        pattern: r'\bradiance\b',
+        promoterPattern: r'\bradiance\b',
+        projectPattern: r'^\s*radiance\b',
       ),
-      (id: 'builder_rohan_builders', name: 'Rohan Builders', pattern: r'\brohan\b'),
-      (id: 'builder_sjr_primecorp', name: 'SJR Primecorp', pattern: r'\bsjr\b'),
-      (id: 'builder_Vaswani_group', name: 'Vaswani Group', pattern: r'\bvaswani\b'),
+      (
+        id: 'builder_vaswani_group',
+        name: 'Vaswani Group',
+        promoterPattern: r'\bvaswani\b',
+        projectPattern: r'^\s*vaswani\b',
+      ),
+      (
+        id: 'builder_sjr_primecorp',
+        name: 'SJR Primecorp',
+        promoterPattern: r'\bsjr\b',
+        projectPattern: r'^\s*sjr\b',
+      ),
     ];
 
     for (final rule in rules) {
-      if (RegExp(rule.pattern, caseSensitive: false).hasMatch(combined)) {
+      if (RegExp(rule.promoterPattern, caseSensitive: false)
+          .hasMatch(cleanPromoter)) {
+        return (id: rule.id, name: rule.name, isBrand: true);
+      }
+    }
+    for (final rule in rules) {
+      if (RegExp(rule.projectPattern, caseSensitive: false)
+          .hasMatch(cleanProject)) {
         return (id: rule.id, name: rule.name, isBrand: true);
       }
     }
 
-    final clean = promoterName.trim().isEmpty
+    final clean = cleanPromoter.isEmpty
         ? 'Independent / Unspecified Promoter'
-        : promoterName.trim().replaceAll(RegExp(r'\s+'), ' ');
+        : cleanPromoter.replaceAll(RegExp(r'\s+'), ' ');
     final slug = clean
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')

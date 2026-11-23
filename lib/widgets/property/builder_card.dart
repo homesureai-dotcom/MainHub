@@ -127,6 +127,13 @@ class BuilderCard extends StatelessWidget {
                           ),
                         ),
                       ],
+                      if (builder.isProvisional) ...[
+                        const SizedBox(height: 5),
+                        const HomeSureStatusBadge(
+                          label: 'Provisional Identity',
+                          tone: HomeSureBadgeTone.warning,
+                        ),
+                      ],
                     ],
                   ),
                 ),

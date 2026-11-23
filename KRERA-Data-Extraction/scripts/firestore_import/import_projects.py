@@ -3,12 +3,14 @@
 HomeSure Phase 1 — Canonical SQLite & Normalized JSON to Cloud Firestore Importer.
 
 Supports:
-  --dry-run          Validate, transform, and generate dry-run report without writing to Firestore.
-  --project-id       Import one or more specific projects (by registration_number, project_key, or doc_id).
-  --all-selected     Import all verified projects from detail_extraction_checkpoints (875 projects).
-  --cohort           Optional subset selector: 'all' (875, default), 'first8', 'central8', 'pilot5'.
-  --force-update     Overwrite existing Firestore documents even if content_hash is unchanged.
-  --with-subcollections  Also populate regulatory_tabs, documents, complaints, and towers subcollections.
+  --dry-run                Validate, transform, and generate dry-run diff report without writing to Firestore.
+  --project-id             Import one or more specific projects (by registration_number, project_key, or doc_id).
+  --all-selected           Import all verified projects from detail_extraction_checkpoints.
+  --from-catalogue-missing Index remaining eligible APPROVED Bengaluru Urban catalogue rows as `catalogue_summary`.
+  --cohort                 Optional subset selector: 'all' (default), 'first8', 'central8', 'pilot5'.
+  --force-update           Overwrite existing Firestore documents even if content_hash is unchanged.
+  --with-subcollections    Also populate regulatory_tabs, documents, complaints, and towers subcollections.
+  --skip-remote-check      Skip live Firestore existing-hash inspection (for offline tests).
 """
 
 import argparse
@@ -28,10 +30,22 @@ from typing import Any, Dict, List, Optional, Tuple
 
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 EXTRACTION_ROOT = WORKSPACE_ROOT / "KRERA-Data-Extraction"
+SCRIPTS_ROOT = EXTRACTION_ROOT / "scripts"
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
+from geography import build_geography_block
+from name_normalization import (
+    build_normalized_search_tokens,
+    build_project_normalization,
+    decode_portal_text,
+)
+
 SQLITE_DB_PATH = EXTRACTION_ROOT / "data" / "k_rera_extraction.sqlite"
+PHASE4_SQLITE_PATH = EXTRACTION_ROOT / "data" / "phase4_recovery" / "phase4_recovery.sqlite"
 FIREBASE_PROJECT_ID = "homesureai-51893"
 FIRESTORE_DATABASE = "(default)"
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 
 CENTRAL_8_REG_NUMBERS = [
     "PRM/KA/RERA/1251/309/PR/171014/000662",  # ecopolis Block-2
@@ -602,13 +616,35 @@ def transform_project_record(
         1 for v in tab_observations_summary.values() if v.get("observation_state") == "present_with_data"
     )
 
-    # Search metadata
+    # Canonical Name Normalization & Geography Blocks (Phase 4)
     address_val = summary_metrics["project_address"].get("value")
-    search_tokens = build_search_tokens(
+    norm_block = build_project_normalization(
+        project_name=project_name,
+        promoter_name=promoter_name,
+        registration_number=reg_no,
+        canonical_project_id=project_id,
+        source_record_id=project_key or project_id,
+    )
+    geo_block = build_geography_block(
+        raw_district=district,
+        raw_taluk=taluk,
+        project_address=str(address_val) if address_val else None,
+    )
+
+    # Search metadata (includes normalized names, aliases, and tokens)
+    search_tokens = build_normalized_search_tokens(
         project_name,
         promoter_name,
-        taluk,
-        district,
+        norm_block["officialProjectName"],
+        norm_block["normalizedProjectName"],
+        norm_block["officialBuilderName"],
+        norm_block["normalizedBuilderName"],
+        norm_block["canonicalBuilderName"],
+        *norm_block["projectAliases"],
+        *norm_block["builderAliases"],
+        geo_block["taluk"],
+        geo_block["normalizedTaluk"],
+        geo_block["district"],
         reg_no,
         ack_no,
         str(address_val) if address_val else None,
@@ -616,7 +652,10 @@ def transform_project_record(
     search_metadata = {
         "project_name_lower": project_name.lower(),
         "promoter_name_lower": promoter_name.lower(),
+        "normalized_project_name_lower": norm_block["normalizedProjectName"].lower(),
+        "normalized_builder_name_lower": norm_block["normalizedBuilderName"].lower(),
         "taluk_lower": taluk.lower(),
+        "normalized_taluk_lower": geo_block["normalizedTaluk"].lower(),
         "district_lower": district.lower(),
         "registration_number_lower": reg_no.lower(),
         "registration_number_compact": re.sub(r"[^a-z0-9]+", "", reg_no.lower()),
@@ -646,6 +685,9 @@ def transform_project_record(
         "project_name": project_name,
         "promoter_name": promoter_name,
         "status": status,
+        "data_tier": "deep_extracted",
+        "normalization": norm_block,
+        "geography": geo_block,
         "counts": counts,
         "summary_metrics": summary_metrics,
         "schema_version": SCHEMA_VERSION,
@@ -663,8 +705,28 @@ def transform_project_record(
         "acknowledgement_number": ack_no,
         "project_name": project_name,
         "promoter_name": promoter_name,
-        "district": district,
-        "taluk": taluk,
+        "officialBuilderName": norm_block["officialBuilderName"],
+        "normalizedBuilderName": norm_block["normalizedBuilderName"],
+        "officialProjectName": norm_block["officialProjectName"],
+        "normalizedProjectName": norm_block["normalizedProjectName"],
+        "builderAliases": norm_block["builderAliases"],
+        "projectAliases": norm_block["projectAliases"],
+        "reraRegistrationNumber": norm_block["reraRegistrationNumber"],
+        "canonicalProjectId": norm_block["canonicalProjectId"],
+        "sourcePortal": norm_block["sourcePortal"],
+        "sourceRecordId": norm_block["sourceRecordId"],
+        "nameNormalizationConfidence": norm_block["nameNormalizationConfidence"],
+        "needsManualReview": norm_block["needsManualReview"],
+        "builder_id": norm_block["builderId"],
+        "canonical_builder_name": norm_block["canonicalBuilderName"],
+        "is_featured_brand": norm_block["isFeaturedBrand"],
+        "district": geo_block["district"],
+        "normalizedDistrict": geo_block["normalizedDistrict"],
+        "taluk": geo_block["taluk"],
+        "normalizedTaluk": geo_block["normalizedTaluk"],
+        "locality": geo_block["locality"],
+        "projectAddress": geo_block["projectAddress"],
+        "geographySource": geo_block["geographySource"],
         "city": "Bengaluru",
         "project_type": project_type,
         "regulatory_status": status,
@@ -696,9 +758,10 @@ def transform_project_record(
         "unit_hierarchy_status": unit_hierarchy_status,
         "provenance": {
             "source_type": "KRERA_PORTAL",
+            "data_tier": "deep_extracted",
             "schema_version": SCHEMA_VERSION,
             "extraction_status": sqlite_row.get("extraction_status", "successful"),
-            "extracted_at": normalized_data.get("updated_at") or sqlite_row.get("updated_at"),
+            "extracted_at": normalized_data.get("updated_at") or sqlite_row.get("updated_at") or sqlite_row.get("updated_at_utc"),
             "imported_at": now_iso,
             "content_hash": content_hash,
         },
@@ -733,6 +796,233 @@ def transform_project_record(
     return root_project_doc, subcollections
 
 
+def transform_catalogue_row(cat_row: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Transform a Phase 1 `raw_search_rows` APPROVED Bengaluru Urban catalogue row into a
+    canonical root Firestore `/projects/{projectId}` document at `data_tier = "catalogue_summary"`.
+    Never fabricates regulatory details; marks unextracted deep metrics as `not_available`.
+    """
+    reg_no = (cat_row.get("registration_number") or "").strip()
+    ack_no = (cat_row.get("acknowledgement_number") or "").strip() or None
+    project_key = f"REG::{reg_no}" if reg_no else (cat_row.get("record_unique_key") or "")
+    project_id = make_deterministic_project_id(project_key, reg_no)
+
+    project_name = decode_portal_text(cat_row.get("project_name"))
+    promoter_name = decode_portal_text(cat_row.get("promoter_name"))
+    district = (cat_row.get("district") or "Bengaluru Urban").strip()
+    taluk = (cat_row.get("taluk") or "").strip()
+    project_type = (cat_row.get("project_type") or "").strip()
+    status = (cat_row.get("status") or "APPROVED").strip()
+    approved_on_raw = (cat_row.get("approved_on") or "").strip() or None
+    proposed_completion_raw = (cat_row.get("proposed_completion_date") or "").strip() or None
+
+    norm_block = build_project_normalization(
+        project_name=project_name,
+        promoter_name=promoter_name,
+        registration_number=reg_no,
+        canonical_project_id=project_id,
+        source_record_id=cat_row.get("record_unique_key") or project_id,
+    )
+    geo_block = build_geography_block(
+        raw_district=district,
+        raw_taluk=taluk,
+        project_address=None,
+    )
+
+    search_tokens = build_normalized_search_tokens(
+        project_name,
+        promoter_name,
+        norm_block["officialProjectName"],
+        norm_block["normalizedProjectName"],
+        norm_block["officialBuilderName"],
+        norm_block["normalizedBuilderName"],
+        norm_block["canonicalBuilderName"],
+        *norm_block["projectAliases"],
+        *norm_block["builderAliases"],
+        geo_block["taluk"],
+        geo_block["normalizedTaluk"],
+        geo_block["district"],
+        reg_no,
+        ack_no,
+    )
+    search_metadata = {
+        "project_name_lower": project_name.lower(),
+        "promoter_name_lower": promoter_name.lower(),
+        "normalized_project_name_lower": norm_block["normalizedProjectName"].lower(),
+        "normalized_builder_name_lower": norm_block["normalizedBuilderName"].lower(),
+        "taluk_lower": taluk.lower(),
+        "normalized_taluk_lower": geo_block["normalizedTaluk"].lower(),
+        "district_lower": district.lower(),
+        "registration_number_lower": reg_no.lower(),
+        "registration_number_compact": re.sub(r"[^a-z0-9]+", "", reg_no.lower()),
+        "acknowledgement_number_lower": (ack_no or "").lower(),
+        "search_tokens": search_tokens,
+    }
+
+    counts = {
+        "visible_tabs_total": 0,
+        "visible_tabs_with_data": 0,
+        "unlinked_panes_total": 0,
+        "total_sections": 0,
+        "total_fields": 0,
+        "total_documents": 0,
+        "downloadable_documents": 0,
+        "total_complaints": 0,
+        "project_complaints": 0,
+        "promoter_complaints": 0,
+        "pii_exclusions_count": 0,
+        "conflicts_count": 0,
+    }
+
+    summary_metrics = {
+        "proposed_completion_date": {
+            "value": proposed_completion_raw,
+            "raw_value": proposed_completion_raw,
+            "raw_label": "Proposed Completion Date",
+            "observation_state": "present_with_data" if proposed_completion_raw else "not_present",
+            "source_tab": "Catalogue",
+            "source_section": "K-RERA Search Catalogue",
+        },
+        "plan_approval_date": {
+            "value": approved_on_raw,
+            "raw_value": approved_on_raw,
+            "raw_label": "Approved On",
+            "observation_state": "present_with_data" if approved_on_raw else "not_present",
+            "source_tab": "Catalogue",
+            "source_section": "K-RERA Search Catalogue",
+        },
+    }
+
+    canonical_payload_for_hash = {
+        "project_id": project_id,
+        "registration_number": reg_no,
+        "project_name": project_name,
+        "promoter_name": promoter_name,
+        "status": status,
+        "data_tier": "catalogue_summary",
+        "normalization": norm_block,
+        "geography": geo_block,
+        "approved_on_raw": approved_on_raw,
+        "proposed_completion_raw": proposed_completion_raw,
+        "schema_version": SCHEMA_VERSION,
+    }
+    content_hash = hashlib.sha256(
+        json.dumps(canonical_payload_for_hash, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
+
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    return {
+        "project_id": project_id,
+        "internal_id": project_key,
+        "registration_number": reg_no,
+        "acknowledgement_number": ack_no,
+        "project_name": project_name,
+        "promoter_name": promoter_name,
+        "officialBuilderName": norm_block["officialBuilderName"],
+        "normalizedBuilderName": norm_block["normalizedBuilderName"],
+        "officialProjectName": norm_block["officialProjectName"],
+        "normalizedProjectName": norm_block["normalizedProjectName"],
+        "builderAliases": norm_block["builderAliases"],
+        "projectAliases": norm_block["projectAliases"],
+        "reraRegistrationNumber": norm_block["reraRegistrationNumber"],
+        "canonicalProjectId": norm_block["canonicalProjectId"],
+        "sourcePortal": norm_block["sourcePortal"],
+        "sourceRecordId": norm_block["sourceRecordId"],
+        "nameNormalizationConfidence": norm_block["nameNormalizationConfidence"],
+        "needsManualReview": norm_block["needsManualReview"],
+        "builder_id": norm_block["builderId"],
+        "canonical_builder_name": norm_block["canonicalBuilderName"],
+        "is_featured_brand": norm_block["isFeaturedBrand"],
+        "district": geo_block["district"],
+        "normalizedDistrict": geo_block["normalizedDistrict"],
+        "taluk": geo_block["taluk"],
+        "normalizedTaluk": geo_block["normalizedTaluk"],
+        "locality": geo_block["locality"],
+        "projectAddress": geo_block["projectAddress"],
+        "geographySource": geo_block["geographySource"],
+        "city": "Bengaluru",
+        "project_type": project_type,
+        "regulatory_status": status,
+        "approved_on_raw": approved_on_raw,
+        "approved_on_iso": parse_date_to_iso(approved_on_raw),
+        "proposed_completion_date_raw": proposed_completion_raw,
+        "proposed_completion_date_iso": parse_date_to_iso(proposed_completion_raw),
+        "project_start_date_iso": None,
+        "search_metadata": search_metadata,
+        "summary_metrics": summary_metrics,
+        "inventory_configurations": [],
+        "towers_summary": [],
+        "tab_observations_summary": {},
+        "unlinked_pane_summary": {},
+        "counts": counts,
+        "identity_verification": {
+            "is_verified": bool(reg_no),
+            "status": "catalogue_verified",
+        },
+        "catalogue_source_info": {
+            "page_number": cat_row.get("page_number"),
+            "row_index": cat_row.get("row_order"),
+            "catalogue_certificates": cat_row.get("catalogue_certificates") or {},
+        },
+        "pii_exclusions": [],
+        "cross_section_conflicts": [],
+        "unit_hierarchy_status": {
+            "phases_state": "not_available",
+            "towers_state": "not_available",
+            "towers_count": 0,
+            "inventory_configs_state": "not_available",
+            "inventory_configs_count": 0,
+            "portal_unit_rows_state": "not_available",
+            "portal_unit_rows_count": 0,
+            "buyer_units_enabled": True,
+            "notes": "Catalogue-indexed K-RERA record pending deep modal extraction.",
+        },
+        "provenance": {
+            "source_type": "KRERA_PORTAL",
+            "data_tier": "catalogue_summary",
+            "schema_version": SCHEMA_VERSION,
+            "extraction_status": "catalogue_only",
+            "extracted_at": cat_row.get("extracted_at"),
+            "imported_at": now_iso,
+            "content_hash": content_hash,
+        },
+    }
+
+
+def should_write_project(
+    incoming_doc: Dict[str, Any],
+    existing_index_entry: Optional[Dict[str, Any]],
+    force_update: bool = False,
+) -> Tuple[bool, str]:
+    """
+    Idempotency & richer-record protection check.
+    Returns `(should_write, reason)`.
+    """
+    if existing_index_entry is None:
+        return True, "new_record"
+
+    existing_prov = existing_index_entry.get("provenance") or {}
+    existing_counts = existing_index_entry.get("counts") or {}
+    existing_tier = existing_prov.get("data_tier") or (
+        "deep_extracted" if (existing_counts.get("total_fields") or 0) > 0 else "catalogue_summary"
+    )
+    incoming_prov = incoming_doc.get("provenance") or {}
+    incoming_tier = incoming_prov.get("data_tier") or "deep_extracted"
+
+    # Never overwrite richer deep_extracted data with a lightweight catalogue_summary record!
+    if existing_tier == "deep_extracted" and incoming_tier == "catalogue_summary":
+        return False, "skipped_richer_existing"
+
+    if not force_update:
+        existing_hash = existing_prov.get("content_hash")
+        incoming_hash = incoming_prov.get("content_hash")
+        if existing_hash and incoming_hash and existing_hash == incoming_hash:
+            return False, "skipped_unchanged"
+
+    return True, "update_existing"
+
+
 # ============================================================================
 # Firestore REST Batch Commit Client (Uses Firebase CLI OAuth2 Token)
 # ============================================================================
@@ -762,7 +1052,7 @@ def get_firebase_Auth_token() -> str:
     # Trigger a lightweight firebase CLI command to auto-refresh token in configstore
     import subprocess
     subprocess.run(
-        ["npx", "firebase-tools", "projects:list", "--Account", "homesureai@gmail.com"],
+        ["npx", "firebase-tools", "projects:list"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         shell=True,
@@ -772,6 +1062,80 @@ def get_firebase_Auth_token() -> str:
         if acc.get("user", {}).get("email") == "homesureai@gmail.com":
             return acc["tokens"]["access_token"]
     return cfg["tokens"]["access_token"]
+
+
+def firestore_value_to_python(val_obj: Any) -> Any:
+    """Convert a Firestore REST API Value object back into native Python values."""
+    if not isinstance(val_obj, dict):
+        return val_obj
+    if "nullValue" in val_obj:
+        return None
+    if "stringValue" in val_obj:
+        return val_obj["stringValue"]
+    if "booleanValue" in val_obj:
+        return val_obj["booleanValue"]
+    if "integerValue" in val_obj:
+        try:
+            return int(val_obj["integerValue"])
+        except (ValueError, TypeError):
+            return val_obj["integerValue"]
+    if "doubleValue" in val_obj:
+        return val_obj["doubleValue"]
+    if "timestampValue" in val_obj:
+        return val_obj["timestampValue"]
+    if "arrayValue" in val_obj:
+        return [firestore_value_to_python(x) for x in (val_obj["arrayValue"].get("values") or [])]
+    if "mapValue" in val_obj:
+        return {k: firestore_value_to_python(v) for k, v in (val_obj["mapValue"].get("fields") or {}).items()}
+    return None
+
+
+def list_firestore_collection_docs(
+    collection_path: str,
+    token: str,
+    mask_fields: Optional[List[str]] = None,
+    page_size: int = 300,
+) -> List[Dict[str, Any]]:
+    """List all documents in a Firestore collection via REST with optional field mask."""
+    docs: List[Dict[str, Any]] = []
+    page_token: Optional[str] = None
+    base_url = (
+        f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}"
+        f"/databases/{FIRESTORE_DATABASE}/documents/{collection_path}"
+    )
+    while True:
+        params: List[Tuple[str, str]] = [("pageSize", str(page_size))]
+        if mask_fields:
+            for mf in mask_fields:
+                params.append(("mask.fieldPaths", mf))
+        if page_token:
+            params.append(("pageToken", page_token))
+        url = f"{base_url}?{urllib.parse.urlencode(params)}"
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        for raw_doc in payload.get("documents") or []:
+            doc_id = raw_doc["name"].split("/")[-1]
+            parsed_fields = {
+                k: firestore_value_to_python(v)
+                for k, v in (raw_doc.get("fields") or {}).items()
+            }
+            parsed_fields["_doc_id"] = doc_id
+            docs.append(parsed_fields)
+        page_token = payload.get("nextPageToken")
+        if not page_token:
+            break
+    return docs
+
+
+def fetch_existing_firestore_project_index(token: str) -> Dict[str, Dict[str, Any]]:
+    """Fetch minimal provenance & counts index for all existing `/projects` docs."""
+    docs = list_firestore_collection_docs(
+        "projects",
+        token,
+        mask_fields=["project_id", "registration_number", "provenance", "counts"],
+    )
+    return {d["_doc_id"]: d for d in docs}
 
 
 def python_to_firestore_value(val: Any) -> Dict[str, Any]:
@@ -815,6 +1179,14 @@ def make_firestore_write_op(doc_rel_path: str, data: Dict[str, Any]) -> Dict[str
     }
 
 
+def make_firestore_delete_op(doc_rel_path: str) -> Dict[str, Any]:
+    """Create a Firestore REST API Delete operation for `documents:commit`."""
+    full_name = (
+        f"projects/{FIREBASE_PROJECT_ID}/databases/{FIRESTORE_DATABASE}/documents/{doc_rel_path}"
+    )
+    return {"delete": full_name}
+
+
 def commit_firestore_writes(writes: List[Dict[str, Any]], token: str) -> int:
     """Commit a batch of up to 200 Firestore Write operations with exponential backoff."""
     if not writes:
@@ -852,22 +1224,59 @@ def commit_firestore_writes(writes: List[Dict[str, Any]], token: str) -> int:
     return 0
 
 
+def _sqlite_has_table(conn: sqlite3.Connection, table_name: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (table_name,),
+    ).fetchone()
+    return row is not None
+
+
+def _load_checkpoint_rows_from_conn(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+    if not _sqlite_has_table(conn, "detail_extraction_checkpoints"):
+        return []
+    conn.row_factory = sqlite3.Row
+    return [
+        dict(r)
+        for r in conn.execute(
+            """
+            SELECT *
+            FROM detail_extraction_checkpoints
+            WHERE extraction_status = 'successful'
+            ORDER BY catalogue_page_number ASC, catalogue_row_order ASC
+            """
+        ).fetchall()
+    ]
+
+
 def load_selected_sqlite_rows(
     conn: sqlite3.Connection,
     project_ids: Optional[List[str]],
     cohort: str,
     limit: Optional[int],
 ) -> List[Dict[str, Any]]:
-    """Query verified extraction rows along with catalogue search metadata from SQLite."""
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    query = """
-        SELECT c.*
-        FROM detail_extraction_checkpoints c
-        WHERE c.extraction_status = 'successful'
-        ORDER BY c.catalogue_page_number ASC, c.catalogue_row_order ASC
-    """
-    rows = [dict(r) for r in cur.execute(query).fetchall()]
+    """Query verified extraction rows from legacy SQLite merged with Phase 4 checkpoints."""
+    by_key: Dict[str, Dict[str, Any]] = {}
+    for r in _load_checkpoint_rows_from_conn(conn):
+        k = (r.get("registration_number") or r["project_key"]).strip().upper()
+        by_key[k] = r
+
+    if PHASE4_SQLITE_PATH.exists():
+        p4_conn = sqlite3.connect(f"file:{PHASE4_SQLITE_PATH}?mode=ro", uri=True)
+        try:
+            for r in _load_checkpoint_rows_from_conn(p4_conn):
+                k = (r.get("registration_number") or r["project_key"]).strip().upper()
+                by_key[k] = r
+        finally:
+            p4_conn.close()
+
+    rows = sorted(
+        by_key.values(),
+        key=lambda x: (
+            int(x.get("catalogue_page_number") or 0),
+            int(x.get("catalogue_row_order") or 0),
+        ),
+    )
 
     if project_ids:
         wanted = set()
@@ -906,19 +1315,134 @@ def load_selected_sqlite_rows(
     return rows
 
 
+def _ingest_catalogue_rows_into_map(
+    rows: List[sqlite3.Row],
+    deep_regs: set[str],
+    by_reg: Dict[str, Dict[str, Any]],
+) -> None:
+    for r in rows:
+        cells_list = json.loads(r["cells_json"])
+        cells = {
+            item["column_header"]: (item.get("raw_text") or "").strip()
+            for item in cells_list
+            if isinstance(item, dict) and "column_header" in item
+        }
+        status_raw = cells.get("STATUS", "")
+        status_canon = status_raw.split()[0].upper() if status_raw else ""
+        district = cells.get("DISTRICT", "")
+        reg_no = cells.get("REGISTRATION NO", "").strip()
+        if status_canon != "APPROVED" or not reg_no:
+            continue
+        if "urban" not in district.lower():
+            continue
+        if reg_no.upper() in deep_regs:
+            continue
+
+        cert_links: Dict[str, str] = {}
+        for item in cells_list:
+            if isinstance(item, dict) and item.get("links"):
+                hdr = item.get("column_header", "")
+                if hdr in ("Certificate", "Covid Certificate", "Renewed Certificate", "FURTHER EXTENSION ORDER"):
+                    cert_links[hdr] = item["links"][0].get("href") or item["links"][0].get("onclick") or ""
+
+        by_reg[reg_no.upper()] = {
+            "page_number": r["page_number"],
+            "row_order": r["row_order"],
+            "record_unique_key": r["record_unique_key"],
+            "registration_number": reg_no,
+            "acknowledgement_number": cells.get("ACKNOWLEDGEMENT NO", ""),
+            "promoter_name": cells.get("PROMOTER NAME", ""),
+            "project_name": cells.get("PROJECT NAME", ""),
+            "status": status_canon,
+            "district": district,
+            "taluk": cells.get("TALUK", ""),
+            "project_type": cells.get("PROJECT TYPE", ""),
+            "approved_on": cells.get("APPROVED ON", ""),
+            "proposed_completion_date": cells.get("PROPOSED COMPLETION DATE", ""),
+            "extracted_at": r["extracted_at"],
+            "catalogue_certificates": cert_links,
+        }
+
+
+def load_missing_catalogue_rows(
+    conn: sqlite3.Connection,
+    limit: Optional[int] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Load eligible APPROVED Bengaluru Urban rows from `raw_search_rows` overlaid with
+    `phase4_urban_catalogue` that do NOT yet have a successful deep checkpoint
+    in either legacy or Phase 4 SQLite.
+    """
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    deep_regs = {
+        str(r["registration_number"]).strip().upper()
+        for r in cur.execute(
+            "SELECT registration_number FROM detail_extraction_checkpoints WHERE extraction_status = 'successful'"
+        ).fetchall()
+        if r["registration_number"]
+    }
+
+    p4_cat_rows: List[sqlite3.Row] = []
+    if PHASE4_SQLITE_PATH.exists():
+        p4_conn = sqlite3.connect(f"file:{PHASE4_SQLITE_PATH}?mode=ro", uri=True)
+        p4_conn.row_factory = sqlite3.Row
+        try:
+            if _sqlite_has_table(p4_conn, "detail_extraction_checkpoints"):
+                deep_regs |= {
+                    str(r["registration_number"]).strip().upper()
+                    for r in p4_conn.execute(
+                        "SELECT registration_number FROM detail_extraction_checkpoints WHERE extraction_status = 'successful'"
+                    ).fetchall()
+                    if r["registration_number"]
+                }
+            if _sqlite_has_table(p4_conn, "phase4_urban_catalogue"):
+                p4_cat_rows = p4_conn.execute(
+                    """
+                    SELECT page_number, row_order, record_unique_key, cells_json, extracted_at
+                    FROM phase4_urban_catalogue
+                    ORDER BY page_number ASC, row_order ASC
+                    """
+                ).fetchall()
+        finally:
+            p4_conn.close()
+
+    by_reg: Dict[str, Dict[str, Any]] = {}
+    legacy_rows = cur.execute(
+        """
+        SELECT id, page_number, row_order, record_unique_key, cells_json, extracted_at
+        FROM raw_search_rows
+        ORDER BY id ASC
+        """
+    ).fetchall()
+    _ingest_catalogue_rows_into_map(legacy_rows, deep_regs, by_reg)
+    if p4_cat_rows:
+        _ingest_catalogue_rows_into_map(p4_cat_rows, deep_regs, by_reg)
+
+    missing_list = sorted(
+        by_reg.values(),
+        key=lambda x: (int(x.get("page_number") or 0), int(x.get("row_order") or 0)),
+    )
+    if limit and limit > 0:
+        missing_list = missing_list[:limit]
+    return missing_list
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="HomeSure K-RERA SQLite-to-Firestore Importer")
     parser.add_argument("--dry-run", action="store_true", help="Run full transformation & validation without writing to Firestore")
     parser.add_argument("--project-id", action="append", help="Specific registration_number, project_key, or Firestore doc_id")
-    parser.add_argument("--all-selected", action="store_true", help="Import all selected verified projects")
+    parser.add_argument("--all-selected", action="store_true", help="Import all selected verified deep-extracted projects")
+    parser.add_argument("--from-catalogue-missing", action="store_true", help="Index remaining eligible APPROVED Bengaluru Urban catalogue rows")
     parser.add_argument("--cohort", choices=["all", "first8", "central8", "pilot5"], default="all", help="Project cohort to import")
     parser.add_argument("--limit", type=int, default=None, help="Optional cap on number of projects")
-    parser.add_argument("--force-update", action="store_true", help="Force update existing Firestore documents")
+    parser.add_argument("--force-update", action="store_true", help="Force update existing Firestore documents even if content_hash is unchanged")
     parser.add_argument("--with-subcollections", action="store_true", help="Write subcollections for all imported projects")
+    parser.add_argument("--skip-remote-check", action="store_true", help="Skip live Firestore existing-hash inspection")
     args = parser.parse_args()
 
-    if not args.project_id and not args.all_selected:
-        print("Error: Specify either --project-id <ID> or --all-selected", file=sys.stderr)
+    if not args.project_id and not args.all_selected and not args.from_catalogue_missing:
+        print("Error: Specify --project-id <ID>, --all-selected, or --from-catalogue-missing", file=sys.stderr)
         return 1
 
     if not SQLITE_DB_PATH.exists():
@@ -926,27 +1450,88 @@ def main() -> int:
         return 1
 
     conn = sqlite3.connect(str(SQLITE_DB_PATH))
-    selected_rows = load_selected_sqlite_rows(conn, args.project_id, args.cohort, args.limit)
+    selected_rows: List[Dict[str, Any]] = []
+    catalogue_rows: List[Dict[str, Any]] = []
+    if args.project_id or args.all_selected:
+        selected_rows = load_selected_sqlite_rows(conn, args.project_id, args.cohort, args.limit)
+    if args.from_catalogue_missing:
+        catalogue_rows = load_missing_catalogue_rows(conn, args.limit)
     conn.close()
 
     print(f"[Importer] Mode: {'DRY-RUN' if args.dry_run else 'LIVE FIRESTORE IMPORT'}")
-    print(f"[Importer] Selected projects count: {len(selected_rows)} (cohort={args.cohort})")
+    print(f"[Importer] Deep-extracted selected: {len(selected_rows)} | Missing catalogue rows: {len(catalogue_rows)} (cohort={args.cohort})")
 
-    # Always write full subcollections for the 14 showcase/central/first8 projects (or all if --with-subcollections)
     priority_subcollection_regs = set(CENTRAL_8_REG_NUMBERS) | set(FIRST_8_REG_NUMBERS)
 
     report_items: List[Dict[str, Any]] = []
     pending_writes: List[Dict[str, Any]] = []
+    action_counts: Dict[str, int] = {
+        "new_record": 0,
+        "update_existing": 0,
+        "skipped_unchanged": 0,
+        "skipped_richer_existing": 0,
+    }
     total_root_docs = 0
     total_subcollection_docs = 0
     total_Committed_writes = 0
     errors: List[Dict[str, Any]] = []
 
-    token = None
-    if not args.dry_run:
+    token: Optional[str] = None
+    existing_index: Dict[str, Dict[str, Any]] = {}
+    if not args.skip_remote_check:
+        try:
+            token = get_firebase_Auth_token()
+            existing_index = fetch_existing_firestore_project_index(token)
+            print(f"[Importer] Loaded {len(existing_index)} existing project entries from live Firestore for idempotency checks.")
+        except Exception as exc:
+            if not args.dry_run:
+                raise
+            print(f"[Importer] Warning: Could not inspect live Firestore during dry-run ({exc}); proceeding offline.")
+    elif not args.dry_run:
         token = get_firebase_Auth_token()
 
     start_time = time.time()
+
+    def queue_writes(project_id: str, root_doc: Dict[str, Any], subcollections: Optional[Dict[str, List[Dict[str, Any]]]], include_subs: bool) -> None:
+        nonlocal total_subcollection_docs, total_Committed_writes
+        pending_writes.append(make_firestore_write_op(f"projects/{project_id}", root_doc))
+        if subcollections:
+            bundle_doc = subcollections["detail_bundle"][0]
+            pending_writes.append(
+                make_firestore_write_op(f"projects/{project_id}/regulatory_tabs/bundle_all", bundle_doc)
+            )
+            total_subcollection_docs += 1
+            if include_subs:
+                for tab_doc in subcollections["regulatory_tabs"]:
+                    pending_writes.append(
+                        make_firestore_write_op(f"projects/{project_id}/regulatory_tabs/{tab_doc['tab_id']}", tab_doc)
+                    )
+                    total_subcollection_docs += 1
+                for doc_item in subcollections["documents"][:150]:
+                    pending_writes.append(
+                        make_firestore_write_op(f"projects/{project_id}/documents/{doc_item['document_id']}", doc_item)
+                    )
+                    total_subcollection_docs += 1
+                for cmp_item in subcollections["complaints"][:100]:
+                    pending_writes.append(
+                        make_firestore_write_op(f"projects/{project_id}/complaints/{cmp_item['complaint_id']}", cmp_item)
+                    )
+                    total_subcollection_docs += 1
+                for twr_item in subcollections["towers"][:50]:
+                    pending_writes.append(
+                        make_firestore_write_op(f"projects/{project_id}/towers/{twr_item['tower_id']}", twr_item)
+                    )
+                    total_subcollection_docs += 1
+
+        while len(pending_writes) >= 30:
+            batch = pending_writes[:30]
+            pending_writes[:] = pending_writes[30:]
+            committed = commit_firestore_writes(batch, token)  # type: ignore[arg-type]
+            total_Committed_writes += committed
+            if total_Committed_writes % 150 == 0 or committed < 30:
+                print(
+                    f"  [Firestore] Committed {total_Committed_writes} writes so far..."
+                )
 
     for idx, row in enumerate(selected_rows, start=1):
         norm_rel_path = (row.get("normalized_output_path") or row.get("normalized_json_path") or "").replace("/", os.sep).replace("\\", os.sep)
@@ -974,12 +1559,16 @@ def main() -> int:
                     ks["table_rows_preview"] = ks["table_rows_preview"][:5]
                 bundle_size_bytes = len(json.dumps(bundle_doc, ensure_ascii=False).encode("utf-8"))
 
+            do_write, write_reason = should_write_project(
+                root_doc, existing_index.get(project_id), force_update=args.force_update
+            )
+            action_counts[write_reason] = action_counts.get(write_reason, 0) + 1
+
             include_subs = (
                 args.with_subcollections
                 or bool(args.project_id)
                 or (reg_no in priority_subcollection_regs)
             )
-
             sub_counts = {k: len(v) for k, v in subcollections.items()}
             report_items.append({
                 "index": idx,
@@ -988,9 +1577,14 @@ def main() -> int:
                 "acknowledgement_number": root_doc["acknowledgement_number"],
                 "project_name": root_doc["project_name"],
                 "promoter_name": root_doc["promoter_name"],
+                "canonical_builder_name": root_doc["canonical_builder_name"],
+                "builder_id": root_doc["builder_id"],
                 "taluk": root_doc["taluk"],
+                "normalized_taluk": root_doc["normalizedTaluk"],
                 "project_type": root_doc["project_type"],
                 "regulatory_status": root_doc["regulatory_status"],
+                "data_tier": "deep_extracted",
+                "idempotency_action": write_reason,
                 "root_doc_size_kb": round(root_size_bytes / 1024, 2),
                 "bundle_doc_size_kb": round(bundle_size_bytes / 1024, 2),
                 "visible_tabs": root_doc["counts"]["visible_tabs_total"],
@@ -1002,65 +1596,14 @@ def main() -> int:
                 "total_complaints": root_doc["counts"]["total_complaints"],
                 "towers_count": root_doc["unit_hierarchy_status"]["towers_count"],
                 "inventory_configs_count": root_doc["unit_hierarchy_status"]["inventory_configs_count"],
-                "subcollections_written": include_subs,
+                "subcollections_written": include_subs if do_write else False,
                 "subcollection_counts": sub_counts if include_subs else {"detail_bundle": 1},
                 "content_hash": root_doc["provenance"]["content_hash"][:16],
             })
-
             total_root_docs += 1
 
-            if not args.dry_run:
-                pending_writes.append(make_firestore_write_op(f"projects/{project_id}", root_doc))
-                pending_writes.append(
-                    make_firestore_write_op(
-                        f"projects/{project_id}/regulatory_tabs/bundle_all", bundle_doc
-                    )
-                )
-                total_subcollection_docs += 1
-                if include_subs:
-                    for tab_doc in subcollections["regulatory_tabs"]:
-                        t_id = tab_doc["tab_id"]
-                        pending_writes.append(
-                            make_firestore_write_op(
-                                f"projects/{project_id}/regulatory_tabs/{t_id}", tab_doc
-                            )
-                        )
-                        total_subcollection_docs += 1
-                    for doc_item in subcollections["documents"][:150]:
-                        d_id = doc_item["document_id"]
-                        pending_writes.append(
-                            make_firestore_write_op(
-                                f"projects/{project_id}/documents/{d_id}", doc_item
-                            )
-                        )
-                        total_subcollection_docs += 1
-                    for cmp_item in subcollections["complaints"][:100]:
-                        c_id = cmp_item["complaint_id"]
-                        pending_writes.append(
-                            make_firestore_write_op(
-                                f"projects/{project_id}/complaints/{c_id}", cmp_item
-                            )
-                        )
-                        total_subcollection_docs += 1
-                    for twr_item in subcollections["towers"][:50]:
-                        tw_id = twr_item["tower_id"]
-                        pending_writes.append(
-                            make_firestore_write_op(
-                                f"projects/{project_id}/towers/{tw_id}", twr_item
-                            )
-                        )
-                        total_subcollection_docs += 1
-
-                # Flush batch whenever pending_writes reaches 30 operations
-                while len(pending_writes) >= 30:
-                    batch = pending_writes[:30]
-                    pending_writes = pending_writes[30:]
-                    committed = commit_firestore_writes(batch, token)
-                    total_Committed_writes += committed
-                    print(
-                        f"  [Firestore] Committed batch ({committed} writes) | "
-                        f"Total writes: {total_Committed_writes} | Projects processed: {idx}/{len(selected_rows)}"
-                    )
+            if not args.dry_run and do_write:
+                queue_writes(project_id, root_doc, subcollections, include_subs)
 
         except Exception as exc:
             errors.append({
@@ -1069,12 +1612,66 @@ def main() -> int:
                 "error": str(exc),
             })
 
+    # Catalogue-only missing rows ingestion
+    for c_idx, cat_row in enumerate(catalogue_rows, start=len(selected_rows) + 1):
+        try:
+            root_doc = transform_catalogue_row(cat_row)
+            project_id = root_doc["project_id"]
+            reg_no = root_doc["registration_number"]
+            root_size_bytes = len(json.dumps(root_doc, ensure_ascii=False).encode("utf-8"))
+
+            do_write, write_reason = should_write_project(
+                root_doc, existing_index.get(project_id), force_update=args.force_update
+            )
+            action_counts[write_reason] = action_counts.get(write_reason, 0) + 1
+
+            report_items.append({
+                "index": c_idx,
+                "project_id": project_id,
+                "registration_number": reg_no,
+                "acknowledgement_number": root_doc["acknowledgement_number"],
+                "project_name": root_doc["project_name"],
+                "promoter_name": root_doc["promoter_name"],
+                "canonical_builder_name": root_doc["canonical_builder_name"],
+                "builder_id": root_doc["builder_id"],
+                "taluk": root_doc["taluk"],
+                "normalized_taluk": root_doc["normalizedTaluk"],
+                "project_type": root_doc["project_type"],
+                "regulatory_status": root_doc["regulatory_status"],
+                "data_tier": "catalogue_summary",
+                "idempotency_action": write_reason,
+                "root_doc_size_kb": round(root_size_bytes / 1024, 2),
+                "bundle_doc_size_kb": 0.0,
+                "visible_tabs": 0,
+                "visible_tabs_with_data": 0,
+                "total_sections": 0,
+                "total_fields": 0,
+                "total_documents": 0,
+                "downloadable_documents": 0,
+                "total_complaints": 0,
+                "towers_count": 0,
+                "inventory_configs_count": 0,
+                "subcollections_written": False,
+                "subcollection_counts": {},
+                "content_hash": root_doc["provenance"]["content_hash"][:16],
+            })
+            total_root_docs += 1
+
+            if not args.dry_run and do_write:
+                queue_writes(project_id, root_doc, None, False)
+
+        except Exception as exc:
+            errors.append({
+                "registration_number": cat_row.get("registration_number"),
+                "error": str(exc),
+            })
+
     # Flush remaining writes
     if not args.dry_run and pending_writes:
         while pending_writes:
             batch = pending_writes[:30]
             pending_writes = pending_writes[30:]
-            committed = commit_firestore_writes(batch, token)
+            committed = commit_firestore_writes(batch, token)  # type: ignore[arg-type]
             total_Committed_writes += committed
             print(
                 f"  [Firestore] Committed final batch ({committed} writes) | "
@@ -1089,10 +1686,14 @@ def main() -> int:
         "firestore_database": FIRESTORE_DATABASE,
         "schema_version": SCHEMA_VERSION,
         "cohort": args.cohort,
+        "from_catalogue_missing": args.from_catalogue_missing,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "elapsed_seconds": elapsed_sec,
-        "projects_selected": len(selected_rows),
+        "projects_selected": len(selected_rows) + len(catalogue_rows),
+        "deep_extracted_selected": len(selected_rows),
+        "catalogue_missing_selected": len(catalogue_rows),
         "projects_transformed_successfully": total_root_docs,
+        "idempotency_actions": action_counts,
         "subcollection_documents_prepared": total_subcollection_docs,
         "total_firestore_writes_committed": total_Committed_writes,
         "errors_count": len(errors),
@@ -1113,15 +1714,23 @@ def main() -> int:
         "sample_projects": report_items[:15],
     }
 
-    out_json_name = (
-        "firestore_import_dry_run_report.json"
-        if args.dry_run
-        else "firestore_import_live_report.json"
-    )
+    is_partial_run = bool(args.project_id) or args.cohort != "all" or args.limit is not None
+    if args.dry_run:
+        out_json_name = "firestore_import_dry_run_report.json"
+    elif args.from_catalogue_missing and not args.all_selected:
+        out_json_name = "firestore_import_catalogue_report.json"
+    elif is_partial_run:
+        out_json_name = "firestore_import_incremental_report.json"
+    else:
+        out_json_name = "firestore_import_live_report.json"
+
     out_json_path = EXTRACTION_ROOT / "data" / out_json_name
     out_json_path.write_text(json.dumps({**summary_report, "all_projects": report_items}, indent=2), encoding="utf-8")
 
-    print(f"[Importer] Completed in {elapsed_sec}s. Errors: {len(errors)}. Report saved to {out_json_path}")
+    print(
+        f"[Importer] Completed in {elapsed_sec}s | Actions: {action_counts} | "
+        f"Errors: {len(errors)} | Report saved to {out_json_path}"
+    )
     return 0 if not errors else 2
 
 

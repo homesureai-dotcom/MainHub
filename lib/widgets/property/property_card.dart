@@ -87,6 +87,19 @@ class PropertyCard extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          if (property.canonicalBuilderName.trim().isNotEmpty &&
+                              property.canonicalBuilderName
+                                      .trim()
+                                      .toLowerCase() !=
+                                  property.builder.trim().toLowerCase()) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Canonical Builder: ${property.canonicalBuilderName}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: HomeSureTypography.caption,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -112,6 +125,23 @@ class PropertyCard extends StatelessWidget {
                       _MetaChip(
                         icon: Icons.layers_outlined,
                         label: property.projectType,
+                      ),
+                    if (property.isDeepExtracted)
+                      const HomeSureStatusBadge(
+                        label: 'Full K-RERA Dossier',
+                        tone: HomeSureBadgeTone.teal,
+                        icon: Icons.fact_check_outlined,
+                      )
+                    else if (property.isCatalogueSummary)
+                      const HomeSureStatusBadge(
+                        label: 'Catalogue Summary',
+                        tone: HomeSureBadgeTone.neutral,
+                        icon: Icons.summarize_outlined,
+                      ),
+                    if (property.isProvisionalIdentity)
+                      const HomeSureStatusBadge(
+                        label: 'Provisional Identity',
+                        tone: HomeSureBadgeTone.warning,
                       ),
                   ],
                 ),
@@ -159,11 +189,17 @@ class PropertyCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Flexible(
+                    Flexible(
                       child: HomeSureStatusBadge(
-                        label: 'Not yet assessed by HomeSureAI',
-                        tone: HomeSureBadgeTone.warning,
-                        icon: Icons.pending_outlined,
+                        label: property.isCatalogueSummary
+                            ? 'Detailed K-RERA extraction pending'
+                            : 'Not yet assessed by HomeSureAI',
+                        tone: property.isCatalogueSummary
+                            ? HomeSureBadgeTone.neutral
+                            : HomeSureBadgeTone.warning,
+                        icon: property.isCatalogueSummary
+                            ? Icons.schedule_outlined
+                            : Icons.pending_outlined,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -171,7 +207,9 @@ class PropertyCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Inspect Dossier',
+                          property.isCatalogueSummary
+                              ? 'View Summary'
+                              : 'Inspect Dossier',
                           style: HomeSureTypography.caption.copyWith(
                             color: HomeSureColors.primaryNavy,
                             fontWeight: FontWeight.w700,

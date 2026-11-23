@@ -40,6 +40,15 @@ class Property {
   /// Unit-hierarchy availability status (`Project -> Phase -> Tower -> Unit`).
   final UnitHierarchyStatus unitHierarchyStatus;
 
+  /// Provenance depth tier (`deep_extracted` or `catalogue_summary`).
+  final String dataTier;
+
+  bool get isCatalogueSummary =>
+      dataTier.trim().toLowerCase() == 'catalogue_summary';
+
+  bool get isDeepExtracted =>
+      dataTier.trim().toLowerCase() == 'deep_extracted';
+
   /// Optional specific unit being evaluated by the buyer.
   final ProjectUnitRecord? selectedUnit;
 
@@ -68,6 +77,7 @@ class Property {
     this.proposedCompletionDate = '',
     this.summaryMetrics = const {},
     this.unitHierarchyStatus = const UnitHierarchyStatus(),
+    this.dataTier = '',
     this.selectedUnit,
     required this.compliance,
     required this.assessment,
@@ -75,6 +85,7 @@ class Property {
   });
 
   Property copyWith({
+    String? dataTier,
     ProjectUnitRecord? selectedUnit,
     ComplianceSummary? compliance,
     AssessmentSummary? assessment,
@@ -96,6 +107,7 @@ class Property {
       proposedCompletionDate: proposedCompletionDate,
       summaryMetrics: summaryMetrics,
       unitHierarchyStatus: unitHierarchyStatus,
+      dataTier: dataTier ?? this.dataTier,
       selectedUnit: selectedUnit ?? this.selectedUnit,
       compliance: compliance ?? this.compliance,
       assessment: assessment ?? this.assessment,
@@ -123,6 +135,7 @@ class Property {
       'acknowledgementNumber': acknowledgementNumber,
       'regulatoryStatus': regulatoryStatus,
       'proposedCompletionDate': proposedCompletionDate,
+      if (dataTier.isNotEmpty) 'dataTier': dataTier,
       'compliance': {
         'verifiedCount': compliance.verifiedCount,
         'pendingCount': compliance.pendingCount,
@@ -178,6 +191,7 @@ class Property {
       acknowledgementNumber: (map['acknowledgementNumber'] ?? '').toString(),
       regulatoryStatus: (map['regulatoryStatus'] ?? '').toString(),
       proposedCompletionDate: (map['proposedCompletionDate'] ?? '').toString(),
+      dataTier: (map['dataTier'] ?? '').toString(),
       compliance: ComplianceSummary(
         verifiedCount: toInt(compMap['verifiedCount']),
         pendingCount: toInt(compMap['pendingCount']),

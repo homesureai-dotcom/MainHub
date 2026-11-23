@@ -105,11 +105,15 @@ class _PropertySearchScreenState extends State<PropertySearchScreen> {
   }
 
   void _openBuilderProjects(BuilderCatalogueEntry builder) {
+    final fullBuilder = allFetchedBuilders.firstWhere(
+      (b) => b.builderId == builder.builderId,
+      orElse: () => builder,
+    );
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BuilderProjectsScreen(
-          builder: builder,
+          builder: fullBuilder,
           catalogueGateway: widget.catalogueGateway,
           initialTalukFilters: selectedTaluks,
         ),

@@ -61,6 +61,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   PropertyCatalogueGateway get _catalogueGateway =>
       widget.catalogueGateway ?? PropertyRepository.instance;
 
+  bool get _isCatalogueSummary => _property.isCatalogueSummary;
+
   @override
   void initState() {
     super.initState();
@@ -89,10 +91,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
     try {
       final hydrated = await _catalogueGateway.fetchProjectById(_property.id);
-      final bundle = await _catalogueGateway.fetchProjectRegulatoryDetail(
-        _property.id,
-      );
-      final units = await _catalogueGateway.fetchProjectUnits(_property.id);
+      final effective = hydrated ?? _property;
+      final bundle = effective.isCatalogueSummary
+          ? null
+          : await _catalogueGateway.fetchProjectRegulatoryDetail(_property.id);
+      final units = effective.isCatalogueSummary
+          ? const <ProjectUnitRecord>[]
+          : await _catalogueGateway.fetchProjectUnits(_property.id);
 
       if (!mounted) return;
       setState(() {
@@ -286,10 +291,16 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
             spacing: 8,
             runSpacing: 6,
             children: [
-              const HomeSureStatusBadge(
-                label: 'Official K-RERA Record',
-                tone: HomeSureBadgeTone.teal,
-                icon: Icons.verified_outlined,
+              HomeSureStatusBadge(
+                label: _isCatalogueSummary
+                    ? 'K-RERA Catalogue Summary'
+                    : 'Deep K-RERA Dossier',
+                tone: _isCatalogueSummary
+                    ? HomeSureBadgeTone.warning
+                    : HomeSureBadgeTone.teal,
+                icon: _isCatalogueSummary
+                    ? Icons.summarize_outlined
+                    : Icons.verified_outlined,
               ),
               HomeSureStatusBadge(
                 label: statusLabel,
@@ -388,7 +399,132 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     );
   }
 
+  Widget _buildCatalogueSummaryNotice() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: HomeSureColors.statusWarningBg,
+        borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+        border: Border.all(color: HomeSureColors.statusWarningBorder),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.summarize_outlined,
+            color: HomeSureColors.statusWarningText,
+            size: 22,
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Catalogue Summary Only — Detailed Regulatory Extraction Pending',
+                  style: TextStyle(
+                    color: HomeSureColors.statusWarningText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'This listing reflects core K-RERA catalogue registration '
+                  'metadata (project title, builder, registration number, '
+                  'taluk, and approval/completion dates). Full portal tabs, '
+                  'uploaded documents, complaint filings, tower/unit details, '
+                  'and a complete regulatory analysis or Property Health '
+                  'assessment are not yet available for this project.',
+                  style: TextStyle(
+                    color: HomeSureColors.textPrimary,
+                    fontSize: 12.5,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIntelligenceSummaryGrid() {
+    if (_isCatalogueSummary) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: HomeSureColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+          border: Border.all(color: HomeSureColors.borderDivider),
+          boxShadow: HomeSureShadows.cardSubtle,
+        ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            HomeSureSectionHeader(
+              title: 'Catalogue Registration Summary',
+              subtitle:
+                  'Basic K-RERA directory fields indexed; deep portal dossier pending extraction.',
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: HomeSureMetricTile(
+                    label: 'Portal Sections',
+                    value: 'Pending',
+                    sublabel: 'Detailed extraction pending',
+                    icon: Icons.schedule_outlined,
+                    accentColor: HomeSureColors.statusWarningText,
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: HomeSureMetricTile(
+                    label: 'Filing Documents',
+                    value: 'Not Extracted',
+                    sublabel: 'Documents not yet extracted',
+                    icon: Icons.description_outlined,
+                    accentColor: HomeSureColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: HomeSureMetricTile(
+                    label: 'RERA Complaints',
+                    value: 'Not Extracted',
+                    sublabel: 'Complaints not yet verified',
+                    icon: Icons.gavel_outlined,
+                    accentColor: HomeSureColors.textSecondary,
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: HomeSureMetricTile(
+                    label: 'Record Depth',
+                    value: 'Summary',
+                    sublabel: 'Basic catalogue listing',
+                    icon: Icons.summarize_outlined,
+                    accentColor: HomeSureColors.statusWarningText,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     final docs = _detailBundle?.documents ?? const [];
     final complaints = _detailBundle?.complaints ?? const [];
     final docCount =
@@ -639,12 +775,16 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         (
           keys: const ['project_start_date'],
           label: 'Project Start Date',
-          fallback: null,
+          fallback: _property.projectStartDate.trim().isNotEmpty
+              ? _property.projectStartDate.trim()
+              : null,
         ),
         (
           keys: const ['proposed_completion_date'],
           label: 'Proposed Completion Date',
-          fallback: null,
+          fallback: _property.proposedCompletionDate.trim().isNotEmpty
+              ? _property.proposedCompletionDate.trim()
+              : null,
         ),
         (
           keys: const ['project_address'],
@@ -898,6 +1038,35 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildDevelopmentSection() {
+    if (_isCatalogueSummary) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: HomeSureColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+          border: Border.all(color: HomeSureColors.borderDivider),
+          boxShadow: HomeSureShadows.cardSubtle,
+        ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            HomeSureSectionHeader(
+              title: 'Development, Tower & Land Schedules',
+              subtitle: 'Not yet extracted for this catalogue-summary listing.',
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Detailed tower, land area, and apartment inventory disclosures '
+              'have not been extracted from the K-RERA project modal yet.',
+              style: HomeSureTypography.bodySecondary,
+            ),
+          ],
+        ),
+      );
+    }
+
     final towers = _detailBundle?.towers.isNotEmpty == true
         ? _detailBundle!.towers
         : _property.towersSummary;
@@ -1158,6 +1327,36 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildDocumentsSection() {
+    if (_isCatalogueSummary) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: HomeSureColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+          border: Border.all(color: HomeSureColors.borderDivider),
+          boxShadow: HomeSureShadows.cardSubtle,
+        ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            HomeSureSectionHeader(
+              title: 'Uploaded Regulatory Documents',
+              subtitle: 'Not yet extracted for this catalogue-summary listing.',
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Detailed K-RERA document links and regulatory filings have not '
+              'been extracted yet. Absence of listed files here does not '
+              'indicate zero filings on K-RERA.',
+              style: HomeSureTypography.bodySecondary,
+            ),
+          ],
+        ),
+      );
+    }
+
     final docs = _detailBundle?.documents ?? const [];
     final docCount =
         _property.regulatoryCounts['total_documents'] ?? docs.length;
@@ -1281,6 +1480,36 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildIssuesSection() {
+    if (_isCatalogueSummary) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: HomeSureColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(HomeSureRadius.lg),
+          border: Border.all(color: HomeSureColors.borderDivider),
+          boxShadow: HomeSureShadows.cardSubtle,
+        ),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            HomeSureSectionHeader(
+              title: 'Complaints & Regulatory Issues',
+              subtitle: 'Not yet verified — detailed extraction pending.',
+            ),
+            SizedBox(height: 8),
+            Text(
+              'K-RERA complaints and litigation disclosures have not been '
+              'extracted yet for this catalogue-summary project. Absence of '
+              'rows here does not indicate zero complaints.',
+              style: HomeSureTypography.bodySecondary,
+            ),
+          ],
+        ),
+      );
+    }
+
     final complaints = _detailBundle?.complaints ?? const [];
     final complaintCount =
         _property.regulatoryCounts['total_complaints'] ?? complaints.length;
@@ -1380,6 +1609,17 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildUnassessedState() {
+    final title = _isCatalogueSummary
+        ? 'Property Health Assessment Unavailable (Catalogue Summary)'
+        : 'Assessment pending';
+    final description = _isCatalogueSummary
+        ? 'Complete regulatory analysis and a K-RERA-backed Property Health '
+            'assessment are unavailable until detailed portal extraction is '
+            'completed for this project.'
+        : 'No HomeSureAI scores are available for this project yet. '
+            'Start the assessment to continue. Any scores or compliance '
+            'findings must be based on supporting evidence and review.';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -1388,21 +1628,21 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         borderRadius: BorderRadius.circular(HomeSureRadius.lg),
         border: Border.all(color: HomeSureColors.statusWarningBorder),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.pending_actions_outlined,
                 color: HomeSureColors.statusWarningText,
                 size: 22,
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Assessment pending',
-                  style: TextStyle(
+                  title,
+                  style: const TextStyle(
                     color: HomeSureColors.statusWarningText,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -1411,12 +1651,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'No HomeSureAI scores are available for this project yet. '
-            'Start the assessment to continue. Any scores or compliance '
-            'findings must be based on supporting evidence and review.',
-            style: TextStyle(
+            description,
+            style: const TextStyle(
               color: HomeSureColors.textPrimary,
               fontSize: 13,
               height: 1.45,
@@ -1429,7 +1667,8 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasCatalogueScores = _property.overallScore > 0;
+    final bool hasCatalogueScores =
+        !_isCatalogueSummary && _property.overallScore > 0;
 
     return Scaffold(
       backgroundColor: HomeSureColors.backgroundWarm,
@@ -1454,6 +1693,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       PropertyHeroCard(property: _property)
                     else
                       _buildPropertyIdentityHeader(),
+                    if (_isCatalogueSummary) _buildCatalogueSummaryNotice(),
                     _buildIntelligenceSummaryGrid(),
                     _buildSectionNavigationBar(),
                     _buildOverviewDetailsSection(),
@@ -1515,8 +1755,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ],
               const SizedBox(height: 20),
               AppButton(
-                text: 'Start Assessment',
-                icon: Icons.play_arrow_rounded,
+                text: _isCatalogueSummary
+                    ? 'Assessment Unavailable (Catalogue Summary)'
+                    : 'Start Assessment',
+                icon: _isCatalogueSummary
+                    ? Icons.lock_clock_outlined
+                    : Icons.play_arrow_rounded,
+                enabled: !_isCatalogueSummary,
                 onPressed: () {
                   _selectCanonicalProperty();
 

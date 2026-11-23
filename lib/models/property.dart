@@ -60,6 +60,40 @@ class Property {
   final int safetyScore;
   final int builderScore;
 
+  /// Official portal project name and normalized canonical variant.
+  final String officialProjectName;
+  final String normalizedProjectName;
+
+  /// Official portal promoter name and normalized canonical variant.
+  final String officialBuilderName;
+  final String normalizedBuilderName;
+
+  /// Canonical/provisional builder ID (`builder_id`) and display name (`canonical_builder_name`).
+  final String builderId;
+  final String canonicalBuilderName;
+
+  /// True when the project's promoter identity is retained provisionally pending review.
+  final bool needsManualReview;
+
+  bool get isProvisionalIdentity =>
+      needsManualReview || builderId.contains('_provisional_');
+
+  /// Search aliases for builder & project (preserving official names untouched).
+  final List<String> builderAliases;
+  final List<String> projectAliases;
+
+  /// Canonical Bengaluru taluk name (e.g. Anekal, Yelahanka, Bengaluru East).
+  final String normalizedTaluk;
+
+  /// Provenance tier (`deep_extracted` or `catalogue_summary`).
+  final String dataTier;
+
+  bool get isCatalogueSummary =>
+      dataTier.trim().toLowerCase() == 'catalogue_summary';
+
+  bool get isDeepExtracted =>
+      dataTier.trim().toLowerCase() == 'deep_extracted';
+
   /// Indicates the existing catalogue verification flag.
   /// This must not be treated as proof of legal compliance
   /// without independently reviewed supporting evidence.
@@ -91,8 +125,27 @@ class Property {
     this.utilityScore = 0,
     this.safetyScore = 0,
     this.builderScore = 0,
+    this.officialProjectName = '',
+    this.normalizedProjectName = '',
+    this.officialBuilderName = '',
+    this.normalizedBuilderName = '',
+    this.builderId = '',
+    this.canonicalBuilderName = '',
+    this.needsManualReview = false,
+    this.builderAliases = const [],
+    this.projectAliases = const [],
+    this.normalizedTaluk = '',
+    this.dataTier = '',
     required this.verified,
   });
+
+  static Map<String, dynamic> _asStringMap(dynamic raw) {
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) {
+      return raw.map((key, value) => MapEntry(key.toString(), value));
+    }
+    return const <String, dynamic>{};
+  }
 
   /// Deserialize a canonical `projects/{projectId}` Firestore document into [Property].
   factory Property.fromFirestoreMap(
@@ -101,38 +154,35 @@ class Property {
   }) {
     final docId =
         (documentId ?? map['project_id'] ?? map['id'] ?? '').toString();
-    final rawMetrics =
-        (map['summary_metrics'] as Map<String, dynamic>?) ?? const {};
+    final rawMetrics = _asStringMap(map['summary_metrics']);
     final parsedMetrics = <String, RegulatoryMetric>{};
     for (final entry in rawMetrics.entries) {
       if (entry.value is Map) {
         parsedMetrics[entry.key] = RegulatoryMetric.fromMap(
           entry.key,
-          Map<String, dynamic>.from(entry.value as Map),
+          _asStringMap(entry.value),
         );
       }
     }
 
-    final rawTabs =
-        (map['tab_observations_summary'] as Map<String, dynamic>?) ?? const {};
+    final rawTabs = _asStringMap(map['tab_observations_summary']);
     final parsedTabs = <String, RegulatoryTabSummary>{};
     for (final entry in rawTabs.entries) {
       if (entry.value is Map) {
         parsedTabs[entry.key] = RegulatoryTabSummary.fromMap(
           entry.key,
-          Map<String, dynamic>.from(entry.value as Map),
+          _asStringMap(entry.value),
         );
       }
     }
 
-    final rawPanes =
-        (map['unlinked_pane_summary'] as Map<String, dynamic>?) ?? const {};
+    final rawPanes = _asStringMap(map['unlinked_pane_summary']);
     final parsedPanes = <String, RegulatoryTabSummary>{};
     for (final entry in rawPanes.entries) {
       if (entry.value is Map) {
         parsedPanes[entry.key] = RegulatoryTabSummary.fromMap(
           entry.key,
-          Map<String, dynamic>.from(entry.value as Map),
+          _asStringMap(entry.value),
         );
       }
     }
@@ -141,7 +191,7 @@ class Property {
         (map['inventory_configurations'] as List<dynamic>?) ?? const [];
     final parsedInv = rawInv
         .whereType<Map>()
-        .map((e) => InventoryConfiguration.fromMap(Map<String, dynamic>.from(e)))
+        .map((e) => InventoryConfiguration.fromMap(_asStringMap(e)))
         .toList();
 
     final rawTowers = (map['towers_summary'] as List<dynamic>?) ?? const [];
@@ -149,13 +199,13 @@ class Property {
         .whereType<Map>()
         .map(
           (e) => ProjectTowerRecord.fromMap(
-            Map<String, dynamic>.from(e),
+            _asStringMap(e),
             defaultProjectId: docId,
           ),
         )
         .toList();
 
-    final rawCounts = (map['counts'] as Map<String, dynamic>?) ?? const {};
+    final rawCounts = _asStringMap(map['counts']);
     final parsedCounts = <String, int>{};
     for (final entry in rawCounts.entries) {
       final v = entry.value;
@@ -168,10 +218,13 @@ class Property {
       }
     }
 
-    final provenance =
-        (map['provenance'] as Map<String, dynamic>?) ?? const {};
-    final identityVer =
-        (map['identity_verification'] as Map<String, dynamic>?) ?? const {};
+    final provenance = _asStringMap(map['provenance']);
+    final identityVer = _asStringMap(map['identity_verification']);
+
+    final rawBuilderAliases =
+        (map['builderAliases'] as List<dynamic>?) ?? const [];
+    final rawProjectAliases =
+        (map['projectAliases'] as List<dynamic>?) ?? const [];
 
     return Property(
       id: docId,
@@ -213,6 +266,19 @@ class Property {
       utilityScore: 0,
       safetyScore: 0,
       builderScore: 0,
+      officialProjectName: (map['officialProjectName'] ?? '').toString(),
+      normalizedProjectName: (map['normalizedProjectName'] ?? '').toString(),
+      officialBuilderName: (map['officialBuilderName'] ?? '').toString(),
+      normalizedBuilderName: (map['normalizedBuilderName'] ?? '').toString(),
+      builderId: (map['builder_id'] ?? map['builderId'] ?? '').toString(),
+      canonicalBuilderName:
+          (map['canonical_builder_name'] ?? map['canonicalBuilderName'] ?? '')
+              .toString(),
+      needsManualReview: map['needsManualReview'] == true,
+      builderAliases: rawBuilderAliases.map((e) => e.toString()).toList(),
+      projectAliases: rawProjectAliases.map((e) => e.toString()).toList(),
+      normalizedTaluk: (map['normalizedTaluk'] ?? '').toString(),
+      dataTier: (provenance['data_tier'] ?? '').toString(),
       verified: identityVer['is_verified'] == true,
     );
   }
@@ -231,6 +297,21 @@ class Property {
       'approved_on_iso': approvedOn,
       'proposed_completion_date_iso': proposedCompletionDate,
       'project_start_date_iso': projectStartDate,
+      if (officialProjectName.isNotEmpty)
+        'officialProjectName': officialProjectName,
+      if (normalizedProjectName.isNotEmpty)
+        'normalizedProjectName': normalizedProjectName,
+      if (officialBuilderName.isNotEmpty)
+        'officialBuilderName': officialBuilderName,
+      if (normalizedBuilderName.isNotEmpty)
+        'normalizedBuilderName': normalizedBuilderName,
+      if (builderId.isNotEmpty) 'builder_id': builderId,
+      if (canonicalBuilderName.isNotEmpty)
+        'canonical_builder_name': canonicalBuilderName,
+      if (needsManualReview) 'needsManualReview': true,
+      if (builderAliases.isNotEmpty) 'builderAliases': builderAliases,
+      if (projectAliases.isNotEmpty) 'projectAliases': projectAliases,
+      if (normalizedTaluk.isNotEmpty) 'normalizedTaluk': normalizedTaluk,
       'summary_metrics': summaryMetrics.map((k, v) => MapEntry(k, v.toMap())),
       'tab_observations_summary': tabObservations.map(
         (k, v) => MapEntry(k, v.toMap()),
@@ -244,7 +325,10 @@ class Property {
       'towers_summary': towersSummary.map((e) => e.toMap()).toList(),
       'unit_hierarchy_status': unitHierarchyStatus.toMap(),
       'counts': regulatoryCounts,
-      'provenance': {'source_type': sourceType.wireValue},
+      'provenance': {
+        'source_type': sourceType.wireValue,
+        if (dataTier.isNotEmpty) 'data_tier': dataTier,
+      },
       'identity_verification': {'is_verified': verified},
     };
   }

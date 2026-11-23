@@ -37,6 +37,9 @@ abstract class PropertyCatalogueGateway {
     final idSet = builder.projectIds.toSet();
     final matched = allProjects.where((p) {
       if (idSet.contains(p.id)) return true;
+      if (p.builderId.trim().isNotEmpty) {
+        return p.builderId.trim() == builder.builderId;
+      }
       final resolved = BuilderCatalogueEntry.resolveCanonicalBrand(
         promoterName: p.builder,
         projectName: p.name,
@@ -47,7 +50,14 @@ abstract class PropertyCatalogueGateway {
       matched.isNotEmpty
           ? matched
           : builder.projects
-                .map(PropertyRepository.propertyFromBuilderSummary)
+                .map(
+                  (s) => PropertyRepository.propertyFromBuilderSummary(
+                    s,
+                    builderId: builder.builderId,
+                    canonicalBuilderName: builder.builderName,
+                    needsManualReview: builder.isProvisional,
+                  ),
+                )
                 .toList(),
       searchQuery: searchQuery,
     );
@@ -106,6 +116,9 @@ class PropertyRepository implements PropertyCatalogueGateway {
 
   /// In-memory cache of the canonical builders catalog loaded from `/builders`.
   List<BuilderCatalogueEntry> _cachedBuilders = [];
+
+  /// Last observed `_catalog_meta.updated_at` timestamp so stale caches are invalidated automatically.
+  String? _cachedCatalogUpdatedAt;
 
   Property _selectedProperty = const Property(
     id: 'UNSELECTED',
@@ -171,10 +184,11 @@ class PropertyRepository implements PropertyCatalogueGateway {
       return loaded;
     }
 
-    // Extract primary search token (alphanumeric word >= 2 chars) for Firestore arrayContains
-    final tokens = normalizedQuery
+    // Extract primary search token (normalized alphanumeric word >= 2 chars) for Firestore arrayContains
+    final normQueryForTokens = normalizeSearchText(searchQuery);
+    final tokens = (normQueryForTokens.isNotEmpty ? normQueryForTokens : normalizedQuery)
         .split(RegExp(r'[^a-z0-9]+'))
-        .where((t) => t.length >= 2)
+        .where((t) => t.length >= 2 && t != 'and')
         .toList();
 
     final resultsById = <String, legacy.Property>{};
@@ -232,46 +246,112 @@ class PropertyRepository implements PropertyCatalogueGateway {
     return results;
   }
 
+  /// Clears in-memory caches (useful after re-ingestion or in unit tests).
+  void clearCaches() {
+    _cachedCatalogue = [];
+    _cachedBuilders = [];
+    _cachedCatalogUpdatedAt = null;
+  }
+
   @override
   Future<List<BuilderCatalogueEntry>> fetchBuilders({
     String searchQuery = '',
   }) async {
-    if (_cachedBuilders.isEmpty) {
-      // 1. Try reading canonical builder catalog chunks from `/builders/_catalog_chunk_*`
-      final chunkDocs = await Future.wait([
-        _firestore.collection('builders').doc('_catalog_chunk_1').get(),
-        _firestore.collection('builders').doc('_catalog_chunk_2').get(),
-        _firestore.collection('builders').doc('_catalog_chunk_3').get(),
-      ]);
+    final trimmed = searchQuery.trim();
+    List<String> chunkIdsToFetch = const <String>[];
+    String? latestMetaUpdatedAt;
 
-      final loadedFromChunks = <BuilderCatalogueEntry>[];
-      for (final chunk in chunkDocs) {
-        if (chunk.exists && chunk.data() != null) {
-          final rawBuilders =
-              (chunk.data()!['builders'] as List<dynamic>?) ?? const [];
-          for (final item in rawBuilders) {
-            if (item is Map) {
-              loadedFromChunks.add(
-                BuilderCatalogueEntry.fromMap(Map<String, dynamic>.from(item)),
+    if (_cachedBuilders.isEmpty || trimmed.isEmpty) {
+      try {
+        final metaSnap =
+            await _firestore.collection('builders').doc('_catalog_meta').get();
+        if (metaSnap.exists && metaSnap.data() != null) {
+          final meta = metaSnap.data()!;
+          latestMetaUpdatedAt = meta['updated_at']?.toString();
+          if (_cachedBuilders.isNotEmpty &&
+              latestMetaUpdatedAt != null &&
+              latestMetaUpdatedAt.isNotEmpty &&
+              _cachedCatalogUpdatedAt != null &&
+              latestMetaUpdatedAt != _cachedCatalogUpdatedAt) {
+            clearCaches();
+          }
+          final rawChunkIds =
+              (meta['chunk_ids'] as List<dynamic>?)
+                  ?.map((e) => e.toString())
+                  .where((e) => e.isNotEmpty)
+                  .toList() ??
+              const <String>[];
+          if (rawChunkIds.isNotEmpty) {
+            chunkIdsToFetch = rawChunkIds;
+          } else {
+            final totalChunks = (meta['total_chunks'] as num?)?.toInt() ?? 0;
+            if (totalChunks > 0) {
+              chunkIdsToFetch = List.generate(
+                totalChunks,
+                (idx) => '_catalog_chunk_${idx + 1}',
               );
             }
           }
+        }
+      } catch (_) {
+        // Fall through to sequential chunk probing below when _catalog_meta is unavailable.
+      }
+    }
+
+    if (_cachedBuilders.isEmpty) {
+      final loadedFromChunks = <BuilderCatalogueEntry>[];
+      void ingestChunkSnap(DocumentSnapshot<Map<String, dynamic>> chunk) {
+        if (!chunk.exists || chunk.data() == null) return;
+        final rawBuilders =
+            (chunk.data()!['builders'] as List<dynamic>?) ?? const [];
+        for (final item in rawBuilders) {
+          if (item is Map) {
+            loadedFromChunks.add(
+              BuilderCatalogueEntry.fromMap(Map<String, dynamic>.from(item)),
+            );
+          }
+        }
+      }
+
+      if (chunkIdsToFetch.isNotEmpty) {
+        // 2a. Fetch all meta-declared canonical builder catalog chunks in parallel
+        final chunkDocs = await Future.wait(
+          chunkIdsToFetch.map(
+            (id) => _firestore.collection('builders').doc(id).get(),
+          ),
+        );
+        for (final chunk in chunkDocs) {
+          ingestChunkSnap(chunk);
+        }
+      } else {
+        // 2b. Sequential probing fallback when `_catalog_meta` is absent so chunks >= 4 are never dropped
+        const int maxChunkProbe = 50;
+        for (var chunkIdx = 1; chunkIdx <= maxChunkProbe; chunkIdx++) {
+          final snap = await _firestore
+              .collection('builders')
+              .doc('_catalog_chunk_$chunkIdx')
+              .get();
+          if (!snap.exists || snap.data() == null) {
+            break;
+          }
+          ingestChunkSnap(snap);
         }
       }
 
       if (loadedFromChunks.isNotEmpty) {
         _cachedBuilders = loadedFromChunks;
+        _cachedCatalogUpdatedAt = latestMetaUpdatedAt;
       } else {
-        // 2. Fallback: group projects from `/projects` collection dynamically
+        // 3. Fallback: group projects from `/projects` collection dynamically
         final projects = await fetchCatalogueProjects(
           searchQuery: '',
-          limit: 300,
+          limit: 500,
         );
         _cachedBuilders = groupProjectsIntoBuilders(projects, searchQuery: '');
+        _cachedCatalogUpdatedAt = latestMetaUpdatedAt;
       }
     }
 
-    final trimmed = searchQuery.trim();
     if (trimmed.isEmpty) {
       return List<BuilderCatalogueEntry>.unmodifiable(_cachedBuilders);
     }
@@ -288,23 +368,40 @@ class PropertyRepository implements PropertyCatalogueGateway {
   }) async {
     final loadedById = <String, legacy.Property>{};
 
-    // Fetch full project documents in batches of 10 from `/projects`
+    // Fetch full project documents in parallel batches of 10 from `/projects`
+    // Fault-tolerant per batch so a single transient error falls back cleanly per ID.
     final ids = builder.projectIds.where((id) => id.trim().isNotEmpty).toList();
+    final batchFutures = <Future<List<legacy.Property>>>[];
     for (var i = 0; i < ids.length; i += 10) {
       final batchIds = ids.sublist(
         i,
         i + 10 > ids.length ? ids.length : i + 10,
       );
-      final snap = await _firestore
-          .collection('projects')
-          .where(FieldPath.documentId, whereIn: batchIds)
-          .get();
-      for (final doc in snap.docs) {
-        final prop = legacy.Property.fromFirestoreMap(
-          doc.data(),
-          documentId: doc.id,
-        );
-        loadedById[prop.id] = prop;
+      batchFutures.add(() async {
+        try {
+          final snap = await _firestore
+              .collection('projects')
+              .where(FieldPath.documentId, whereIn: batchIds)
+              .get();
+          return snap.docs
+              .map(
+                (doc) => legacy.Property.fromFirestoreMap(
+                  doc.data(),
+                  documentId: doc.id,
+                ),
+              )
+              .toList();
+        } catch (_) {
+          return const <legacy.Property>[];
+        }
+      }());
+    }
+    if (batchFutures.isNotEmpty) {
+      final batchResults = await Future.wait(batchFutures);
+      for (final batchProps in batchResults) {
+        for (final prop in batchProps) {
+          loadedById[prop.id] = prop;
+        }
       }
     }
 
@@ -312,7 +409,12 @@ class PropertyRepository implements PropertyCatalogueGateway {
     // fallback to converting the embedded BuilderProjectSummary
     for (final summary in builder.projects) {
       if (!loadedById.containsKey(summary.projectId)) {
-        loadedById[summary.projectId] = propertyFromBuilderSummary(summary);
+        loadedById[summary.projectId] = propertyFromBuilderSummary(
+          summary,
+          builderId: builder.builderId,
+          canonicalBuilderName: builder.builderName,
+          needsManualReview: builder.isProvisional,
+        );
       }
     }
 
@@ -326,8 +428,11 @@ class PropertyRepository implements PropertyCatalogueGateway {
 
   /// Converts a lightweight [BuilderProjectSummary] into a [legacy.Property].
   static legacy.Property propertyFromBuilderSummary(
-    BuilderProjectSummary summary,
-  ) {
+    BuilderProjectSummary summary, {
+    String builderId = '',
+    String canonicalBuilderName = '',
+    bool needsManualReview = false,
+  }) {
     return legacy.Property(
       id: summary.projectId,
       name: summary.projectName,
@@ -341,6 +446,14 @@ class PropertyRepository implements PropertyCatalogueGateway {
       approvedOn: summary.approvedOn,
       proposedCompletionDate: summary.proposedCompletionDate,
       projectStartDate: summary.projectStartDate,
+      officialProjectName: summary.officialProjectName,
+      normalizedProjectName: summary.normalizedProjectName,
+      builderId: builderId,
+      canonicalBuilderName: canonicalBuilderName,
+      needsManualReview: needsManualReview,
+      projectAliases: summary.projectAliases,
+      normalizedTaluk: summary.normalizedTaluk,
+      dataTier: summary.dataTier,
       regulatoryCounts: {
         'total_units': summary.totalUnits,
         'total_towers': summary.totalTowers,
@@ -358,20 +471,46 @@ class PropertyRepository implements PropertyCatalogueGateway {
     final groups = <String, _BuilderGroupAccumulator>{};
 
     for (final p in projects) {
-      final resolved = BuilderCatalogueEntry.resolveCanonicalBrand(
-        promoterName: p.builder,
-        projectName: p.name,
-      );
+      final hasMigratedId = p.builderId.trim().isNotEmpty;
+      final resolved = hasMigratedId
+          ? (
+              id: p.builderId.trim(),
+              name: p.canonicalBuilderName.trim().isNotEmpty
+                  ? p.canonicalBuilderName.trim()
+                  : (p.normalizedBuilderName.trim().isNotEmpty
+                      ? p.normalizedBuilderName.trim()
+                      : p.builder.trim()),
+              isBrand: false,
+            )
+          : BuilderCatalogueEntry.resolveCanonicalBrand(
+              promoterName: p.builder,
+              projectName: p.name,
+            );
       final acc = groups.putIfAbsent(
         resolved.id,
         () => _BuilderGroupAccumulator(
           builderId: resolved.id,
           builderName: resolved.name,
           isFeaturedBrand: resolved.isBrand,
+          provisionalIdentity: p.isProvisionalIdentity,
+          identityReviewRequired: p.needsManualReview || p.isProvisionalIdentity,
         ),
       );
+      if (p.isProvisionalIdentity) {
+        acc.provisionalIdentity = true;
+      }
+      if (p.needsManualReview || p.isProvisionalIdentity) {
+        acc.identityReviewRequired = true;
+      }
       if (p.builder.trim().isNotEmpty) {
         acc.legalPromoters.add(p.builder.trim());
+      }
+      if (p.builderAliases.isNotEmpty) {
+        acc.builderAliases.addAll(p.builderAliases);
+      }
+      if (p.normalizedBuilderName.trim().isNotEmpty &&
+          acc.normalizedBuilderName.isEmpty) {
+        acc.normalizedBuilderName = p.normalizedBuilderName.trim();
       }
       if (p.locality.trim().isNotEmpty) {
         acc.localities.add(p.locality.trim());
@@ -381,18 +520,29 @@ class PropertyRepository implements PropertyCatalogueGateway {
         BuilderProjectSummary(
           projectId: p.id,
           projectName: p.name,
+          officialProjectName: p.officialProjectName.isNotEmpty
+              ? p.officialProjectName
+              : p.name,
+          normalizedProjectName: p.normalizedProjectName.isNotEmpty
+              ? p.normalizedProjectName
+              : normalizeSearchText(p.name).toUpperCase(),
+          projectAliases: p.projectAliases,
           promoterName: p.builder,
           registrationNumber: p.reraNumber,
           acknowledgementNumber: p.acknowledgementNumber,
           projectType: p.projectType,
           regulatoryStatus: p.regulatoryStatus,
           taluk: p.locality,
+          normalizedTaluk: p.normalizedTaluk.isNotEmpty
+              ? p.normalizedTaluk
+              : p.locality,
           city: p.city,
           approvedOn: p.approvedOn,
           proposedCompletionDate: p.proposedCompletionDate,
           projectStartDate: p.projectStartDate,
           totalUnits: p.regulatoryCounts['total_units'] ?? 0,
           totalTowers: p.towersSummary.length,
+          dataTier: p.dataTier,
         ),
       );
     }
@@ -405,12 +555,18 @@ class PropertyRepository implements PropertyCatalogueGateway {
       return BuilderCatalogueEntry(
         builderId: acc.builderId,
         builderName: acc.builderName,
+        normalizedBuilderName: acc.normalizedBuilderName.isNotEmpty
+            ? acc.normalizedBuilderName
+            : normalizeSearchText(acc.builderName).toUpperCase(),
+        builderAliases: acc.builderAliases.toList()..sort(),
         isFeaturedBrand: acc.isFeaturedBrand,
         projectCount: acc.projects.length,
         legalPromoterNames: acc.legalPromoters.toList()..sort(),
         localities: acc.localities.toList()..sort(),
         projectIds: acc.projectIds,
         projects: acc.projects,
+        provisionalIdentity: acc.provisionalIdentity,
+        identityReviewRequired: acc.identityReviewRequired,
       );
     }).toList();
 
@@ -435,6 +591,10 @@ class PropertyRepository implements PropertyCatalogueGateway {
     BengaluruTalukFilter talukFilter,
   ) {
     if (talukFilter == BengaluruTalukFilter.all) return true;
+    if (property.normalizedTaluk.isNotEmpty &&
+        talukFilter.matchesTaluk(property.normalizedTaluk)) {
+      return true;
+    }
     if (talukFilter.matchesTaluk(property.locality)) return true;
     final metricTaluk = property.summaryMetrics['taluk']?.formattedValue;
     return talukFilter.matchesTaluk(metricTaluk);
@@ -465,50 +625,52 @@ class PropertyRepository implements PropertyCatalogueGateway {
             ? const <BengaluruTalukFilter>{}
             : {talukFilter});
     final lower = searchQuery.trim().toLowerCase();
+    final normQuery = normalizeSearchText(searchQuery);
     return projects.where((p) {
       if (!propertyMatchesTaluks(p, effectiveFilters)) {
         return false;
       }
-      if (lower.isEmpty) return true;
-      return p.name.toLowerCase().contains(lower) ||
-          p.builder.toLowerCase().contains(lower) ||
-          p.locality.toLowerCase().contains(lower) ||
-          p.reraNumber.toLowerCase().contains(lower) ||
-          p.projectType.toLowerCase().contains(lower);
+      if (lower.isEmpty || normQuery.isEmpty) return true;
+      return _matchesPropertyQuery(p, lower, normQuery);
     }).toList();
   }
 
-  bool _matchesQuery(legacy.Property property, String lowerQuery) {
-    if (lowerQuery.isEmpty) return true;
-    final compactQuery = lowerQuery.replaceAll(RegExp(r'[^a-z0-9]'), '');
-    final compactRera = property.reraNumber.toLowerCase().replaceAll(
-      RegExp(r'[^a-z0-9]'),
-      '',
+  static bool _matchesPropertyQuery(
+    legacy.Property property,
+    String lowerQuery,
+    String normQuery,
+  ) {
+    if (lowerQuery.isEmpty || normQuery.isEmpty) return true;
+    final candidateText = [
+      property.name,
+      property.officialProjectName,
+      property.normalizedProjectName,
+      ...property.projectAliases,
+      property.builder,
+      property.officialBuilderName,
+      property.normalizedBuilderName,
+      ...property.builderAliases,
+      property.locality,
+      property.normalizedTaluk,
+      property.city,
+      property.projectType,
+      property.reraNumber,
+      property.acknowledgementNumber,
+    ].where((e) => e.trim().isNotEmpty).join(' ');
+
+    return matchesNormalizedSearchTokens(
+      candidateText,
+      lowerQuery,
+      registrationNumber: property.reraNumber,
     );
+  }
 
-    if (property.name.toLowerCase().contains(lowerQuery) ||
-        property.builder.toLowerCase().contains(lowerQuery) ||
-        property.locality.toLowerCase().contains(lowerQuery) ||
-        property.city.toLowerCase().contains(lowerQuery) ||
-        property.reraNumber.toLowerCase().contains(lowerQuery) ||
-        property.acknowledgementNumber.toLowerCase().contains(lowerQuery) ||
-        (compactQuery.length >= 3 && compactRera.contains(compactQuery))) {
-      return true;
-    }
-
-    // Multi-word check: all words in query appear across name/builder/locality/reraNumber
-    final words = lowerQuery
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .toList();
-    if (words.length > 1) {
-      final combined =
-          '${property.name} ${property.builder} ${property.locality} ${property.city} ${property.reraNumber}'
-              .toLowerCase();
-      return words.every((w) => combined.contains(w));
-    }
-
-    return false;
+  bool _matchesQuery(legacy.Property property, String lowerQuery) {
+    return _matchesPropertyQuery(
+      property,
+      lowerQuery,
+      normalizeSearchText(lowerQuery),
+    );
   }
 
   @override
@@ -625,6 +787,10 @@ class _BuilderGroupAccumulator {
   final String builderId;
   final String builderName;
   final bool isFeaturedBrand;
+  bool provisionalIdentity;
+  bool identityReviewRequired;
+  String normalizedBuilderName = '';
+  final Set<String> builderAliases = {};
   final Set<String> legalPromoters = {};
   final Set<String> localities = {};
   final List<String> projectIds = [];
@@ -634,5 +800,7 @@ class _BuilderGroupAccumulator {
     required this.builderId,
     required this.builderName,
     required this.isFeaturedBrand,
+    this.provisionalIdentity = false,
+    this.identityReviewRequired = false,
   });
 }

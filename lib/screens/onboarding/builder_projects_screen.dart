@@ -167,6 +167,12 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
     final localitiesSummary = widget.builder.localities.isNotEmpty
         ? widget.builder.localities.take(3).join(' • ')
         : 'Bengaluru';
+    final deepCount = _allBuilderProjects.where((p) => p.isDeepExtracted).length;
+    final summaryCount =
+        _allBuilderProjects.where((p) => p.isCatalogueSummary).length;
+    final depthSummary = (deepCount > 0 || summaryCount > 0)
+        ? ' • Full Dossiers: $deepCount • Catalogue Summaries: $summaryCount'
+        : '';
 
     return Scaffold(
       backgroundColor: HomeSureColors.backgroundWarm,
@@ -216,8 +222,8 @@ class _BuilderProjectsScreenState extends State<BuilderProjectsScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'K-RERA Coverage: $localitiesSummary',
-                        maxLines: 1,
+                        'K-RERA Coverage: $localitiesSummary$depthSummary',
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 12.5,
